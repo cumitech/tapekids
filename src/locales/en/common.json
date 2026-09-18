@@ -1,0 +1,537 @@
+{
+  "actions": {
+    "create": "Create",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "show": "Show"
+  },
+  "search": "Search",
+  "loading": "Loading...",
+  "empty": "No records found",
+  "form": {
+    "typeOrSelect": "Type or select",
+    "noMatchType": "No match. Type a value and press Enter.",
+    "useCustom": "Use \"{{value}}\"",
+    "countryCode": "Country code",
+    "searchCountry": "Search country or code",
+    "phonePlaceholder": "6XXXXXXXX",
+    "noCountryMatch": "No matching country."
+  },
+  "uploads": {
+    "choose": "Upload image",
+    "change": "Change image",
+    "remove": "Remove image",
+    "uploading": "Uploading…",
+    "failed": "Could not upload the image."
+  },
+  "brand": {
+    "name": "Kids Events Cameroon"
+  },
+  "buttons": {
+    "create": "Create",
+    "save": "Save",
+    "logout": "Logout",
+    "delete": "Delete",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "confirm": "Are you sure?",
+    "refresh": "Refresh",
+    "show": "Show",
+    "list": "List",
+    "filter": "Filter",
+    "clear": "Clear",
+    "apply": "Apply",
+    "undo": "Undo",
+    "clone": "Clone"
+  },
+  "documentTitle": {
+    "default": "Kids Events Cameroon",
+    "suffix": " | Kids Events Cameroon",
+    "wrapper": "{{title}} | Kids Events Cameroon"
+  },
+  "yes": "Yes",
+  "no": "No",
+  "notifications": {
+    "success": "Success",
+    "error": "Error (status code: {{statusCode}})",
+    "undoable": "You have {{seconds}} seconds to undo",
+    "createSuccess": "Successfully created {{resource}}",
+    "createError": "Could not create {{resource}} (status code: {{statusCode}})",
+    "deleteSuccess": "Successfully deleted {{resource}}",
+    "deleteError": "Could not delete {{resource}} (status code: {{statusCode}})",
+    "editSuccess": "Successfully updated {{resource}}",
+    "editError": "Could not update {{resource}} (status code: {{statusCode}})"
+  },
+  "table": {
+    "sn": "SN",
+    "actions": "Actions",
+    "rows": "{{count}} row(s)",
+    "rowsPerPage": "Rows per page",
+    "pageOf": "Page {{current}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next",
+    "firstPage": "Go to first page",
+    "previousPage": "Go to previous page",
+    "nextPage": "Go to next page",
+    "lastPage": "Go to last page",
+    "emptyTitle": "No data to display",
+    "emptyDescription": "This table is empty for the time being.",
+    "filter": {
+      "all": "All",
+      "searchPlaceholder": "Search…",
+      "text": {
+        "placeholder": "Filter by..."
+      },
+      "numeric": {
+        "placeholder": "Filter by..."
+      },
+      "combobox": {
+        "placeholder": "Select...",
+        "search": "Search...",
+        "noResults": "Results not found."
+      },
+      "operator": {
+        "placeholder": "Search operator...",
+        "noResults": "No operator found.",
+        "eq": "Equals",
+        "ne": "Not equals",
+        "lt": "Less than",
+        "gt": "Greater than",
+        "lte": "Less than or equal",
+        "gte": "Greater than or equal",
+        "in": "Includes in an array",
+        "nin": "Not includes in an array",
+        "ina": "Includes in an array (case sensitive)",
+        "nina": "Not includes in an array (case sensitive)",
+        "contains": "Contains",
+        "ncontains": "Not contains",
+        "containss": "Contains (case sensitive)",
+        "ncontainss": "Not contains (case sensitive)",
+        "between": "Between",
+        "nbetween": "Not between",
+        "null": "Is null",
+        "nnull": "Is not null",
+        "startswith": "Starts with",
+        "nstartswith": "Not starts with",
+        "startswiths": "Starts with (case sensitive)",
+        "nstartswiths": "Not starts with (case sensitive)",
+        "endswith": "Ends with",
+        "nendswith": "Not ends with",
+        "endswiths": "Ends with (case sensitive)",
+        "nendswiths": "Not ends with (case sensitive)",
+        "eqs": "Equals (case sensitive)",
+        "nes": "Not equals (case sensitive)"
+      }
+    }
+  },
+  "warnWhenUnsavedChanges": "Are you sure you want to leave? You have unsaved changes.",
+  "dashboard": {
+    "title": "Dashboard",
+    "adminEyebrow": "Administration",
+    "adminTitle": "Admin workspace",
+    "adminDescription": "Oversee people, events, invitations, and the audit trail from one place.",
+    "staffEyebrow": "Staff",
+    "staffTitle": "Staff dashboard",
+    "staffDescription": "Register people, build mailing lists, and send event invitations.",
+    "staffHome": "Home",
+    "adminHome": "Admin home",
+    "staffNavGroup": "Daily work",
+    "adminNavDirectory": "Directory",
+    "adminNavOversight": "Oversight",
+    "roleStaff": "Staff",
+    "roleAdmin": "Admin",
+    "roleSuperAdmin": "Super-admin",
+    "staffAddPerson": "Add a person",
+    "guestEyebrow": "Your portal",
+    "guestTitle": "Welcome, {{name}}",
+    "guestDescription": "Pay for your place, then keep your profile accurate.",
+    "description": "Record people, build mailing lists, and queue event invitations.",
+    "navigation": "Main menu",
+    "openSection": "Open this section",
+    "statSections": "Workspace sections",
+    "upcoming": "Your upcoming events",
+    "viewAll": "View all",
+    "noMembershipsTitle": "No events yet",
+    "noMembershipsDescription": "When you are invited to a camp or asked to sponsor, it will appear here.",
+    "sections": {
+      "people": "Add campers, families, and coordinators with the details each event needs.",
+      "mailing-lists": "Group people and queue invitations when it is time to write.",
+      "events": "Plan camps with venues, dates, and participant or sponsor funds.",
+      "audit-logs": "Review who changed people, events, payments, and invitations.",
+      "profile": "Keep your own contact details, location, and family information up to date."
+    }
+  },
+  "onboarding": {
+    "title": "Complete these first",
+    "profile": "Update your person profile with accurate contact, church, location, and family details. This stays here until it is done. You cannot pay for a camp until your profile is complete.",
+    "updateProfile": "Update my profile",
+    "completeToPay": "Complete profile to pay"
+  },
+  "landing": {
+    "brand": "Kids Events Cameroon",
+    "signIn": "Sign in",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "welcome": "Shalom",
+    "headline": "Young Foundations Cameroon",
+    "description": "Encouraging young Christians in their walk with Christ. A fellowship anchored in the Word brought by God’s prophet, William Marrion Branham, not bound by doctrine or separated by churches.",
+    "ctaSignIn": "Sign in",
+    "ctaRegister": "Create an account",
+    "ctaDashboard": "Open dashboard",
+    "sections": "Young Foundations · Creations · Cub Corner",
+    "featurePeopleTitle": "Young Foundations",
+    "featurePeopleBody": "Founded in 2006 after the Lord placed a burden on Brother Joseph’s heart: an avenue for young people throughout the world to draw strength from each other. The message is simple: place God and His Word first, stay away from the world, encourage each other, and believe God’s prophet.",
+    "featureEventsTitle": "Creations",
+    "featureEventsBody": "Launched in 2013 for craft, woodshop, and sewing centered on the Message. Today Creations shares video classes, projects, and homeschooling resources in English, French, Portuguese, and Spanish, for every age and location.",
+    "featureInvitesTitle": "Cub Corner",
+    "featureInvitesBody": "Since 2008, Cub Corner has helped younger believers stay in the Word through Bible and Brother Branham stories, trivia, fun facts, and pictures.",
+    "quote": "Place God and His Word first in all things, stay away from the world, encourage each other, and believe God’s prophet.",
+    "quoteRef": "Young Foundations",
+    "study": "The Laodicean Church Age",
+    "footer": "Kids Events Cameroon",
+    "footerTagline": "Young Foundations fellowship across Cameroon: camps, Creations, and Cub Corner.",
+    "eventsTitle": "Upcoming gatherings",
+    "eventsEmpty": "Published camps and Creations gatherings will appear here."
+  },
+  "locale": {
+    "label": "Language",
+    "en": "English",
+    "fr": "Français"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "welcomeBack": "Shalom",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password",
+    "forgotDescription": "Enter your email to change your password.",
+    "forgotSent": "If that email exists, a reset link was sent.",
+    "send": "Send",
+    "back": "Back",
+    "resetPassword": "Set a new password",
+    "savePassword": "Save password",
+    "passwordUpdated": "Password updated",
+    "resetFailed": "Could not update the password",
+    "invalidCredentials": "Invalid email or password.",
+    "or": "or",
+    "signInUsing": "Sign in using",
+    "noAccount": "No account?",
+    "signUp": "Sign up",
+    "signUpWelcome": "Create your account to get started.",
+    "haveAccount": "Have an account?",
+    "passwordsDontMatch": "Passwords don't match",
+    "passwordsDontMatchDescription": "Please make sure both password fields contain the same value."
+  },
+  "header": {
+    "logout": "Logout",
+    "loggingOut": "Logging out...",
+    "account": "Account"
+  },
+  "pages": {
+    "error": {
+      "title": "Page not found.",
+      "description": "The page you're looking for does not exist.",
+      "backHome": "Back to homepage",
+      "info": "You may have forgotten to add the \"{{action}}\" component to \"{{resource}}\" resource."
+    }
+  },
+  "people": {
+    "titles": {
+      "list": "People",
+      "create": "Add person",
+      "edit": "Edit person",
+      "show": "Person"
+    },
+    "fields": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "dateOfBirth": "Date of birth",
+      "gender": "Gender",
+      "address": "Address",
+      "churchName": "Church name",
+      "churchPastorName": "Pastor's name",
+      "churchAddress": "Church address",
+      "town": "City",
+      "region": "Region",
+      "division": "Division",
+      "subDivision": "Sub-division",
+      "parentGuardianName": "Name",
+      "parentGuardianPhone": "Phone",
+      "medicalNotes": "Medical notes",
+      "country": "Country"
+    },
+    "sections": {
+      "identity": "Personal details",
+      "location": "Location",
+      "church": "Church",
+      "guardians": "Parents / guardians",
+      "notes": "Medical notes"
+    },
+    "createHint": "Name, email, and phone are enough to start. The person completes the rest when they accept an invitation.",
+    "guardiansHint": "Add up to three parents or guardians. At least one row stays available.",
+    "addGuardian": "Add guardian",
+    "removeGuardian": "Remove guardian",
+    "guardianNamePlaceholder": "Full name",
+    "guardianRow": "Guardian {{n}}",
+    "genderPlaceholder": "Select gender",
+    "genders": {
+      "female": "Female",
+      "male": "Male"
+    },
+    "steps": {
+      "next": "Continue",
+      "back": "Back",
+      "progress": "Step {{current}} of {{total}}"
+    }
+  },
+  "mailingLists": {
+    "titles": {
+      "list": "Mailing lists",
+      "create": "Create mailing list",
+      "edit": "Edit mailing list",
+      "show": "Mailing list"
+    },
+    "fields": {
+      "name": "Name",
+      "description": "Description",
+      "audienceKind": "Audience",
+      "email": "Email",
+      "kind": "Invitation kind",
+      "subject": "Subject",
+      "body": "Message"
+    },
+    "members": "Members",
+    "pickCampers": "Select campers",
+    "pickCampersPlaceholder": "Search and select campers",
+    "pickCampersHint": "Search by name or email, then pick several people or select all.",
+    "searchCampers": "Search by name or email",
+    "selectAll": "Select all",
+    "selectAllMatching": "Select all",
+    "selectVisible": "Select all",
+    "clearSelection": "Clear selection",
+    "selectedCount": "{{count}} selected",
+    "selectedPerson": "Selected",
+    "moreSelected": "+{{count}} more",
+    "addMember": "Add to list",
+    "memberAdded": "Person added to the list",
+    "memberAddFailed": "Could not add that person",
+    "memberRemoved": "Person removed from the list",
+    "memberRemoveFailed": "Could not remove that person",
+    "queueInvitations": "Queue invitations",
+    "sendInvitations": "Send invitations",
+    "selectEvent": "Select an event",
+    "invitationPreview": "Invitation preview",
+    "invitationPreviewHint": "This is how the email will look for the selected language.",
+    "invitationPreviewEmpty": "Select an event to preview the invitation.",
+    "invitationsQueued": "{{count}} invitations queued (email not sent yet)",
+    "invitationsSent": "{{count}} invitations sent ({{failed}} failed)",
+    "invitationsFailed": "Could not queue invitations",
+    "audienceKinds": {
+      "camper": "Camper",
+      "coordinator": "Coordinator",
+      "sponsor": "Sponsor",
+      "mixed": "Mixed"
+    }
+  },
+  "events": {
+    "titles": {
+      "list": "Events",
+      "create": "Create event",
+      "edit": "Edit event",
+      "show": "Event"
+    },
+    "fields": {
+      "title": "Title",
+      "summary": "Summary",
+      "description": "Description",
+      "descriptionPlaceholder": "Write the full event story…",
+      "venue": "Venue",
+      "city": "City",
+      "startsAt": "Starts",
+      "endsAt": "Ends",
+      "scheduleStatus": "Status",
+      "imageUrl": "Event image",
+      "isPublished": "Show on the public website",
+      "requiresParticipantFee": "Participant fee required",
+      "participantFeeAmount": "Participant fee (XAF)",
+      "currency": "Currency",
+      "coordinatorFundAmount": "Coordinator fund (XAF)",
+      "sponsorFundAmount": "Sponsor fund (XAF)"
+    },
+    "schedule": {
+      "upcoming": "Upcoming",
+      "active": "Happening now",
+      "past": "Past"
+    },
+    "editor": {
+      "heading2": "Heading",
+      "heading3": "Subheading",
+      "bold": "Bold",
+      "italic": "Italic",
+      "quote": "Quote",
+      "bullets": "Bulleted list",
+      "numbers": "Numbered list",
+      "link": "Link",
+      "linkPrompt": "Link URL"
+    },
+    "public": {
+      "back": "Back to events",
+      "viewDetails": "View details"
+    }
+  },
+  "payments": {
+    "titles": {
+      "list": "Payments",
+      "create": "Pay now",
+      "edit": "Pay now",
+      "show": "Payment"
+    },
+    "title": "Collect payment",
+    "kind": "Payment for",
+    "method": "Method",
+    "momo": "Mobile money",
+    "link": "Payment link",
+    "phone": "MoMo number",
+    "charge": "Start payment",
+    "started": "Payment started",
+    "waiting": "Waiting for payment confirmation…",
+    "paidSuccess": "Payment confirmed.",
+    "failedStatus": "Payment failed.",
+    "failed": "Could not start payment",
+    "disabled": "CamPay is not configured.",
+    "testAmountHint": "Test charge of {{amount}} {{currency}} (production uses the event fee).",
+    "ussd": "Dial this USSD code",
+    "openLink": "Open payment page",
+    "waived": "No amount due; payment marked as waived.",
+    "alreadyPaid": "This payment is already marked paid.",
+    "listTitle": "Payments",
+    "webhookHint": "CamPay webhook URL",
+    "refresh": "Refresh status",
+    "refreshed": "Payment status updated",
+    "markPaid": "Mark paid",
+    "markWaived": "Waive",
+    "kinds": {
+      "camper": "Camper fee",
+      "coordinator": "Coordinator fund",
+      "sponsor": "Sponsor fund"
+    }
+  },
+  "invite": {
+    "title": "Invitation",
+    "completeProfile": "Create a password to open your account.",
+    "completeProfileHint": "Your name and email were added by the organiser. Fill in the rest from your dashboard after you sign in.",
+    "createPassword": "Create a password",
+    "accept": "Save and continue",
+    "accepted": "Invitation accepted. Opening your dashboard…",
+    "acceptedWithAccount": "Invitation accepted. Opening your dashboard…",
+    "goToLogin": "Go to login",
+    "notFound": "Invitation not found.",
+    "failed": "Could not accept this invitation."
+  },
+  "auditLogs": {
+    "titles": {
+      "list": "Audit logs",
+      "create": "Audit log",
+      "edit": "Audit log",
+      "show": "Audit log"
+    },
+    "fields": {
+      "action": "Action",
+      "entity": "Entity",
+      "entityId": "Record",
+      "actor": "Actor",
+      "createdAt": "When"
+    }
+  },
+  "camp": {
+    "titles": {
+      "list": "My camp",
+      "create": "Camp",
+      "edit": "Camp",
+      "show": "Camp"
+    },
+    "eyebrow": "Kids Events Cameroon",
+    "description": "See the camps you are invited to, confirm your place, and pay any participant fee.",
+    "homeCard": "Dates, venue, and fees for camps you attend.",
+    "emptyTitle": "No camp invitations yet",
+    "emptyDescription": "Staff will invite you to a camp. Once they do, you can review details and pay from here."
+  },
+  "sponsorships": {
+    "titles": {
+      "list": "Sponsorships",
+      "create": "Sponsorship",
+      "edit": "Sponsorship",
+      "show": "Sponsorship"
+    },
+    "eyebrow": "Kids Events Cameroon",
+    "description": "Support a camp by reviewing your sponsorship and completing the fund when it is due.",
+    "homeCard": "Events you sponsor and the funds attached to them.",
+    "emptyTitle": "No sponsorships yet",
+    "emptyDescription": "When you are invited as a sponsor, the event and any fund amount will show here."
+  },
+  "profile": {
+    "titles": {
+      "list": "My profile",
+      "create": "Profile",
+      "edit": "Profile",
+      "show": "Profile"
+    },
+    "eyebrow": "Your account",
+    "description": "Keep your contact details, location, and family information up to date.",
+    "homeCard": "Update your personal and family information.",
+    "unavailableTitle": "Profile unavailable",
+    "unavailableDescription": "We could not load your profile. Sign in again, or ask staff for help."
+  },
+  "portal": {
+    "pay": "Pay now",
+    "settled": "Paid",
+    "noFee": "No fee due",
+    "unknownEvent": "Event",
+    "count": "{{count}} linked",
+    "statEvents": "Events",
+    "statDue": "Payments due",
+    "statRegistered": "Registered",
+    "status": {
+      "membership": {
+        "invited": "Invited",
+        "registered": "Registered",
+        "cancelled": "Cancelled"
+      },
+      "payment": {
+        "pending": "Payment pending",
+        "paid": "Paid",
+        "failed": "Payment failed",
+        "waived": "Waived"
+      }
+    }
+  },
+  "content": {
+    "translationHint": "Add English and French copy. Missing French falls back to English.",
+    "languages": "Languages"
+  },
+  "a11y": {
+    "toggleSidebar": "Toggle menu",
+    "sidebar": "Sidebar",
+    "sidebarDescription": "Displays the mobile menu.",
+    "pagination": "Pagination",
+    "morePages": "More pages",
+    "previousSlide": "Previous slide",
+    "nextSlide": "Next slide"
+  },
+  "pwa": {
+    "name": "Kids Events Cameroon",
+    "shortName": "Kids Events",
+    "description": "Camps, classes, and gatherings across Cameroon."
+  }
+}

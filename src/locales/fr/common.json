@@ -1,0 +1,537 @@
+{
+  "actions": {
+    "create": "Créer",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "show": "Afficher"
+  },
+  "search": "Rechercher",
+  "loading": "Chargement...",
+  "empty": "Aucun enregistrement trouvé",
+  "form": {
+    "typeOrSelect": "Saisir ou choisir",
+    "noMatchType": "Aucun résultat. Saisissez une valeur et appuyez sur Entrée.",
+    "useCustom": "Utiliser « {{value}} »",
+    "countryCode": "Indicatif",
+    "searchCountry": "Rechercher un pays ou un indicatif",
+    "phonePlaceholder": "6XXXXXXXX",
+    "noCountryMatch": "Aucun pays correspondant."
+  },
+  "uploads": {
+    "choose": "Téléverser une image",
+    "change": "Changer l'image",
+    "remove": "Retirer l'image",
+    "uploading": "Téléversement…",
+    "failed": "Impossible de téléverser l'image."
+  },
+  "brand": {
+    "name": "Kids Events Cameroon"
+  },
+  "buttons": {
+    "create": "Créer",
+    "save": "Enregistrer",
+    "logout": "Déconnexion",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "cancel": "Annuler",
+    "confirm": "Êtes-vous sûr ?",
+    "refresh": "Actualiser",
+    "show": "Afficher",
+    "list": "Liste",
+    "filter": "Filtrer",
+    "clear": "Effacer",
+    "apply": "Appliquer",
+    "undo": "Annuler",
+    "clone": "Dupliquer"
+  },
+  "documentTitle": {
+    "default": "Kids Events Cameroon",
+    "suffix": " | Kids Events Cameroon",
+    "wrapper": "{{title}} | Kids Events Cameroon"
+  },
+  "yes": "Oui",
+  "no": "Non",
+  "notifications": {
+    "success": "Succès",
+    "error": "Erreur (code : {{statusCode}})",
+    "undoable": "Vous avez {{seconds}} secondes pour annuler",
+    "createSuccess": "{{resource}} créé avec succès",
+    "createError": "Impossible de créer {{resource}} (code : {{statusCode}})",
+    "deleteSuccess": "{{resource}} supprimé avec succès",
+    "deleteError": "Impossible de supprimer {{resource}} (code : {{statusCode}})",
+    "editSuccess": "{{resource}} mis à jour avec succès",
+    "editError": "Impossible de mettre à jour {{resource}} (code : {{statusCode}})"
+  },
+  "table": {
+    "sn": "N°",
+    "actions": "Actions",
+    "rows": "{{count}} ligne(s)",
+    "rowsPerPage": "Lignes par page",
+    "pageOf": "Page {{current}} sur {{total}}",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "firstPage": "Aller à la première page",
+    "previousPage": "Page précédente",
+    "nextPage": "Page suivante",
+    "lastPage": "Aller à la dernière page",
+    "emptyTitle": "Aucune donnée à afficher",
+    "emptyDescription": "Ce tableau est vide pour le moment.",
+    "filter": {
+      "all": "Tous",
+      "searchPlaceholder": "Rechercher…",
+      "text": {
+        "placeholder": "Filtrer par..."
+      },
+      "numeric": {
+        "placeholder": "Filtrer par..."
+      },
+      "combobox": {
+        "placeholder": "Sélectionner...",
+        "search": "Rechercher...",
+        "noResults": "Aucun résultat."
+      },
+      "operator": {
+        "placeholder": "Rechercher un opérateur...",
+        "noResults": "Aucun opérateur trouvé.",
+        "eq": "Égal à",
+        "ne": "Différent de",
+        "lt": "Inférieur à",
+        "gt": "Supérieur à",
+        "lte": "Inférieur ou égal",
+        "gte": "Supérieur ou égal",
+        "in": "Inclus dans un tableau",
+        "nin": "Non inclus dans un tableau",
+        "ina": "Inclus dans un tableau (sensible à la casse)",
+        "nina": "Non inclus dans un tableau (sensible à la casse)",
+        "contains": "Contient",
+        "ncontains": "Ne contient pas",
+        "containss": "Contient (sensible à la casse)",
+        "ncontainss": "Ne contient pas (sensible à la casse)",
+        "between": "Entre",
+        "nbetween": "Pas entre",
+        "null": "Est nul",
+        "nnull": "N'est pas nul",
+        "startswith": "Commence par",
+        "nstartswith": "Ne commence pas par",
+        "startswiths": "Commence par (sensible à la casse)",
+        "nstartswiths": "Ne commence pas par (sensible à la casse)",
+        "endswith": "Se termine par",
+        "nendswith": "Ne se termine pas par",
+        "endswiths": "Se termine par (sensible à la casse)",
+        "nendswiths": "Ne se termine pas par (sensible à la casse)",
+        "eqs": "Égal à (sensible à la casse)",
+        "nes": "Différent de (sensible à la casse)"
+      }
+    }
+  },
+  "warnWhenUnsavedChanges": "Voulez-vous vraiment quitter ? Des modifications n'ont pas été enregistrées.",
+  "dashboard": {
+    "title": "Tableau de bord",
+    "adminEyebrow": "Administration",
+    "adminTitle": "Espace administration",
+    "adminDescription": "Supervisez les personnes, les événements, les invitations et le journal d'audit au même endroit.",
+    "staffEyebrow": "Équipe",
+    "staffTitle": "Tableau de bord équipe",
+    "staffDescription": "Enregistrez des personnes, constituez des listes d'envoi et envoyez les invitations.",
+    "staffHome": "Accueil",
+    "adminHome": "Accueil admin",
+    "staffNavGroup": "Travail du jour",
+    "adminNavDirectory": "Annuaire",
+    "adminNavOversight": "Supervision",
+    "roleStaff": "Équipe",
+    "roleAdmin": "Admin",
+    "roleSuperAdmin": "Super-admin",
+    "staffAddPerson": "Ajouter une personne",
+    "guestEyebrow": "Votre espace",
+    "guestTitle": "Bienvenue, {{name}}",
+    "guestDescription": "Réglez votre place, puis tenez votre profil à jour.",
+    "description": "Enregistrez des personnes, constituez des listes d'envoi et préparez les invitations.",
+    "navigation": "Menu principal",
+    "openSection": "Ouvrir cette section",
+    "statSections": "Sections de travail",
+    "upcoming": "Vos prochains événements",
+    "viewAll": "Tout voir",
+    "noMembershipsTitle": "Aucun événement pour le moment",
+    "noMembershipsDescription": "Lorsqu'on vous invitera à un camp ou comme parrain, cela apparaîtra ici.",
+    "sections": {
+      "people": "Ajoutez campeurs, familles et coordinateurs avec les informations de chaque événement.",
+      "mailing-lists": "Regroupez les personnes et préparez les invitations au bon moment.",
+      "events": "Organisez les camps avec lieux, dates et fonds participants ou parrains.",
+      "audit-logs": "Consultez qui a modifié les personnes, événements, paiements et invitations.",
+      "profile": "Tenez à jour vos coordonnées, votre localisation et les informations familiales."
+    }
+  },
+  "onboarding": {
+    "title": "À faire en premier",
+    "profile": "Mettez à jour votre profil avec des informations exactes (contact, église, lieu, famille). Cet avis reste affiché jusqu'à ce que ce soit fait. Vous ne pourrez pas payer un camp tant que votre profil n'est pas complet.",
+    "updateProfile": "Mettre à jour mon profil",
+    "completeToPay": "Compléter le profil pour payer"
+  },
+  "landing": {
+    "brand": "Kids Events Cameroon",
+    "signIn": "Connexion",
+    "register": "Inscription",
+    "dashboard": "Tableau de bord",
+    "welcome": "Shalom",
+    "headline": "Young Foundations Cameroun",
+    "description": "Encourager les jeunes chrétiens dans leur marche avec Christ. Une communion ancrée dans la Parole apportée par le prophète de Dieu, William Marrion Branham, sans être liée par la doctrine ni séparée par les églises.",
+    "ctaSignIn": "Se connecter",
+    "ctaRegister": "Créer un compte",
+    "ctaDashboard": "Ouvrir le tableau de bord",
+    "sections": "Young Foundations · Creations · Cub Corner",
+    "featurePeopleTitle": "Young Foundations",
+    "featurePeopleBody": "Fondé en 2006 après que le Seigneur a mis un fardeau sur le cœur de frère Joseph : un lieu pour que les jeunes du monde entier puisent de la force les uns des autres. Le message est simple : placez Dieu et Sa Parole en premier, restez séparés du monde, encouragez-vous, et croyez le prophète de Dieu.",
+    "featureEventsTitle": "Creations",
+    "featureEventsBody": "Lancé en 2013 pour le bricolage, l'atelier bois et la couture centrés sur le Message. Creations propose aujourd'hui des cours vidéo, des projets et des ressources pour l'école à la maison en anglais, français, portugais et espagnol, quel que soit l'âge ou le lieu.",
+    "featureInvitesTitle": "Cub Corner",
+    "featureInvitesBody": "Depuis 2008, Cub Corner aide les plus jeunes croyants à rester dans la Parole par des récits bibliques et de frère Branham, des quiz, des faits amusants et des images.",
+    "quote": "Placez Dieu et Sa Parole en premier en toutes choses, restez séparés du monde, encouragez-vous les uns les autres, et croyez le prophète de Dieu.",
+    "quoteRef": "Young Foundations",
+    "study": "L'âge de l'Église de Laodicée",
+    "footer": "Kids Events Cameroon",
+    "footerTagline": "Communion Young Foundations au Cameroun : camps, Creations et Cub Corner.",
+    "eventsTitle": "Rassemblements à venir",
+    "eventsEmpty": "Les camps et rassemblements Creations publiés apparaîtront ici."
+  },
+  "locale": {
+    "label": "Langue",
+    "en": "English",
+    "fr": "Français"
+  },
+  "theme": {
+    "label": "Thème",
+    "light": "Clair",
+    "dark": "Sombre"
+  },
+  "auth": {
+    "signIn": "Connexion",
+    "welcomeBack": "Shalom",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "rememberMe": "Se souvenir de moi",
+    "forgotPassword": "Mot de passe oublié",
+    "forgotDescription": "Saisissez votre e-mail pour modifier votre mot de passe.",
+    "forgotSent": "Si cet e-mail existe, un lien de réinitialisation a été envoyé.",
+    "send": "Envoyer",
+    "back": "Retour",
+    "resetPassword": "Définir un nouveau mot de passe",
+    "savePassword": "Enregistrer le mot de passe",
+    "passwordUpdated": "Mot de passe mis à jour",
+    "resetFailed": "Impossible de mettre à jour le mot de passe",
+    "invalidCredentials": "E-mail ou mot de passe incorrect.",
+    "or": "ou",
+    "signInUsing": "Se connecter avec",
+    "noAccount": "Pas de compte ?",
+    "signUp": "Inscription",
+    "signUpWelcome": "Créez votre compte pour commencer.",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "passwordsDontMatch": "Les mots de passe ne correspondent pas",
+    "passwordsDontMatchDescription": "Veuillez vous assurer que les deux champs de mot de passe sont identiques."
+  },
+  "header": {
+    "logout": "Déconnexion",
+    "loggingOut": "Déconnexion...",
+    "account": "Compte"
+  },
+  "pages": {
+    "error": {
+      "title": "Page introuvable.",
+      "description": "La page que vous recherchez n'existe pas.",
+      "backHome": "Retour à l'accueil",
+      "info": "Vous avez peut-être oublié d'ajouter le composant \"{{action}}\" à la ressource \"{{resource}}\"."
+    }
+  },
+  "people": {
+    "titles": {
+      "list": "Personnes",
+      "create": "Ajouter une personne",
+      "edit": "Modifier la personne",
+      "show": "Personne"
+    },
+    "fields": {
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "dateOfBirth": "Date de naissance",
+      "gender": "Sexe",
+      "address": "Adresse",
+      "churchName": "Nom de l'église",
+      "churchPastorName": "Nom du pasteur",
+      "churchAddress": "Adresse de l'église",
+      "town": "Ville",
+      "region": "Région",
+      "division": "Département",
+      "subDivision": "Arrondissement",
+      "parentGuardianName": "Nom",
+      "parentGuardianPhone": "Téléphone",
+      "medicalNotes": "Notes médicales",
+      "country": "Pays"
+    },
+    "sections": {
+      "identity": "Informations personnelles",
+      "location": "Localisation",
+      "church": "Église",
+      "guardians": "Parents / tuteurs",
+      "notes": "Notes médicales"
+    },
+    "createHint": "Le nom, l'e-mail et le téléphone suffisent pour commencer. La personne complète le reste en acceptant l'invitation.",
+    "guardiansHint": "Ajoutez jusqu’à trois parents ou tuteurs. Une ligne reste toujours disponible.",
+    "addGuardian": "Ajouter un tuteur",
+    "removeGuardian": "Retirer le tuteur",
+    "guardianNamePlaceholder": "Nom complet",
+    "guardianRow": "Tuteur {{n}}",
+    "genderPlaceholder": "Choisir le sexe",
+    "genders": {
+      "female": "Féminin",
+      "male": "Masculin"
+    },
+    "steps": {
+      "next": "Continuer",
+      "back": "Retour",
+      "progress": "Étape {{current}} sur {{total}}"
+    }
+  },
+  "mailingLists": {
+    "titles": {
+      "list": "Listes d'envoi",
+      "create": "Créer une liste",
+      "edit": "Modifier la liste",
+      "show": "Liste d'envoi"
+    },
+    "fields": {
+      "name": "Nom",
+      "description": "Description",
+      "audienceKind": "Audience",
+      "email": "E-mail",
+      "kind": "Type d'invitation",
+      "subject": "Objet",
+      "body": "Message"
+    },
+    "members": "Membres",
+    "pickCampers": "Sélectionner des campeurs",
+    "pickCampersPlaceholder": "Rechercher et sélectionner des campeurs",
+    "pickCampersHint": "Recherchez par nom ou e-mail, puis choisissez plusieurs personnes ou tout sélectionner.",
+    "searchCampers": "Rechercher par nom ou e-mail",
+    "selectAll": "Tout sélectionner",
+    "selectAllMatching": "Tout sélectionner",
+    "selectVisible": "Tout sélectionner",
+    "clearSelection": "Vider la sélection",
+    "selectedCount": "{{count}} sélectionné(s)",
+    "selectedPerson": "Sélectionné",
+    "moreSelected": "+{{count}} de plus",
+    "addMember": "Ajouter à la liste",
+    "memberAdded": "Personne ajoutée à la liste",
+    "memberAddFailed": "Impossible d'ajouter cette personne",
+    "memberRemoved": "Personne retirée de la liste",
+    "memberRemoveFailed": "Impossible de retirer cette personne",
+    "queueInvitations": "Préparer les invitations",
+    "sendInvitations": "Envoyer les invitations",
+    "selectEvent": "Choisir un événement",
+    "invitationPreview": "Aperçu de l'invitation",
+    "invitationPreviewHint": "Voici l'apparence de l'e-mail dans la langue sélectionnée.",
+    "invitationPreviewEmpty": "Choisissez un événement pour prévisualiser l'invitation.",
+    "invitationsQueued": "{{count}} invitations en file (e-mail pas encore envoyé)",
+    "invitationsSent": "{{count}} invitations envoyées ({{failed}} échecs)",
+    "invitationsFailed": "Impossible de préparer les invitations",
+    "audienceKinds": {
+      "camper": "Campeur",
+      "coordinator": "Coordinateur",
+      "sponsor": "Parrain",
+      "mixed": "Mixte"
+    }
+  },
+  "events": {
+    "titles": {
+      "list": "Événements",
+      "create": "Créer un événement",
+      "edit": "Modifier l'événement",
+      "show": "Événement"
+    },
+    "fields": {
+      "title": "Titre",
+      "summary": "Résumé",
+      "description": "Description",
+      "descriptionPlaceholder": "Rédigez le récit complet de l'événement…",
+      "venue": "Lieu",
+      "city": "Ville",
+      "startsAt": "Début",
+      "endsAt": "Fin",
+      "scheduleStatus": "Statut",
+      "imageUrl": "Image de l'événement",
+      "isPublished": "Afficher sur le site public",
+      "requiresParticipantFee": "Frais participant requis",
+      "participantFeeAmount": "Frais participant (XAF)",
+      "currency": "Devise",
+      "coordinatorFundAmount": "Fonds coordinateur (XAF)",
+      "sponsorFundAmount": "Fonds parrain (XAF)"
+    },
+    "schedule": {
+      "upcoming": "À venir",
+      "active": "En cours",
+      "past": "Passé"
+    },
+    "editor": {
+      "heading2": "Titre",
+      "heading3": "Sous-titre",
+      "bold": "Gras",
+      "italic": "Italique",
+      "quote": "Citation",
+      "bullets": "Liste à puces",
+      "numbers": "Liste numérotée",
+      "link": "Lien",
+      "linkPrompt": "URL du lien"
+    },
+    "public": {
+      "back": "Retour aux événements",
+      "viewDetails": "Voir les détails"
+    }
+  },
+  "payments": {
+    "titles": {
+      "list": "Paiements",
+      "create": "Payer",
+      "edit": "Payer",
+      "show": "Paiement"
+    },
+    "title": "Encaisser un paiement",
+    "kind": "Paiement pour",
+    "method": "Méthode",
+    "momo": "Mobile money",
+    "link": "Lien de paiement",
+    "phone": "Numéro MoMo",
+    "charge": "Lancer le paiement",
+    "started": "Paiement lancé",
+    "waiting": "En attente de la confirmation du paiement…",
+    "paidSuccess": "Paiement confirmé.",
+    "failedStatus": "Le paiement a échoué.",
+    "failed": "Impossible de lancer le paiement",
+    "disabled": "CamPay n'est pas configuré.",
+    "testAmountHint": "Montant test de {{amount}} {{currency}} (en production, les frais de l'événement s'appliquent).",
+    "ussd": "Composer ce code USSD",
+    "openLink": "Ouvrir la page de paiement",
+    "waived": "Aucun montant dû ; paiement marqué comme dispensé.",
+    "alreadyPaid": "Ce paiement est déjà marqué payé.",
+    "listTitle": "Paiements",
+    "webhookHint": "URL webhook CamPay",
+    "refresh": "Actualiser le statut",
+    "refreshed": "Statut du paiement mis à jour",
+    "markPaid": "Marquer payé",
+    "markWaived": "Dispenser",
+    "kinds": {
+      "camper": "Frais campeur",
+      "coordinator": "Fonds coordinateur",
+      "sponsor": "Fonds parrain"
+    }
+  },
+  "invite": {
+    "title": "Invitation",
+    "completeProfile": "Créez un mot de passe pour ouvrir votre compte.",
+    "completeProfileHint": "Votre nom et votre e-mail ont été ajoutés par l'organisateur. Complétez le reste depuis votre tableau de bord après connexion.",
+    "createPassword": "Créer un mot de passe",
+    "accept": "Enregistrer et continuer",
+    "accepted": "Invitation acceptée. Ouverture de votre tableau de bord…",
+    "acceptedWithAccount": "Invitation acceptée. Ouverture de votre tableau de bord…",
+    "goToLogin": "Aller à la connexion",
+    "notFound": "Invitation introuvable.",
+    "failed": "Impossible d'accepter cette invitation."
+  },
+  "auditLogs": {
+    "titles": {
+      "list": "Journaux d'audit",
+      "create": "Journal",
+      "edit": "Journal",
+      "show": "Journal"
+    },
+    "fields": {
+      "action": "Action",
+      "entity": "Entité",
+      "entityId": "Enregistrement",
+      "actor": "Auteur",
+      "createdAt": "Quand"
+    }
+  },
+  "camp": {
+    "titles": {
+      "list": "Mon camp",
+      "create": "Camp",
+      "edit": "Camp",
+      "show": "Camp"
+    },
+    "eyebrow": "Kids Events Cameroon",
+    "description": "Consultez les camps auxquels vous êtes invité, confirmez votre place et réglez les frais.",
+    "homeCard": "Dates, lieu et frais des camps auxquels vous participez.",
+    "emptyTitle": "Aucune invitation de camp",
+    "emptyDescription": "L'équipe vous invitera à un camp. Vous pourrez alors voir les détails et payer ici."
+  },
+  "sponsorships": {
+    "titles": {
+      "list": "Parrainages",
+      "create": "Parrainage",
+      "edit": "Parrainage",
+      "show": "Parrainage"
+    },
+    "eyebrow": "Kids Events Cameroon",
+    "description": "Soutenez un camp en consultant votre parrainage et en versant le fonds lorsqu'il est dû.",
+    "homeCard": "Les événements que vous parrainez et les fonds associés.",
+    "emptyTitle": "Aucun parrainage pour le moment",
+    "emptyDescription": "Lorsque vous serez invité comme parrain, l'événement et le montant apparaîtront ici."
+  },
+  "profile": {
+    "titles": {
+      "list": "Mon profil",
+      "create": "Profil",
+      "edit": "Profil",
+      "show": "Profil"
+    },
+    "eyebrow": "Votre compte",
+    "description": "Tenez à jour vos coordonnées, votre localisation et les informations familiales.",
+    "homeCard": "Mettez à jour vos informations personnelles et familiales.",
+    "unavailableTitle": "Profil indisponible",
+    "unavailableDescription": "Impossible de charger votre profil. Reconnectez-vous ou contactez l'équipe."
+  },
+  "portal": {
+    "pay": "Payer",
+    "settled": "Payé",
+    "noFee": "Aucun frais dû",
+    "unknownEvent": "Événement",
+    "count": "{{count}} lié(s)",
+    "statEvents": "Événements",
+    "statDue": "Paiements dus",
+    "statRegistered": "Inscrits",
+    "status": {
+      "membership": {
+        "invited": "Invité",
+        "registered": "Inscrit",
+        "cancelled": "Annulé"
+      },
+      "payment": {
+        "pending": "Paiement en attente",
+        "paid": "Payé",
+        "failed": "Paiement échoué",
+        "waived": "Dispensé"
+      }
+    }
+  },
+  "content": {
+    "translationHint": "Ajoutez le texte en anglais et en français. Le français manquant utilise l'anglais.",
+    "languages": "Langues"
+  },
+  "a11y": {
+    "toggleSidebar": "Ouvrir le menu",
+    "sidebar": "Menu latéral",
+    "sidebarDescription": "Affiche le menu sur mobile.",
+    "pagination": "Pagination",
+    "morePages": "Plus de pages",
+    "previousSlide": "Diapositive précédente",
+    "nextSlide": "Diapositive suivante"
+  },
+  "pwa": {
+    "name": "Kids Events Cameroon",
+    "shortName": "Kids Events",
+    "description": "Camps, classes et rassemblements au Cameroun."
+  }
+}

@@ -1,34 +1,24 @@
 "use client";
 
 import React from "react";
-import { Refine, GitHubBanner } from "@refinedev/core";
+import { Refine } from "@refinedev/core";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
-
 import routerProvider from "@refinedev/nextjs-router";
 
-import { dataProvider } from "@providers/data-provider";
-import { Login } from "@/pages/login";
-import { Register } from "@/pages/register";
-import { ForgotPassword } from "@/pages/forgot-password";
-import { ErrorComponent } from "@/components/refine-ui/layout/error-component";
-import { Layout } from "@/components/refine-ui/layout/layout";
-import { Header } from "@/components/refine-ui/layout/header";
-import { useNotificationProvider } from "@/components/refine-ui/notification/use-notification-provider";
-import { Toaster } from "@/components/refine-ui/notification/toaster";
-import { ThemeProvider } from "@/components/refine-ui/theme/theme-provider";
+import { AppLogoMark } from "@/components/shared/brand/app-logo";
+import { APP_NAME } from "@/constants/brand";
+import { useRefineResources } from "@/hooks/core/refine-resources.hook";
+import { accessControlProvider } from "@/providers/access-control-provider";
+import { authProvider } from "@/providers/auth-provider";
+import { getAppQueryClient } from "@/lib/client/query-client";
+import { dataProvider } from "@/providers/data-provider";
+import { i18nProvider } from "@/providers/i18n-provider";
+import { liveProvider } from "@/providers/live-provider";
+import { ReduxProvider } from "@/providers/redux-provider";
+import { ThemeProvider } from "@/providers/theme-provider";
+import { useNotificationProvider } from "@/components/shared/refine-ui/notification/use-notification-provider";
+import { Toaster } from "@/components/shared/refine-ui/notification/toaster";
 import "@/app/globals.css";
-import {
-  BlogPostList,
-  BlogPostCreate,
-  BlogPostEdit,
-  BlogPostShow,
-} from "@/pages/blog-posts";
-import {
-  CategoryList,
-  CategoryCreate,
-  CategoryEdit,
-  CategoryShow,
-} from "@/pages/categories";
 
 type RefineContextProps = {
   children: React.ReactNode;
@@ -36,46 +26,39 @@ type RefineContextProps = {
 
 export const RefineContext = ({ children }: RefineContextProps) => {
   const notificationProvider = useNotificationProvider();
+  const resources = useRefineResources();
 
   return (
-    <RefineKbarProvider>
-      <ThemeProvider>
-        <Refine
-          dataProvider={dataProvider}
-          notificationProvider={notificationProvider}
-          routerProvider={routerProvider}
-          resources={[
-            {
-              name: "blog_posts",
-              list: "/blog-posts",
-              create: "/blog-posts/create",
-              edit: "/blog-posts/edit/:id",
-              show: "/blog-posts/show/:id",
-              meta: {
-                canDelete: true,
+    <ReduxProvider>
+      <RefineKbarProvider>
+        <ThemeProvider>
+          <Refine
+            dataProvider={dataProvider}
+            authProvider={authProvider}
+            i18nProvider={i18nProvider}
+            accessControlProvider={accessControlProvider}
+            {...(liveProvider ? { liveProvider } : {})}
+            notificationProvider={notificationProvider}
+            routerProvider={routerProvider}
+            resources={resources}
+            options={{
+              title: {
+                icon: <AppLogoMark className="size-9 text-primary" />,
+                text: APP_NAME,
               },
-            },
-            {
-              name: "categories",
-              list: "/categories",
-              create: "/categories/create",
-              edit: "/categories/edit/:id",
-              show: "/categories/show/:id",
-              meta: {
-                canDelete: true,
+              syncWithLocation: true,
+              warnWhenUnsavedChanges: true,
+              reactQuery: {
+                clientConfig: getAppQueryClient(),
               },
-            },
-          ]}
-          options={{
-            syncWithLocation: true,
-            warnWhenUnsavedChanges: true,
-          }}
-        >
-          {children}
-          <Toaster />
-          <RefineKbar />
-        </Refine>
-      </ThemeProvider>
-    </RefineKbarProvider>
+            }}
+          >
+            {children}
+            <Toaster />
+            <RefineKbar />
+          </Refine>
+        </ThemeProvider>
+      </RefineKbarProvider>
+    </ReduxProvider>
   );
 };

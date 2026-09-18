@@ -26,7 +26,18 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+.env
 .env*.local
+
+# uploaded event images (seed placeholders are committed)
+/public/uploads/events/*
+!/public/uploads/events/.gitkeep
+!/public/uploads/events/sdevent001.png
+!/public/uploads/events/sdevent002.png
+!/public/uploads/events/sdevent003.png
+!/public/uploads/events/sdevent001.svg
+!/public/uploads/events/sdevent002.svg
+!/public/uploads/events/sdevent003.svg
 
 # vercel
 .vercel

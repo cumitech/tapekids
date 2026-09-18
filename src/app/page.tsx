@@ -1,16 +1,8 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { Suspense } from "react";
-
-import { NavigateToResource } from "@refinedev/nextjs-router";
-import { Authenticated } from "@refinedev/core";
+import { DEFAULT_LOCALE } from "@/constants/locales";
+import { withLocalePath } from "@/lib/locale";
 
 export default function IndexPage() {
-  return (
-    <Suspense>
-      <Authenticated key="home-page">
-        <NavigateToResource />
-      </Authenticated>
-    </Suspense>
-  );
+  redirect(withLocalePath(DEFAULT_LOCALE, "/"));
 }
