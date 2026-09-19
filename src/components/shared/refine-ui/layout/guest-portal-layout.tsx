@@ -10,7 +10,9 @@ import { AppModalProvider } from "@/components/shared/modals/app-modal";
 import { GuestOnboardingAlert } from "@/components/portal/guest-onboarding-alert";
 import { HeaderTools } from "@/components/shared/refine-ui/layout/header-tools";
 import { LayoutHeaderBar } from "@/components/shared/refine-ui/layout/layout-header-bar";
+import { MobileNavPreferences, MobileNavSheet } from "@/components/shared/refine-ui/layout/mobile-nav-sheet";
 import { ResourceRouteGuard } from "@/components/shared/refine-ui/layout/resource-route-guard";
+import { UserMenu } from "@/components/shared/refine-ui/layout/user-menu";
 import { GUEST_NAV_ITEMS } from "@/constants/guest-portal";
 import { LAYOUT_CHROME_BG } from "@/constants/layout";
 import { MeProvider } from "@/hooks/core/use-me.hook";
@@ -28,12 +30,12 @@ export function GuestPortalLayout({ children }: PropsWithChildren) {
         <LayoutHeaderBar className="px-3 sm:px-6">
           <Link
             href={path("/dashboard")}
-            className="shrink-0 text-primary"
+            className="min-w-0 shrink text-primary"
             aria-label={translate("brand.name")}
           >
             <AppLogo className="h-8" />
           </Link>
-          <nav className="flex min-w-0 flex-1 items-center gap-3 overflow-x-auto text-sm font-medium">
+          <nav className="hidden min-w-0 flex-1 items-center gap-3 text-sm font-medium md:flex">
             {GUEST_NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
@@ -44,7 +46,24 @@ export function GuestPortalLayout({ children }: PropsWithChildren) {
               </Link>
             ))}
           </nav>
-          <HeaderTools />
+          <HeaderTools className="hidden md:flex" />
+          <div className="ml-auto flex items-center gap-1 md:hidden">
+            <UserMenu />
+            <MobileNavSheet title={translate("dashboard.navigation")}>
+              <nav className="flex flex-col gap-1 px-3 py-3">
+                {GUEST_NAV_ITEMS.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={path(item.href)}
+                    className="flex min-h-12 items-center rounded-lg px-3 text-base font-medium hover:bg-muted"
+                  >
+                    {translate(item.labelKey)}
+                  </Link>
+                ))}
+              </nav>
+              <MobileNavPreferences />
+            </MobileNavSheet>
+          </div>
         </LayoutHeaderBar>
         <main className="mx-auto flex w-full min-w-0 max-w-3xl flex-1 flex-col px-4 py-6 sm:px-6">
           <GuestOnboardingAlert />

@@ -12,6 +12,7 @@ import { GUEST_HOME_CARDS } from "@/constants/guest-portal";
 import { SPONSOR_PORTAL_KINDS } from "@/constants/event-participation";
 import { useGuestHome } from "@/hooks/dashboard/use-guest-home.hook";
 import { useLocale } from "@/hooks/core/use-locale.hook";
+import { DashboardOpenProfileAction } from "@/views/dashboard/dashboard-hero-actions";
 
 const ICON = { className: "h-5 w-5" };
 const CARD_ICONS = {
@@ -31,7 +32,7 @@ export function GuestHome() {
   };
 
   return (
-    <section className="flex flex-col gap-8">
+    <section className="flex flex-col gap-5 sm:gap-8">
       <PortalHero
         tone="guest"
         eyebrow={translate("dashboard.guestEyebrow")}
@@ -40,13 +41,16 @@ export function GuestHome() {
         stats={[
           {
             label: translate("camp.titles.list"),
+            shortLabel: translate("dashboard.statCamp"),
             value: home.campCount,
           },
           {
             label: translate("sponsorships.titles.list"),
+            shortLabel: translate("dashboard.statSponsors"),
             value: home.sponsorCount,
           },
         ]}
+        actions={<DashboardOpenProfileAction />}
       />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {GUEST_HOME_CARDS.map((card) => (

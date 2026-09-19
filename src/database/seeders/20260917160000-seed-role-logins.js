@@ -8,7 +8,7 @@ module.exports = {
     await upsertSeedLogins(queryInterface);
   },
 
-  async down(queryInterface) {
+  async down(queryInterface) { 
     await queryInterface.sequelize.query(
       "DELETE FROM users WHERE email IN (:emails)",
       {

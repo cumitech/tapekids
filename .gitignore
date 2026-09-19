@@ -38,6 +38,7 @@ yarn-error.log*
 !/public/uploads/events/sdevent001.svg
 !/public/uploads/events/sdevent002.svg
 !/public/uploads/events/sdevent003.svg
+/data/uploads/
 
 # vercel
 .vercel

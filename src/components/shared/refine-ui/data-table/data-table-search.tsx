@@ -50,12 +50,12 @@ export function DataTableSearch<TData extends BaseRecord>({
   }
 
   return (
-    <div className="relative w-full min-w-0 max-w-sm">
-      <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+    <div className="relative w-full min-w-0 md:max-w-sm">
+      <Search className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground md:left-2.5 md:size-4" />
       <Input
         value={value}
         placeholder={translate("table.filter.searchPlaceholder")}
-        className="pl-8 pr-8"
+        className="h-12 rounded-xl border-border bg-white pl-11 pr-12 shadow-[0_1px_4px_rgba(15,23,42,0.08)] md:h-9 md:rounded-md md:pl-8 md:pr-8"
         onChange={(event) => setValue(event.target.value)}
       />
       {value ? (
@@ -63,10 +63,10 @@ export function DataTableSearch<TData extends BaseRecord>({
           type="button"
           size="icon"
           variant="ghost"
-          className="absolute right-0.5 top-1/2 size-7 -translate-y-1/2 text-muted-foreground"
+          className="absolute right-1 top-1/2 size-10 -translate-y-1/2 text-muted-foreground md:right-0.5 md:size-7"
           onClick={() => setValue("")}
         >
-          <X className="size-3.5" />
+          <X className="size-5 md:size-3.5" />
           <span className="sr-only">{translate("buttons.clear")}</span>
         </Button>
       ) : null}

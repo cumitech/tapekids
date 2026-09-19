@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
+  outputFileTracingRoot: process.cwd(),
   serverExternalPackages: ["sequelize", "mysql2", "bcryptjs", "mailgun.js", "form-data"],
   async headers() {
     return [
@@ -14,20 +15,32 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    return [
-      {
-        source: "/:lang(en|fr)/manifest.webmanifest",
-        destination: "/manifest.webmanifest",
-      },
-      {
-        source: "/:lang(en|fr)/sw.js",
-        destination: "/sw.js",
-      },
-      {
-        source: "/:lang(en|fr)/uploads/:path*",
-        destination: "/uploads/:path*",
-      },
-    ];
+    return {
+      beforeFiles: [
+        {
+          source: "/uploads/events/:filename",
+          destination: "/api/uploads/events/:filename",
+        },
+        {
+          source: "/:lang(en|fr)/uploads/events/:filename",
+          destination: "/api/uploads/events/:filename",
+        },
+      ],
+      afterFiles: [
+        {
+          source: "/:lang(en|fr)/manifest.webmanifest",
+          destination: "/manifest.webmanifest",
+        },
+        {
+          source: "/:lang(en|fr)/sw.js",
+          destination: "/sw.js",
+        },
+        {
+          source: "/:lang(en|fr)/uploads/:path*",
+          destination: "/uploads/:path*",
+        },
+      ],
+    };
   },
 };
 

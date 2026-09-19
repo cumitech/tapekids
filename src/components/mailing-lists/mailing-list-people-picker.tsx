@@ -130,7 +130,7 @@ export function MailingListPeoplePicker({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="h-9 w-full justify-between font-normal"
+            className="w-full justify-between font-normal"
           >
             <span
               className={cn("truncate", value.length === 0 && "text-muted-foreground")}

@@ -10,7 +10,6 @@ import { Input } from "@/components/shared/ui/input";
 import { Label } from "@/components/shared/ui/label";
 import { Checkbox } from "@/components/shared/ui/checkbox";
 import {
-  Card,
   CardContent,
   CardHeader,
   CardTitle,
@@ -18,9 +17,9 @@ import {
   CardFooter,
 } from "@/components/shared/ui/card";
 import { Separator } from "@/components/shared/ui/separator";
+import { AuthFormFrame } from "@/components/shared/refine-ui/form/auth-form-frame";
 import { InputPassword } from "@/components/shared/refine-ui/form/input-password";
 import { useLocale } from "@/hooks/core/use-locale.hook";
-import { cn } from "@/lib/utils";
 
 export const SignInForm = () => {
   const [rememberMe, setRememberMe] = useState(false);
@@ -65,118 +64,94 @@ export const SignInForm = () => {
   };
 
   return (
-    <div
-      className={cn(
-        "flex",
-        "flex-col",
-        "items-center",
-        "justify-center",
-        "px-6",
-        "py-8",
-        "flex-1"
-      )}
-    >
-      <Card className={cn("sm:w-[456px]", "p-12", "mt-6")}>
-        <CardHeader className={cn("px-0")}>
-          <CardTitle
-            className={cn("text-primary", "text-3xl", "font-semibold")}
-          >
-            {translate("auth.signIn")}
-          </CardTitle>
-          <CardDescription
-            className={cn("text-muted-foreground", "font-medium")}
-          >
-            {translate("auth.welcomeBack")}
-          </CardDescription>
-        </CardHeader>
+    <AuthFormFrame>
+      <CardHeader className="px-0">
+        <CardTitle className="text-2xl font-semibold text-primary sm:text-3xl">
+          {translate("auth.signIn")}
+        </CardTitle>
+        <CardDescription className="font-medium text-muted-foreground">
+          {translate("auth.welcomeBack")}
+        </CardDescription>
+      </CardHeader>
 
-        <Separator />
+      <Separator />
 
-        <CardContent className={cn("px-0")}>
-          <form onSubmit={handleSignIn}>
-            <div className={cn("flex", "flex-col", "gap-2")}>
-              <Label htmlFor="email">{translate("auth.email")}</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder=""
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+      <CardContent className="px-0">
+        <form onSubmit={handleSignIn}>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="email">{translate("auth.email")}</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder=""
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="relative mt-4 flex flex-col gap-2 sm:mt-6">
+            <Label htmlFor="password">{translate("auth.password")}</Label>
+            <InputPassword
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="mt-4 flex min-h-12 flex-wrap items-center justify-between gap-2">
+            <div className="flex min-h-12 items-center gap-3">
+              <Checkbox
+                id="remember"
+                checked={rememberMe}
+                onCheckedChange={(checked) =>
+                  setRememberMe(checked === "indeterminate" ? false : checked)
+                }
               />
+              <Label htmlFor="remember" className="min-h-12 cursor-pointer py-3">
+                {translate("auth.rememberMe")}
+              </Label>
             </div>
-            <div
-              className={cn("relative", "flex", "flex-col", "gap-2", "mt-6")}
-            >
-              <Label htmlFor="password">{translate("auth.password")}</Label>
-              <InputPassword
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <div
-              className={cn(
-                "flex items-center justify-between",
-                "flex-wrap",
-                "gap-2",
-                "mt-4"
-              )}
-            >
-              <div className={cn("flex items-center", "space-x-2")}>
-                <Checkbox
-                  id="remember"
-                  checked={rememberMe}
-                  onCheckedChange={(checked) =>
-                    setRememberMe(checked === "indeterminate" ? false : checked)
-                  }
-                />
-                <Label htmlFor="remember">{translate("auth.rememberMe")}</Label>
-              </div>
-              <Link
-                to={path("/forgot-password")}
-                className={cn(
-                  "text-sm",
-                  "flex",
-                  "items-center",
-                  "gap-2",
-                  "text-primary hover:underline"
-                )}
-              >
-                <span>{translate("auth.forgotPassword")}</span>
-                <CircleHelp className={cn("w-4", "h-4")} />
-              </Link>
-            </div>
-
-            <Button type="submit" size="lg" className={cn("w-full", "mt-6")} disabled={isPending}>
-              {isPending ? translate("loading") : translate("auth.signIn")}
-            </Button>
-            {formError ? (
-              <p className="mt-3 text-sm text-destructive" role="alert">
-                {formError}
-              </p>
-            ) : null}
-          </form>
-        </CardContent>
-
-        <Separator />
-
-        <CardFooter>
-          <div className={cn("w-full", "text-center text-sm")}>
-            <span className={cn("text-sm", "text-muted-foreground")}>
-              {translate("auth.noAccount")}{" "}
-            </span>
             <Link
-              to={path("/register")}
-              className={cn("text-primary", "font-semibold", "underline")}
+              to={path("/forgot-password")}
+              className="inline-flex min-h-12 items-center gap-2 text-sm text-primary hover:underline"
             >
-              {translate("auth.signUp")}
+              <span>{translate("auth.forgotPassword")}</span>
+              <CircleHelp className="h-4 w-4" />
             </Link>
           </div>
-        </CardFooter>
-      </Card>
-    </div>
+
+          <Button
+            type="submit"
+            size="lg"
+            className="mt-5 w-full sm:mt-6"
+            disabled={isPending}
+          >
+            {isPending ? translate("loading") : translate("auth.signIn")}
+          </Button>
+          {formError ? (
+            <p className="mt-3 text-sm text-destructive" role="alert">
+              {formError}
+            </p>
+          ) : null}
+        </form>
+      </CardContent>
+
+      <Separator />
+
+      <CardFooter className="px-0">
+        <div className="w-full text-center text-sm">
+          <span className="text-sm text-muted-foreground">
+            {translate("auth.noAccount")}{" "}
+          </span>
+          <Link
+            to={path("/register")}
+            className="inline-flex min-h-12 items-center font-semibold text-primary underline"
+          >
+            {translate("auth.signUp")}
+          </Link>
+        </div>
+      </CardFooter>
+    </AuthFormFrame>
   );
 };
 

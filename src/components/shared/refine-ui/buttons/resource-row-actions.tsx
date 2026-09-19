@@ -11,20 +11,20 @@ type ResourceRowActionsProps = {
 
 export function ResourceRowActions({ id, onEdit }: ResourceRowActionsProps) {
   return (
-    <div className="flex shrink-0 items-center justify-end gap-1">
+    <div className="flex shrink-0 items-center justify-end gap-2">
       <ShowButton
         recordItemId={id}
         size="icon"
         variant="outline"
-        className="size-8"
+        className="size-11 md:size-8"
       />
       <EditButton
         recordItemId={id}
         size="icon"
-        className="size-8"
+        className="size-11 md:size-8"
         onClick={onEdit}
       />
-      <DeleteButton recordItemId={id} size="icon" className="size-8" />
+      <DeleteButton recordItemId={id} size="icon" className="size-11 md:size-8" />
     </div>
   );
 }

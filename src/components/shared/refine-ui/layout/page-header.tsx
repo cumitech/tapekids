@@ -24,7 +24,7 @@ export function PageHeader({
   const translate = useTranslate();
 
   return (
-    <div className={cn("mb-6 flex min-w-0 flex-wrap items-center justify-between gap-4", className)}>
+    <div className={cn("mb-6 flex min-w-0 items-center justify-between gap-3", className)}>
       <div className="flex min-w-0 items-center gap-1">
         {showBack ? (
           <Button
@@ -42,7 +42,7 @@ export function PageHeader({
         </h1>
       </div>
       {actions ? (
-        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto">{actions}</div>
+        <div className="ml-auto flex shrink-0 items-center justify-end gap-2">{actions}</div>
       ) : null}
     </div>
   );

@@ -89,7 +89,7 @@ export function LabeledCombobox({
             variant="outline"
             role="combobox"
             disabled={disabled}
-            className="h-9 w-full justify-between font-normal"
+            className="w-full justify-between font-normal"
           >
             <span
               className={cn(

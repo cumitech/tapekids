@@ -68,7 +68,7 @@ export function DataTablePagination({
             value={`${pageSize}`}
             onValueChange={(v) => setPageSize(Number(v))}
           >
-            <SelectTrigger className={cn("h-8", "w-[70px]")}>
+            <SelectTrigger className={cn("h-11 w-[84px] md:h-8 md:w-[70px]")}>
               <SelectValue placeholder={pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
@@ -98,7 +98,7 @@ export function DataTablePagination({
           <div className={cn("flex", "items-center", "gap-2")}>
             <Button
               variant="outline"
-              className={cn("hidden", "h-8", "w-8", "p-0", "lg:flex")}
+              className={cn("hidden h-11 w-11 p-0 lg:flex md:h-8 md:w-8")}
               onClick={() => setCurrentPage(1)}
               disabled={currentPage === 1}
               aria-label={translate("table.firstPage")}
@@ -107,7 +107,7 @@ export function DataTablePagination({
             </Button>
             <Button
               variant="outline"
-              className={cn("h-8", "w-8", "p-0")}
+              className={cn("h-11 w-11 p-0 md:h-8 md:w-8")}
               onClick={() => setCurrentPage(currentPage - 1)}
               disabled={currentPage === 1}
               aria-label={translate("table.previousPage")}
@@ -116,7 +116,7 @@ export function DataTablePagination({
             </Button>
             <Button
               variant="outline"
-              className={cn("h-8", "w-8", "p-0")}
+              className={cn("h-11 w-11 p-0 md:h-8 md:w-8")}
               onClick={() => setCurrentPage(currentPage + 1)}
               disabled={currentPage === pageCount}
               aria-label={translate("table.nextPage")}
@@ -125,7 +125,7 @@ export function DataTablePagination({
             </Button>
             <Button
               variant="outline"
-              className={cn("hidden", "h-8", "w-8", "p-0", "lg:flex")}
+              className={cn("hidden h-11 w-11 p-0 lg:flex md:h-8 md:w-8")}
               onClick={() => setCurrentPage(pageCount)}
               disabled={currentPage === pageCount}
               aria-label={translate("table.lastPage")}

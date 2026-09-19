@@ -1,6 +1,7 @@
 "use client";
 
 import { DataTableColumnFilter } from "@/components/shared/refine-ui/data-table/data-table-column-filter";
+import { DataTableCards } from "@/components/shared/refine-ui/data-table/data-table-cards";
 import { DataTablePagination } from "@/components/shared/refine-ui/data-table/data-table-pagination";
 import { DataTableSearch } from "@/components/shared/refine-ui/data-table/data-table-search";
 import {
@@ -100,10 +101,16 @@ export function DataTable<TData extends BaseRecord>({
   return (
     <div className={cn("flex min-w-0 flex-1 flex-col gap-4")}>
       {search ? <DataTableSearch table={table} /> : null}
+      <DataTableCards
+        rows={getRowModel().rows}
+        isLoading={isLoading}
+        pageSize={pageSize}
+        currentPage={currentPage}
+      />
       <div
         ref={tableContainerRef}
         className={cn(
-          "min-w-0 max-w-full overflow-hidden rounded-lg bg-white shadow-[0_1px_4px_rgba(15,23,42,0.08)] dark:bg-card"
+          "hidden min-w-0 max-w-full overflow-hidden rounded-lg bg-white shadow-[0_1px_4px_rgba(15,23,42,0.08)] md:block dark:bg-card"
         )}
       >
         <Table

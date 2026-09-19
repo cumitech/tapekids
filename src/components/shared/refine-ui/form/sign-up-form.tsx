@@ -12,7 +12,6 @@ import { Button } from "@/components/shared/ui/button";
 import { Input } from "@/components/shared/ui/input";
 import { Label } from "@/components/shared/ui/label";
 import {
-  Card,
   CardContent,
   CardHeader,
   CardTitle,
@@ -20,9 +19,9 @@ import {
   CardFooter,
 } from "@/components/shared/ui/card";
 import { Separator } from "@/components/shared/ui/separator";
+import { AuthFormFrame } from "@/components/shared/refine-ui/form/auth-form-frame";
 import { InputPassword } from "@/components/shared/refine-ui/form/input-password";
 import { useLocale } from "@/hooks/core/use-locale.hook";
-import { cn } from "@/lib/utils";
 
 export const SignUpForm = () => {
   const [email, setEmail] = useState("");
@@ -57,96 +56,76 @@ export const SignUpForm = () => {
   };
 
   return (
-    <div
-      className={cn(
-        "flex",
-        "flex-col",
-        "items-center",
-        "justify-center",
-        "px-6",
-        "py-8",
-        "flex-1"
-      )}
-    >
-      <Card className={cn("sm:w-[456px]", "p-12", "mt-6")}>
-        <CardHeader className={cn("px-0")}>
-          <CardTitle
-            className={cn("text-primary", "text-3xl", "font-semibold")}
-          >
-            {translate("auth.signUp")}
-          </CardTitle>
-          <CardDescription
-            className={cn("text-muted-foreground", "font-medium")}
-          >
-            {translate("auth.signUpWelcome")}
-          </CardDescription>
-        </CardHeader>
+    <AuthFormFrame>
+      <CardHeader className="px-0">
+        <CardTitle className="text-2xl font-semibold text-primary sm:text-3xl">
+          {translate("auth.signUp")}
+        </CardTitle>
+        <CardDescription className="font-medium text-muted-foreground">
+          {translate("auth.signUpWelcome")}
+        </CardDescription>
+      </CardHeader>
 
-        <Separator />
+      <Separator />
 
-        <CardContent className={cn("px-0")}>
-          <form onSubmit={handleSignUp}>
-            <div className={cn("flex", "flex-col", "gap-2")}>
-              <Label htmlFor="email">{translate("auth.email")}</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder=""
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-
-            <div
-              className={cn("relative", "flex", "flex-col", "gap-2", "mt-6")}
-            >
-              <Label htmlFor="password">{translate("auth.password")}</Label>
-              <InputPassword
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <div
-              className={cn("relative", "flex", "flex-col", "gap-2", "mt-6")}
-            >
-              <Label htmlFor="confirmPassword">
-                {translate("auth.confirmPassword")}
-              </Label>
-              <InputPassword
-                id="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <Button type="submit" size="lg" className={cn("w-full", "mt-6")}>
-              {translate("auth.signUp")}
-            </Button>
-          </form>
-        </CardContent>
-
-        <Separator />
-
-        <CardFooter>
-          <div className={cn("w-full", "text-center text-sm")}>
-            <span className={cn("text-sm", "text-muted-foreground")}>
-              {translate("auth.haveAccount")}{" "}
-            </span>
-            <Link
-              to={path("/login")}
-              className={cn("text-primary", "font-semibold", "underline")}
-            >
-              {translate("auth.signIn")}
-            </Link>
+      <CardContent className="px-0">
+        <form onSubmit={handleSignUp}>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="email">{translate("auth.email")}</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder=""
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
-        </CardFooter>
-      </Card>
-    </div>
+
+          <div className="relative mt-4 flex flex-col gap-2 sm:mt-6">
+            <Label htmlFor="password">{translate("auth.password")}</Label>
+            <InputPassword
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="relative mt-4 flex flex-col gap-2 sm:mt-6">
+            <Label htmlFor="confirmPassword">
+              {translate("auth.confirmPassword")}
+            </Label>
+            <InputPassword
+              id="confirmPassword"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <Button type="submit" size="lg" className="mt-5 w-full sm:mt-6">
+            {translate("auth.signUp")}
+          </Button>
+        </form>
+      </CardContent>
+
+      <Separator />
+
+      <CardFooter className="px-0">
+        <div className="w-full text-center text-sm">
+          <span className="text-sm text-muted-foreground">
+            {translate("auth.haveAccount")}{" "}
+          </span>
+          <Link
+            to={path("/login")}
+            className="inline-flex min-h-12 items-center font-semibold text-primary underline"
+          >
+            {translate("auth.signIn")}
+          </Link>
+        </div>
+      </CardFooter>
+    </AuthFormFrame>
   );
 };
 

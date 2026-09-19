@@ -8,7 +8,10 @@ import { PortalHero } from "@/components/portal/portal-hero";
 import { RESOURCE_CARD_TINT } from "@/components/portal/portal-tone";
 import { USER_ROLES } from "@/constants/user-roles";
 import { useRefineResources } from "@/hooks/core/refine-resources.hook";
+import { useResourceTotal } from "@/hooks/dashboard/use-resource-total.hook";
 import { canPerform } from "@/lib/permissions";
+import { DashboardAddPersonAction } from "@/views/dashboard/dashboard-hero-actions";
+import { directoryHeroStats } from "@/views/dashboard/dashboard-hero-stats";
 
 const ICON = { className: "h-5 w-5" };
 const ADMIN_SECTIONS = ["people", "mailing-lists", "events", "audit-logs"];
@@ -21,20 +24,27 @@ export function AdminHome() {
       ADMIN_SECTIONS.includes(resource.name) &&
       canPerform({ roles, resource: resource.name, action: "list" })
   );
+  const people = useResourceTotal("people");
+  const lists = useResourceTotal("mailing-lists");
+  const events = useResourceTotal("events");
+  const audits = useResourceTotal("audit-logs");
 
   return (
-    <section className="flex flex-col gap-8">
+    <section className="flex flex-col gap-5 sm:gap-8">
       <PortalHero
         tone="admin"
         eyebrow={translate("dashboard.adminEyebrow")}
         title={translate("dashboard.adminTitle")}
         description={translate("dashboard.adminDescription")}
         stats={[
+          ...directoryHeroStats(translate, { people, lists, events }),
           {
-            label: translate("dashboard.statSections"),
-            value: resources.length,
+            label: translate("auditLogs.titles.list"),
+            shortLabel: translate("dashboard.statAudit"),
+            value: audits,
           },
         ]}
+        actions={<DashboardAddPersonAction />}
       />
       <div className="grid gap-4 sm:grid-cols-2">
         {resources.map((resource) => {

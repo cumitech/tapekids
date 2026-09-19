@@ -47,7 +47,7 @@ export function ResourceHero({
           palette.glow
         )}
       />
-      <div className="relative z-10 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+      <div className="relative z-10 flex min-h-14 min-w-0 items-center justify-between gap-3 sm:min-h-16">
         <div className="flex min-w-0 items-center gap-1">
           {showBack ? (
             <PageBackButton className="-ml-1.5 text-white hover:bg-white/15 hover:text-white" />
@@ -57,7 +57,7 @@ export function ResourceHero({
           </h1>
         </div>
         {actions ? (
-          <div className="relative z-10 flex w-full min-w-0 shrink-0 flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end [&_[data-slot=button]]:h-10 [&_[data-slot=button]]:shrink-0 [&_[data-slot=button]]:border-white/40 [&_[data-slot=button]]:bg-white [&_[data-slot=button]]:text-primary [&_[data-slot=button]]:shadow-none [&_[data-slot=button]]:hover:bg-white/90 [&_[data-hero-group]]:shrink-0 [&_[data-hero-group]_[data-slot=button]]:rounded-none [&_[data-hero-group]_[data-slot=button]]:border-0 [&_[data-hero-group]_[data-slot=button]]:bg-transparent [&_[data-hero-group]_[data-slot=button]]:hover:bg-primary/5">
+          <div className="relative z-10 ml-auto flex shrink-0 items-center justify-end gap-2 [&_[data-slot=button]]:h-11 [&_[data-slot=button]]:shrink-0 [&_[data-slot=button]]:border-white/40 [&_[data-slot=button]]:bg-white [&_[data-slot=button]]:text-primary [&_[data-slot=button]]:shadow-none [&_[data-slot=button]]:hover:bg-white/90 md:[&_[data-slot=button]]:h-10 [&_[data-hero-group]]:shrink-0 [&_[data-hero-group]_[data-slot=button]]:rounded-none [&_[data-hero-group]_[data-slot=button]]:border-0 [&_[data-hero-group]_[data-slot=button]]:bg-transparent [&_[data-hero-group]_[data-slot=button]]:hover:bg-primary/5">
             {actions}
           </div>
         ) : null}

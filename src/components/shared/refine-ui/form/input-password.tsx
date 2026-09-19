@@ -11,24 +11,23 @@ export const InputPassword = ({ className, ...props }: InputPasswordProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className={cn("relative")}>
+    <div className="relative">
       <Input
         type={showPassword ? "text" : "password"}
-        className={cn(className)}
+        className={cn("pr-12", className)}
         {...props}
       />
       <button
         type="button"
-        className={cn(
-          "appearance-none",
-          "absolute right-3 top-1/2 -translate-y-1/2"
-        )}
-        onClick={() => setShowPassword(!showPassword)}
+        aria-pressed={showPassword}
+        aria-label={showPassword ? "Hide password" : "Show password"}
+        className="absolute inset-y-0 right-0 flex w-12 touch-manipulation items-center justify-center text-muted-foreground"
+        onClick={() => setShowPassword((open) => !open)}
       >
         {showPassword ? (
-          <EyeOff size={18} className={cn("text-gray-500")} />
+          <EyeOff className="size-5" />
         ) : (
-          <Eye size={18} className={cn("text-gray-500")} />
+          <Eye className="size-5" />
         )}
       </button>
     </div>

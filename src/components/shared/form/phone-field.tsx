@@ -107,7 +107,7 @@ export function PhoneField({
               aria-label={translate("form.countryCode", "Country code")}
               title={translate("form.countryCode", "Country code")}
               disabled={disabled}
-              className="h-9 w-[5.5rem] shrink-0 justify-between px-1.5 font-normal"
+              className="h-12 w-[6.25rem] shrink-0 justify-between px-2 font-normal md:h-9 md:w-[5.5rem] md:px-1.5"
             >
               <span className="truncate">+{selected.dial}</span>
               <ChevronsUpDownIcon className="size-4 shrink-0 opacity-50" />
