@@ -20,8 +20,7 @@ export function ResourceRouteGuard({ children }: PropsWithChildren) {
   const { roles } = useSessionRoles();
   const allowed =
     !resource ||
-    !roles.length ||
-    canPerform({ roles, resource, action });
+    (roles.length > 0 && canPerform({ roles, resource, action }));
 
   useEffect(() => {
     if (!resource || !roles.length) {

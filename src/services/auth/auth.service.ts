@@ -1,11 +1,13 @@
 import bcrypt from "bcryptjs";
 
+import { AUTH_TOKEN_PURPOSES } from "@/constants/auth-tokens";
 import { USER_ROLES } from "@/constants/user-roles";
 import {
   parseForgotPassword,
   parseLogin,
   parseRegister,
   parseResetPassword,
+  parseVerifyEmail,
   toCreateUserPayload,
 } from "@/data/dtos/auth.dto";
 import type { Person } from "@/data/entities/person";
@@ -14,7 +16,7 @@ import { UserRepository } from "@/data/repositories/user.repository";
 import { ConflictException } from "@/exceptions/conflict.exception";
 import { UnauthorizedException } from "@/exceptions/unauthorized.exception";
 import { ValidationException } from "@/exceptions/validation.exception";
-import { nanoid } from "@/lib/api/id";
+import { nanoid, tokenId } from "@/lib/api/id";
 import { hashToken } from "@/lib/api/request-context";
 import { signSession, toPublicUser, type PublicUser } from "@/lib/api/session";
 import { isMailConfigured } from "@/lib/integrations/env";
@@ -25,8 +27,16 @@ import { notificationService } from "@/services/notifications/notification.servi
 const userRepository = new UserRepository();
 const passwordResetRepository = new PasswordResetRepository();
 
+const AUTH_TOKEN_MS = 2 * 60 * 60 * 1000;
+const VERIFY_TOKEN_MS = 48 * 60 * 60 * 1000;
+
+export type AuthSessionResult = { token: string; user: PublicUser };
+export type RegisterResult =
+  | AuthSessionResult
+  | { sent: true; requiresVerification: true };
+
 export class AuthService {
-  async login(body: unknown): Promise<{ token: string; user: PublicUser }> {
+  async login(body: unknown): Promise<AuthSessionResult> {
     const input = parseLogin(body);
     const user = await userRepository.findByEmail(input.email);
     if (!user) {
@@ -38,19 +48,22 @@ export class AuthService {
       throw new UnauthorizedException("Invalid email or password.");
     }
 
+    if (!user.verified) {
+      throw new UnauthorizedException(
+        "Verify your email before signing in."
+      );
+    }
+
     void auditService.record({
       action: "login",
       entity: "User",
       entityId: user.id,
     });
 
-    return {
-      token: signSession(user),
-      user: toPublicUser(user),
-    };
+    return this.sessionFor(user);
   }
 
-  async register(body: unknown): Promise<{ token: string; user: PublicUser }> {
+  async register(body: unknown): Promise<RegisterResult> {
     const input = parseRegister(body);
     const payload = toCreateUserPayload(input);
     const existing = await userRepository.findByEmail(payload.email);
@@ -58,13 +71,14 @@ export class AuthService {
       throw new ConflictException("An account with this email already exists.");
     }
 
+    const mailReady = isMailConfigured();
     const user = await userRepository.create({
       id: nanoid(),
       email: payload.email,
       username: payload.username,
       password: await bcrypt.hash(payload.password, 10),
       role: payload.role,
-      verified: false,
+      verified: !mailReady,
     });
 
     await auditService.record({
@@ -73,22 +87,48 @@ export class AuthService {
       entityId: user.id,
       after: user,
     });
-    await notificationService.welcome({ to: user.email });
 
-    return {
-      token: signSession(user),
-      user: toPublicUser(user),
-    };
+    if (mailReady) {
+      await this.issueEmailVerification(user.id, user.email, user.username);
+      return { sent: true, requiresVerification: true };
+    }
+
+    await notificationService.welcome({
+      to: user.email,
+      firstName: user.username,
+    });
+    return this.sessionFor(user);
+  }
+
+  async verifyEmail(body: unknown): Promise<AuthSessionResult> {
+    const input = parseVerifyEmail(body);
+    const reset = await passwordResetRepository.findValid(
+      hashToken(input.token),
+      AUTH_TOKEN_PURPOSES.VERIFY_EMAIL
+    );
+    const user = await userRepository.markVerified(reset.userId);
+    await passwordResetRepository.markUsed(reset.id);
+    await auditService.record({
+      action: "email_verified",
+      entity: "User",
+      entityId: user.id,
+    });
+    return this.sessionFor(user);
   }
 
   async forgotPassword(body: unknown): Promise<{ sent: boolean }> {
-    if (!isMailConfigured()) {
-      throw new ValidationException("Mail is not configured.");
-    }
     const input = parseForgotPassword(body);
     const user = await userRepository.findByEmail(input.email);
     if (!user) {
       logger.info("auth.forgot_unknown_email");
+      return { sent: true };
+    }
+    if (!user.verified) {
+      await this.issueEmailVerification(user.id, user.email, user.username);
+      return { sent: true };
+    }
+    if (!isMailConfigured()) {
+      logger.warn("auth.password_reset_skipped_no_mail", { userId: user.id });
       return { sent: true };
     }
     await this.issuePasswordReset(user.id, user.email, false);
@@ -105,7 +145,8 @@ export class AuthService {
   ): Promise<{ token: string; user: PublicUser }> {
     const input = parseResetPassword(body);
     const reset = await passwordResetRepository.findValid(
-      hashToken(input.token)
+      hashToken(input.token),
+      AUTH_TOKEN_PURPOSES.RESET_PASSWORD
     );
     const password = await bcrypt.hash(input.password, 10);
     const user = await userRepository.updatePassword(reset.userId, password);
@@ -116,10 +157,7 @@ export class AuthService {
       entityId: user.id,
     });
     await notificationService.passwordChanged({ to: user.email });
-    return {
-      token: signSession(user),
-      user: toPublicUser(user),
-    };
+    return this.sessionFor(user);
   }
 
   async hasAccountForPerson(person: Person): Promise<boolean> {
@@ -154,10 +192,12 @@ export class AuthService {
       const user = existing.personId
         ? existing
         : await userRepository.linkPerson(existing.id, person.id);
+      const verified = user.verified
+        ? user
+        : await userRepository.markVerified(user.id);
       return {
         created: false,
-        token: signSession(user),
-        user: toPublicUser(user),
+        ...this.sessionFor(verified),
       };
     }
 
@@ -184,9 +224,49 @@ export class AuthService {
 
     return {
       created: true,
+      ...this.sessionFor(user),
+    };
+  }
+
+  private sessionFor(user: Awaited<ReturnType<UserRepository["findById"]>>): AuthSessionResult {
+    return {
       token: signSession(user),
       user: toPublicUser(user),
     };
+  }
+
+  private async createOneTimeToken(
+    userId: string,
+    ttlMs: number,
+    purpose: (typeof AUTH_TOKEN_PURPOSES)[keyof typeof AUTH_TOKEN_PURPOSES]
+  ) {
+    const token = tokenId();
+    await passwordResetRepository.create({
+      id: nanoid(),
+      userId,
+      tokenHash: hashToken(token),
+      purpose,
+      expiresAt: new Date(Date.now() + ttlMs),
+      usedAt: null,
+    });
+    return token;
+  }
+
+  private async issueEmailVerification(
+    userId: string,
+    email: string,
+    firstName?: string
+  ) {
+    const token = await this.createOneTimeToken(
+      userId,
+      VERIFY_TOKEN_MS,
+      AUTH_TOKEN_PURPOSES.VERIFY_EMAIL
+    );
+    await notificationService.verifyEmail({
+      to: email,
+      firstName,
+      token,
+    });
   }
 
   private async issuePasswordReset(
@@ -199,14 +279,11 @@ export class AuthService {
       logger.warn("auth.password_reset_skipped_no_mail", { userId });
       return;
     }
-    const token = nanoid(48);
-    await passwordResetRepository.create({
-      id: nanoid(),
+    const token = await this.createOneTimeToken(
       userId,
-      tokenHash: hashToken(token),
-      expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000),
-      usedAt: null,
-    });
+      AUTH_TOKEN_MS,
+      AUTH_TOKEN_PURPOSES.RESET_PASSWORD
+    );
     await notificationService.passwordReset({
       to: email,
       firstName,

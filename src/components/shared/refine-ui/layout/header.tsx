@@ -7,13 +7,11 @@ import { HeaderTools } from "@/components/shared/refine-ui/layout/header-tools";
 import { LayoutHeaderBar } from "@/components/shared/refine-ui/layout/layout-header-bar";
 import { Separator } from "@/components/shared/ui/separator";
 import { SidebarTrigger } from "@/components/shared/ui/sidebar";
-import { hasRole, USER_ROLES } from "@/constants/user-roles";
-import { useSessionRoles } from "@/hooks/core/use-session-roles.hook";
+import { useRoleFlags } from "@/hooks/core/use-session-roles.hook";
 
 export const Header = () => {
   const translate = useTranslate();
-  const { roles } = useSessionRoles();
-  const isAdmin = hasRole(roles, USER_ROLES.ADMIN);
+  const { isAdmin } = useRoleFlags();
   const roleLabel = translate(
     isAdmin ? "dashboard.roleAdmin" : "dashboard.roleStaff"
   );

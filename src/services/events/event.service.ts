@@ -8,6 +8,7 @@ import {
   toUpdatePayload,
 } from "@/data/dtos/event.dto";
 import { contentTranslationRepository } from "@/data/repositories/content-translation.repository";
+import { EventMembershipRepository } from "@/data/repositories/event-membership.repository";
 import { EventRepository } from "@/data/repositories/event.repository";
 import type { ListQuery } from "@/data/types/pagination";
 import { resolveContentLocale } from "@/lib/api/request-locale";
@@ -17,6 +18,7 @@ import { sanitizeRichText } from "@/lib/sanitize-html";
 import { auditService } from "@/services/audit/audit.service";
 
 const eventRepository = new EventRepository();
+const eventMembershipRepository = new EventMembershipRepository();
 
 function eventTranslations(input: {
   translations?: {
@@ -152,6 +154,11 @@ export class EventService {
       entityId: id,
       before,
     });
+  }
+
+  async listMemberships(eventId: string) {
+    await this.getById(eventId);
+    return eventMembershipRepository.listByEvent(eventId);
   }
 
   private async uniqueSlug(base: string, ignoreId?: string): Promise<string> {

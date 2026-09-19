@@ -13,13 +13,12 @@ import { useLocale } from "@/hooks/core/use-locale.hook";
 import { useIntegrations } from "@/hooks/integrations/use-integrations.hook";
 import { apiGet, apiPost } from "@/lib/client/api";
 import { isEmptyHtml } from "@/lib/html";
+import {
+  invitationDeliveryNotice,
+  type InvitationDeliveryResult,
+} from "@/lib/invitations/delivery-notice";
 import { invitationDrafts } from "@/lib/invitations/invitation-copy";
 import type { Event } from "@/models/events/event.model";
-
-type QueueResult = {
-  queuedCount?: number;
-  failedCount?: number;
-};
 
 export function useInvitationQueue(mailingListId: string) {
   const translate = useTranslate();
@@ -78,7 +77,7 @@ export function useInvitationQueue(mailingListId: string) {
 
   function send() {
     return run(async () => {
-      const payload = await apiPost<QueueResult>(
+      const payload = await apiPost<InvitationDeliveryResult>(
         `/events/${eventId}/invitation-batches`,
         {
           mailingListId,
@@ -89,20 +88,14 @@ export function useInvitationQueue(mailingListId: string) {
           },
         }
       );
-      const queued = payload?.queuedCount ?? 0;
-      const failed = payload?.failedCount ?? 0;
-      notify?.({
-        type: "success",
-        message: integrations.mailEnabled
-          ? translate("mailingLists.invitationsSent", {
-              count: queued,
-              failed,
-            })
-          : translate("mailingLists.invitationsQueued", {
-              count: queued,
-            }),
-      });
-    }, translate("mailingLists.invitationsFailed"));
+      notify?.(
+        invitationDeliveryNotice(
+          payload,
+          integrations.mailEnabled,
+          translate
+        )
+      );
+    }, translate("mailingLists.invitationsSendFailed"));
   }
 
   return {

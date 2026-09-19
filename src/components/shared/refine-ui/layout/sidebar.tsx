@@ -33,10 +33,10 @@ import {
 import { AppLogo } from "@/components/shared/brand/app-logo";
 import { Button } from "@/components/shared/ui/button";
 import { useLocale } from "@/hooks/core/use-locale.hook";
-import { useSessionRoles } from "@/hooks/core/use-session-roles.hook";
+import { useRoleFlags, useSessionRoles } from "@/hooks/core/use-session-roles.hook";
 import { LAYOUT_CHROME_BG, LAYOUT_HEADER_SHADOW, LAYOUT_SIDEBAR_BODY_SHADOW } from "@/constants/layout";
 import { canPerform } from "@/lib/permissions";
-import { hasRole, USER_ROLES } from "@/constants/user-roles";
+import { hasRole, isAdminRole, USER_ROLES } from "@/constants/user-roles";
 import { ChevronRight, ListIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -107,7 +107,7 @@ function organizeMenuItems(
   const usable = items.filter((item) => !HIDDEN_NAV.has(item.name ?? ""));
   const nav: TreeMenuItem[] = [];
 
-  if (hasRole(roles, USER_ROLES.ADMIN)) {
+  if (isAdminRole(roles)) {
     const dashboard = takeItem(usable, "dashboard");
     if (dashboard) {
       nav.push({
@@ -369,8 +369,7 @@ function SidebarHeader() {
   const { path } = useLocale();
   const translate = useTranslate();
   const Link = useLink();
-  const { roles } = useSessionRoles();
-  const isAdmin = hasRole(roles, USER_ROLES.ADMIN);
+  const { isAdmin } = useRoleFlags();
   const deskLabel = translate(
     isAdmin ? "dashboard.adminEyebrow" : "dashboard.staffEyebrow"
   );

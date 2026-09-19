@@ -35,9 +35,16 @@ export class UserRepository {
     return User.findOne({ where: { personId } });
   }
 
+  async markVerified(id: string): Promise<User> {
+    const user = await this.findById(id);
+    await user.update({ verified: true });
+    return this.findById(id);
+  }
+
   async updatePassword(id: string, password: string): Promise<User> {
     const user = await this.findById(id);
-    await user.update({ password, verified: true });
+    await user.update({ password });
+    await user.increment("sessionVersion");
     return this.findById(id);
   }
 

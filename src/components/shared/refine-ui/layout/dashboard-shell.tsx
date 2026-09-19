@@ -7,13 +7,12 @@ import { GuestPortalLayout } from "@/components/shared/refine-ui/layout/guest-po
 import { Layout } from "@/components/shared/refine-ui/layout/layout";
 import { useLocale } from "@/hooks/core/use-locale.hook";
 import { useMounted } from "@/hooks/core/use-mounted.hook";
-import { useSessionRoles } from "@/hooks/core/use-session-roles.hook";
-import { isParticipantRole } from "@/lib/permissions";
+import { useRoleFlags } from "@/hooks/core/use-session-roles.hook";
 
 function DashboardChrome({ children }: PropsWithChildren) {
-  const { roles } = useSessionRoles();
+  const { isGuest } = useRoleFlags();
 
-  if (isParticipantRole(roles)) {
+  if (isGuest) {
     return <GuestPortalLayout>{children}</GuestPortalLayout>;
   }
 

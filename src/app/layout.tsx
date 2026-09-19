@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import { Bitter, Inter } from "next/font/google";
 import React, { Suspense } from "react";
 import { APP_NAME } from "@/constants/brand";
 import { STORAGE_KEYS } from "@/constants/storage-keys";
 import { PwaRegister } from "@/components/shared/pwa/pwa-register";
+import { localeOrDefault } from "@/lib/locale";
 import { RefineContext } from "./_refine_context";
 
 const inter = Inter({
@@ -60,9 +62,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const lang = localeOrDefault(
+    (await cookies()).get(STORAGE_KEYS.LOCALE)?.value
+  );
   return (
     <html
-      lang="en"
+      lang={lang}
       className={`${inter.className} ${bitter.variable}`}
       suppressHydrationWarning
     >

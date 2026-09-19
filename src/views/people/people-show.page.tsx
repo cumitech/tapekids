@@ -3,6 +3,7 @@
 import { useShow, useTranslate } from "@refinedev/core";
 
 import { PersonForm } from "@/components/people/person-form.component";
+import { PaymentCheckout } from "@/components/payments/payment-checkout";
 import { PaymentList } from "@/components/payments/payment-list";
 import { RecordDetails } from "@/components/shared/record-details";
 import {
@@ -116,7 +117,11 @@ export function PeopleShowPage() {
               )}
             </section>
           </div>
-          <aside className="min-w-0">
+          <aside className="flex min-w-0 flex-col gap-8">
+            <PaymentCheckout
+              personId={record.id}
+              defaultPhone={record.phone}
+            />
             <PaymentList compact personId={record.id} />
           </aside>
         </div>

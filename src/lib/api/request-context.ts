@@ -41,8 +41,15 @@ export function hashToken(token: string): string {
 
 export function requestPath(request: Request): string {
   try {
-    return new URL(request.url).pathname;
+    return redactSensitivePath(new URL(request.url).pathname);
   } catch {
-    return request.url;
+    return redactSensitivePath(request.url);
   }
+}
+
+const SENSITIVE_PATH =
+  /\/(invitations|invite|verify-email|reset-password)\/[^/]+/gi;
+
+export function redactSensitivePath(pathname: string): string {
+  return pathname.replace(SENSITIVE_PATH, "/$1/[token]");
 }

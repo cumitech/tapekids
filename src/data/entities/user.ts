@@ -19,6 +19,7 @@ export class User extends Model<
   declare password: string;
   declare role: UserRole;
   declare verified: CreationOptional<boolean>;
+  declare sessionVersion: CreationOptional<number>;
   declare personId: CreationOptional<string | null>;
 }
 
@@ -45,11 +46,16 @@ export function initUser(sequelize: Sequelize) {
       role: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        defaultValue: USER_ROLES.STAFF,
+        defaultValue: USER_ROLES.GUEST,
       },
       verified: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
+      },
+      sessionVersion: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
       },
       personId: {
         type: DataTypes.STRING(20),

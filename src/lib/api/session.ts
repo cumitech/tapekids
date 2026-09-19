@@ -1,6 +1,10 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-import { USER_ROLES, type UserRole } from "@/constants/user-roles";
+import {
+  isAdminRole,
+  isStaffDashboardRole,
+  type UserRole,
+} from "@/constants/user-roles";
 import type { User } from "@/data/entities/user";
 import { ForbiddenException } from "@/exceptions/forbidden.exception";
 import { UnauthorizedException } from "@/exceptions/unauthorized.exception";
@@ -10,6 +14,7 @@ type SessionPayload = {
   sub: string;
   email: string;
   roles: UserRole[];
+  sv: number;
   exp: number;
 };
 
@@ -46,6 +51,7 @@ export function signSession(user: User): string {
     sub: user.id,
     email: user.email,
     roles: [user.role],
+    sv: user.sessionVersion ?? 0,
     exp: Date.now() + 7 * 24 * 60 * 60 * 1000,
   };
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
@@ -86,7 +92,14 @@ function bearerToken(request: Request): string {
 export async function requireUser(request: Request): Promise<User> {
   const token = bearerToken(request);
   const payload = verifySession(token);
-  return userRepository.findById(payload.sub);
+  const user = await userRepository.findById(payload.sub);
+  if ((payload.sv ?? 0) !== (user.sessionVersion ?? 0)) {
+    throw new UnauthorizedException();
+  }
+  if (!user.verified) {
+    throw new UnauthorizedException("Verify your email before continuing.");
+  }
+  return user;
 }
 
 export async function optionalUser(request: Request): Promise<User | null> {
@@ -99,7 +112,7 @@ export async function optionalUser(request: Request): Promise<User | null> {
 
 export async function requireAdmin(request: Request): Promise<User> {
   const user = await requireUser(request);
-  if (user.role !== USER_ROLES.ADMIN) {
+  if (!isAdminRole(user.role)) {
     throw new ForbiddenException("Admin role is required.");
   }
   return user;
@@ -107,7 +120,7 @@ export async function requireAdmin(request: Request): Promise<User> {
 
 export async function requireStaffOrAdmin(request: Request): Promise<User> {
   const user = await requireUser(request);
-  if (user.role !== USER_ROLES.ADMIN && user.role !== USER_ROLES.STAFF) {
+  if (!isStaffDashboardRole(user.role)) {
     throw new ForbiddenException();
   }
   return user;

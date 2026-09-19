@@ -1,10 +1,11 @@
 import { CONTENT_ENTITY_TYPES } from "@/constants/content-i18n";
-import { DEFAULT_LOCALE } from "@/constants/locales";
+import { DEFAULT_LOCALE, LOCALES, type AppLocale } from "@/constants/locales";
 import {
   EVENT_MEMBERSHIP_KINDS,
   INVITATION_BATCH_STATUSES,
   INVITATION_STATUSES,
 } from "@/constants/event-participation";
+import type { InvitationBatch } from "@/data/entities/invitation-batch";
 import { parseCreateInvitationBatch } from "@/data/dtos/invitation-batch.dto";
 import { parseAcceptInvitation, parseNewInvitePassword } from "@/data/dtos/invitation.dto";
 import { contentTranslationRepository } from "@/data/repositories/content-translation.repository";
@@ -16,7 +17,7 @@ import { MailingListRepository } from "@/data/repositories/mailing-list.reposito
 import { PersonRepository } from "@/data/repositories/person.repository";
 import type { ListQuery } from "@/data/types/pagination";
 import { ValidationException } from "@/exceptions/validation.exception";
-import { nanoid } from "@/lib/api/id";
+import { nanoid, tokenId } from "@/lib/api/id";
 import { resolveContentLocale } from "@/lib/api/request-locale";
 import { translationsFromInput } from "@/lib/content-i18n/input";
 import { isEmptyHtml } from "@/lib/html";
@@ -96,12 +97,6 @@ export class InvitationService {
       );
     }
 
-    if (!isMailConfigured()) {
-      throw new ValidationException(
-        "Mail is not configured. Set MAILGUN_API_KEY and MAILGUN_DOMAIN to email invitations."
-      );
-    }
-
     const people = await personRepository.findByIds(Array.from(personIds));
     if (people.length !== personIds.size) {
       throw new ValidationException("One or more people were not found.");
@@ -135,7 +130,7 @@ export class InvitationService {
         eventId,
         personId: person.id,
         kind,
-        token: nanoid(48),
+        token: tokenId(),
         emailSnapshot: person.email,
         status: INVITATION_STATUSES.QUEUED,
         sentAt: null,
@@ -144,7 +139,21 @@ export class InvitationService {
       }))
     );
 
-    return this.sendBatch(batch.id);
+    for (const person of people) {
+      await eventMembershipRepository.upsertInvited(eventId, person.id, kind);
+    }
+
+    if (isMailConfigured()) {
+      return this.sendBatch(batch.id);
+    }
+
+    const invitations = await invitationRepository.listByBatch(batch.id);
+    return {
+      batch,
+      invitations,
+      queuedCount: invitations.length,
+      failedCount: 0,
+    };
   }
 
   async sendBatch(id: string) {
@@ -159,11 +168,8 @@ export class InvitationService {
       id,
       INVITATION_BATCH_STATUSES.SENDING
     );
-    const [batch] = await contentTranslationRepository.localize(
-      CONTENT_ENTITY_TYPES.invitationBatch,
-      [rawBatch],
-      resolveContentLocale()
-    );
+    const copies = await this.localizedBatchCopies(rawBatch);
+    const primary = copies[DEFAULT_LOCALE];
     const invitations = await invitationRepository.listByBatch(id);
     let failed = 0;
 
@@ -192,10 +198,10 @@ export class InvitationService {
           eventCity: event.city,
           startsAt: event.startsAt,
           endsAt: event.endsAt,
-          subject: batch.subject,
-          body: batch.body,
+          subject: primary.subject,
+          body: this.bilingualInvitationBody(copies),
           token: invitation.token,
-          locale: resolveContentLocale(),
+          locale: DEFAULT_LOCALE,
         });
         await invitationRepository.markSent(invitation.id);
         await eventMembershipRepository.upsertInvited(
@@ -306,6 +312,37 @@ export class InvitationService {
     return Boolean(
       expiresAt && new Date(expiresAt).getTime() < Date.now()
     );
+  }
+
+  private async localizedBatchCopies(batch: InvitationBatch) {
+    const copies = {} as Record<
+      AppLocale,
+      { subject: string; body: string }
+    >;
+    for (const locale of LOCALES) {
+      const [localized] = await contentTranslationRepository.localize(
+        CONTENT_ENTITY_TYPES.invitationBatch,
+        [batch],
+        locale,
+        true
+      );
+      copies[locale] = {
+        subject: localized.subject,
+        body: localized.body,
+      };
+    }
+    return copies;
+  }
+
+  private bilingualInvitationBody(
+    copies: Record<AppLocale, { subject: string; body: string }>
+  ) {
+    const english = copies.en?.body ?? "";
+    const french = copies.fr?.body ?? "";
+    if (!french || french === english || isEmptyHtml(french)) {
+      return english;
+    }
+    return `${english}<hr /><p><strong>Français</strong></p>${french}`;
   }
 }
 

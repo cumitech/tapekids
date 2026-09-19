@@ -13,6 +13,7 @@ import {
   paymentSucceededMail,
   paymentWaivedMail,
   registrationConfirmedMail,
+  verifyEmailMail,
   welcomeMail,
 } from "@/lib/mail/messages";
 
@@ -55,6 +56,10 @@ export class NotificationService {
 
   passwordChanged(input: { to: string; firstName?: string }) {
     return this.sendQuiet(passwordChangedMail(input));
+  }
+
+  verifyEmail(input: Parameters<typeof verifyEmailMail>[0]) {
+    return this.send(verifyEmailMail(input));
   }
 
   welcome(input: { to: string; firstName?: string }) {

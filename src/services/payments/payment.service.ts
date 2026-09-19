@@ -15,7 +15,7 @@ import { nanoid } from "@/lib/api/id";
 import { resolveContentLocale } from "@/lib/api/request-locale";
 import { isNamedError } from "@/lib/api/app-error";
 import { campayConfig, isCampayConfigured } from "@/lib/integrations/campay.config";
-import { appBaseUrl } from "@/lib/integrations/env";
+import { publicAppUrl } from "@/lib/app-url";
 import { chargeAmountForMembership } from "@/lib/payments/amount";
 import {
   PAYMENT_METHODS,
@@ -202,9 +202,11 @@ export class PaymentService {
           phone: toCameroonMsisdn(input.phone || person.phone || "", {
             required: false,
           }),
-          redirectUrl: `${appBaseUrl()}${
-            input.redirectPath || `/dashboard/people/show/${person.id}`
-          }`,
+          redirectUrl: publicAppUrl(
+            input.redirectPath,
+            resolveContentLocale(),
+            `/dashboard/people/show/${person.id}`
+          ),
         });
         const updated = await paymentRepository.update(payment.id, {
           providerRef: result.reference,

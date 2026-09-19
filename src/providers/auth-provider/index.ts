@@ -1,5 +1,6 @@
 import type { AuthProvider } from "@refinedev/core";
 
+import { unwrapEnvelope } from "@/lib/client/api";
 import { withLocalePath } from "@/lib/locale";
 import { safeInternalPath } from "@/lib/navigation/safe-path";
 import { rolesFromUnknown } from "@/lib/permissions";
@@ -91,10 +92,24 @@ export const authProvider: AuthProvider = {
         password,
         confirmPassword: params.confirmPassword || password,
       });
-      setSession(sessionFromResponse(data), { remember: true });
+      const inner = unwrapEnvelope<AuthSession | { requiresVerification?: boolean }>(
+        data
+      );
+      if (
+        inner &&
+        typeof inner === "object" &&
+        "token" in inner &&
+        typeof inner.token === "string"
+      ) {
+        setSession(inner, { remember: true });
+        return {
+          success: true,
+          redirectTo: localizedPath("/dashboard"),
+        };
+      }
       return {
         success: true,
-        redirectTo: localizedPath("/dashboard"),
+        redirectTo: localizedPath("/login"),
       };
     } catch (error) {
       const message =

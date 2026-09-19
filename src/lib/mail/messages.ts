@@ -1,19 +1,27 @@
 import type { MailMessage } from "@/adapters/mail";
-import type { AppLocale } from "@/constants/locales";
+import { DEFAULT_LOCALE, type AppLocale } from "@/constants/locales";
+import { publicAppUrl } from "@/lib/app-url";
 import { formatEventRange } from "@/lib/invitations/invitation-copy";
-import { appBaseUrl } from "@/lib/integrations/env";
 import { composeMail } from "@/lib/mail/compose";
 
-export function invitationAcceptUrl(token: string): string {
-  return `${appBaseUrl()}/invite/${token}`;
+export function invitationAcceptUrl(token: string) {
+  return publicAppUrl(`/invite/${token}`);
 }
 
-export function passwordResetUrl(token: string): string {
-  return `${appBaseUrl()}/reset-password/${token}`;
+export function passwordResetUrl(token: string) {
+  return publicAppUrl(`/reset-password/${token}`);
 }
 
-export function loginUrl(): string {
-  return `${appBaseUrl()}/login`;
+export function verifyEmailUrl(token: string) {
+  return publicAppUrl(`/verify-email/${token}`);
+}
+
+export function loginUrl() {
+  return publicAppUrl("/login");
+}
+
+export function dashboardUrl(locale?: AppLocale) {
+  return publicAppUrl("/dashboard", locale);
 }
 
 export function invitationMail(input: {
@@ -29,7 +37,7 @@ export function invitationMail(input: {
   token: string;
   locale?: AppLocale;
 }): MailMessage {
-  const locale = input.locale ?? "en";
+  const locale = input.locale ?? DEFAULT_LOCALE;
   const where = [input.eventVenue, input.eventCity].filter(Boolean).join(", ");
   const when = formatEventRange(input.startsAt, input.endsAt, locale);
   return composeMail({
@@ -72,6 +80,23 @@ export function passwordResetMail(input: {
   });
 }
 
+export function verifyEmailMail(input: {
+  to: string;
+  firstName?: string;
+  token: string;
+}): MailMessage {
+  return composeMail({
+    to: input.to,
+    firstName: input.firstName,
+    subject: "Confirm your email",
+    paragraphs: [
+      "Confirm this email to open your Young Foundations guest account.",
+      "This link expires in 48 hours.",
+    ],
+    cta: { label: "Confirm email", url: verifyEmailUrl(input.token) },
+  });
+}
+
 export function passwordChangedMail(input: {
   to: string;
   firstName?: string;
@@ -97,10 +122,10 @@ export function welcomeMail(input: {
     firstName: input.firstName,
     subject: "Welcome to Young Foundations Cameroon",
     paragraphs: [
-      "Your staff account is ready for this Young Foundations fellowship.",
-      "You can sign in to record young believers, mailing lists, camps, Creations classes, and Cub Corner gatherings.",
+      "Your guest account is ready for this Young Foundations fellowship.",
+      "Complete your profile from the dashboard, then pay for camps you are invited to.",
     ],
-    cta: { label: "Open dashboard", url: `${appBaseUrl()}/dashboard` },
+    cta: { label: "Open dashboard", url: dashboardUrl() },
   });
 }
 

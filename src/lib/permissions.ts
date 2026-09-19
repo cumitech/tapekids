@@ -1,4 +1,10 @@
-import { hasRole, USER_ROLES, type UserRole } from "@/constants/user-roles";
+import {
+  hasRole,
+  isAdminRole,
+  isUserRole,
+  USER_ROLES,
+  type UserRole,
+} from "@/constants/user-roles";
 
 export type PermissionAction = "list" | "create" | "edit" | "show" | "delete";
 
@@ -47,14 +53,14 @@ export function canPerform({
   }
 
   if (ADMIN_ONLY_RESOURCES.has(resource)) {
-    return hasRole(normalizedRoles, USER_ROLES.ADMIN);
+    return isAdminRole(normalizedRoles);
   }
 
   if (OWN_ACCOUNT_RESOURCES.has(resource)) {
     return action === "list" || action === "show" || action === "edit";
   }
 
-  if (hasRole(normalizedRoles, USER_ROLES.ADMIN)) {
+  if (isAdminRole(normalizedRoles)) {
     return !GUEST_PORTAL_RESOURCES.has(resource);
   }
 
@@ -73,21 +79,12 @@ export function canPerform({
 }
 
 export function rolesFromUnknown(value: unknown): UserRole[] {
-  if (typeof value === "string") {
-    return value === USER_ROLES.ADMIN ||
-      value === USER_ROLES.STAFF ||
-      value === USER_ROLES.GUEST
-      ? [value]
-      : [];
+  if (isUserRole(value)) {
+    return [value];
   }
   if (!Array.isArray(value)) {
     return [];
   }
 
-  return value.filter(
-    (role): role is UserRole =>
-      role === USER_ROLES.ADMIN ||
-      role === USER_ROLES.STAFF ||
-      role === USER_ROLES.GUEST
-  );
+  return value.filter(isUserRole);
 }

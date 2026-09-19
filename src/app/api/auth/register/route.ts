@@ -5,6 +5,14 @@ import { authService } from "@/services/auth/auth.service";
 export const runtime = "nodejs";
 
 export const POST = publicRoute(async ({ request }) => {
-  const session = await authService.register(await readJsonBody(request));
-  return jsonOk(session, "Account created", 201);
+  const result = await authService.register(await readJsonBody(request));
+  const pending =
+    "requiresVerification" in result && result.requiresVerification;
+  return jsonOk(
+    result,
+    pending
+      ? "Check your email to confirm your account."
+      : "Account created",
+    201
+  );
 });

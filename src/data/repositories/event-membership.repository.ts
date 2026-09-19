@@ -80,4 +80,12 @@ export class EventMembershipRepository {
       order: [["createdAt", "DESC"]],
     });
   }
+
+  async listByEvent(eventId: string): Promise<EventMembership[]> {
+    return EventMembership.findAll({
+      where: { eventId },
+      include: [{ model: Person, as: "person" }],
+      order: [["createdAt", "DESC"]],
+    });
+  }
 }

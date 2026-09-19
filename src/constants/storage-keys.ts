@@ -6,6 +6,7 @@ export const STORAGE_KEYS = {
   UI_PREFERENCES: "kec.ui.preferences",
   SIDEBAR: "kec.sidebar",
   QUERY_CACHE: "kec.query.cache",
+  ONBOARDING_SNOOZE: "kec.onboarding.snooze",
 } as const;
 
 export const UI_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;

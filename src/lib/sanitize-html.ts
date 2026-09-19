@@ -1,5 +1,7 @@
 import DOMPurify from "isomorphic-dompurify";
 
+import { unescapeHtmlEntities } from "@/lib/html";
+
 const ALLOWED_TAGS = [
   "p",
   "br",
@@ -20,7 +22,7 @@ const ALLOWED_TAGS = [
 ];
 
 export function sanitizeRichText(html: string) {
-  return DOMPurify.sanitize(html, {
+  return DOMPurify.sanitize(unescapeHtmlEntities(html), {
     ALLOWED_TAGS,
     ALLOWED_ATTR: ["href", "target", "rel", "class"],
   });

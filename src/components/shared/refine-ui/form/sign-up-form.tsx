@@ -34,7 +34,18 @@ export const SignUpForm = () => {
 
   const Link = useLink();
 
-  const { mutate: register } = useRegister();
+  const { mutate: register } = useRegister({
+    mutationOptions: {
+      onSuccess: (result) => {
+        if (String(result.redirectTo ?? "").includes("/login")) {
+          open?.({
+            type: "success",
+            message: translate("auth.checkEmail"),
+          });
+        }
+      },
+    },
+  });
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

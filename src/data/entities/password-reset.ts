@@ -7,6 +7,8 @@ import {
   type Sequelize,
 } from "sequelize";
 
+import { AUTH_TOKEN_PURPOSES, type AuthTokenPurpose } from "@/constants/auth-tokens";
+
 export class PasswordReset extends Model<
   InferAttributes<PasswordReset>,
   InferCreationAttributes<PasswordReset>
@@ -14,6 +16,7 @@ export class PasswordReset extends Model<
   declare id: string;
   declare userId: string;
   declare tokenHash: string;
+  declare purpose: CreationOptional<AuthTokenPurpose>;
   declare expiresAt: Date;
   declare usedAt: CreationOptional<Date | null>;
 }
@@ -33,6 +36,11 @@ export function initPasswordReset(sequelize: Sequelize) {
         type: DataTypes.STRING(64),
         allowNull: false,
         unique: true,
+      },
+      purpose: {
+        type: DataTypes.STRING(32),
+        allowNull: false,
+        defaultValue: AUTH_TOKEN_PURPOSES.RESET_PASSWORD,
       },
       expiresAt: {
         type: DataTypes.DATE,

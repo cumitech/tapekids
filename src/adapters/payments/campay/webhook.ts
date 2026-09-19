@@ -56,7 +56,19 @@ export function verifyCampayJwt(token: string, secret: string): boolean {
   if (given.length !== wanted.length) {
     return false;
   }
-  return timingSafeEqual(given, wanted);
+  if (!timingSafeEqual(given, wanted)) {
+    return false;
+  }
+  return !isJwtExpired(decodeCampayJwtPayload(token));
+}
+
+function isJwtExpired(claims: Record<string, string>): boolean {
+  const exp = Number(claims.exp);
+  if (!Number.isFinite(exp)) {
+    return false;
+  }
+  const expMs = exp > 1e12 ? exp : exp * 1000;
+  return expMs < Date.now();
 }
 
 export function decodeCampayJwtPayload(token: string): Record<string, string> {
@@ -112,8 +124,8 @@ export function verifiedCampayWebhookPayload(
     return null;
   }
   return {
-    ...decodeCampayJwtPayload(signature),
     ...payload,
+    ...decodeCampayJwtPayload(signature),
     signature,
   };
 }

@@ -4,6 +4,8 @@ import { useTranslate } from "@refinedev/core";
 
 import { Badge } from "@/components/shared/ui/badge";
 import {
+  INVITATION_BATCH_STATUSES,
+  INVITATION_STATUSES,
   MEMBERSHIP_STATUSES,
   PAYMENT_STATUSES,
 } from "@/constants/event-participation";
@@ -24,6 +26,16 @@ const STATUS_CLASS: Record<string, string> = {
     "border-border bg-muted text-muted-foreground",
   [PAYMENT_STATUSES.FAILED]:
     "border-transparent bg-destructive text-white",
+  [INVITATION_BATCH_STATUSES.DRAFT]:
+    "border-border bg-muted text-muted-foreground",
+  [INVITATION_BATCH_STATUSES.SENDING]:
+    "border-transparent bg-warning/20 text-foreground",
+  [INVITATION_BATCH_STATUSES.SENT]:
+    "border-transparent bg-success text-success-foreground",
+  [INVITATION_STATUSES.QUEUED]:
+    "border-border bg-muted text-muted-foreground",
+  [INVITATION_STATUSES.ACCEPTED]:
+    "border-transparent bg-primary text-primary-foreground",
 };
 
 export function StatusBadge({
@@ -31,7 +43,7 @@ export function StatusBadge({
   namespace,
 }: {
   value: string;
-  namespace: "membership" | "payment";
+  namespace: "membership" | "payment" | "batch";
 }) {
   const translate = useTranslate();
   return (

@@ -6,8 +6,8 @@ import { useTranslate } from "@refinedev/core";
 import { PortalCard } from "@/components/portal/portal-card";
 import { PortalHero } from "@/components/portal/portal-hero";
 import { RESOURCE_CARD_TINT } from "@/components/portal/portal-tone";
-import { USER_ROLES } from "@/constants/user-roles";
 import { useRefineResources } from "@/hooks/core/refine-resources.hook";
+import { useRoleFlags } from "@/hooks/core/use-session-roles.hook";
 import { useResourceTotal } from "@/hooks/dashboard/use-resource-total.hook";
 import { canPerform } from "@/lib/permissions";
 import { DashboardAddPersonAction } from "@/views/dashboard/dashboard-hero-actions";
@@ -18,7 +18,7 @@ const ADMIN_SECTIONS = ["people", "mailing-lists", "events", "audit-logs"];
 
 export function AdminHome() {
   const translate = useTranslate();
-  const roles = [USER_ROLES.ADMIN];
+  const { roles } = useRoleFlags();
   const resources = useRefineResources().filter(
     (resource) =>
       ADMIN_SECTIONS.includes(resource.name) &&

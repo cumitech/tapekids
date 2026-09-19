@@ -174,6 +174,7 @@
     "title": "À faire en premier",
     "profile": "Mettez à jour votre profil avec des informations exactes (contact, église, lieu, famille). Cet avis reste affiché jusqu'à ce que ce soit fait. Vous ne pourrez pas payer un camp tant que votre profil n'est pas complet.",
     "updateProfile": "Mettre à jour mon profil",
+    "later": "Me le rappeler plus tard",
     "completeToPay": "Compléter le profil pour payer"
   },
   "landing": {
@@ -233,10 +234,14 @@
     "signInUsing": "Se connecter avec",
     "noAccount": "Pas de compte ?",
     "signUp": "Inscription",
-    "signUpWelcome": "Créez votre compte pour commencer.",
+    "signUpWelcome": "Créez un compte invité pour voir les camps et payer après invitation.",
     "haveAccount": "Vous avez déjà un compte ?",
     "passwordsDontMatch": "Les mots de passe ne correspondent pas",
-    "passwordsDontMatchDescription": "Veuillez vous assurer que les deux champs de mot de passe sont identiques."
+    "passwordsDontMatchDescription": "Veuillez vous assurer que les deux champs de mot de passe sont identiques.",
+    "checkEmail": "Consultez votre e-mail pour confirmer le compte, puis connectez-vous.",
+    "verifyEmail": "Confirmez votre e-mail",
+    "verifying": "Confirmation de votre e-mail…",
+    "verifyFailed": "Ce lien de confirmation est invalide ou a expiré."
   },
   "header": {
     "logout": "Déconnexion",
@@ -344,6 +349,7 @@
     "invitationsQueued": "{{count}} invitations en file (e-mail pas encore envoyé)",
     "invitationsSent": "{{count}} invitations envoyées ({{failed}} échecs)",
     "invitationsFailed": "Impossible de préparer les invitations",
+    "invitationsSendFailed": "Impossible d'envoyer les invitations. Vérifiez la configuration e-mail et réessayez.",
     "audienceKinds": {
       "camper": "Campeur",
       "coordinator": "Coordinateur",
@@ -395,7 +401,13 @@
     "public": {
       "back": "Retour aux événements",
       "viewDetails": "Voir les détails"
-    }
+    },
+    "roster": "Liste des participants",
+    "batches": "Lots d'invitations",
+    "sendBatch": "Envoyer",
+    "resendBatch": "Renvoyer les échecs",
+    "batchSent": "E-mails d'invitation envoyés",
+    "batchSendFailed": "Impossible d'envoyer ce lot"
   },
   "payments": {
     "titles": {
@@ -459,8 +471,11 @@
       "entity": "Entité",
       "entityId": "Enregistrement",
       "actor": "Auteur",
-      "createdAt": "Quand"
-    }
+      "createdAt": "Quand",
+      "changes": "Modifications"
+    },
+    "viewChanges": "Voir les modifications",
+    "noChanges": "Aucun changement de champ"
   },
   "camp": {
     "titles": {
@@ -521,6 +536,12 @@
         "paid": "Payé",
         "failed": "Paiement échoué",
         "waived": "Dispensé"
+      },
+      "batch": {
+        "draft": "En file",
+        "sending": "Envoi",
+        "sent": "Envoyé",
+        "failed": "Échec"
       }
     }
   },

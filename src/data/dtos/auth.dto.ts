@@ -28,8 +28,12 @@ export type CreateUserPayload = {
   email: string;
   username: string;
   password: string;
-  role: typeof USER_ROLES.STAFF;
+  role: typeof USER_ROLES.GUEST;
 };
+
+export const verifyEmailSchema = z.object({
+  token: z.string().trim().min(1),
+});
 
 export function parseLogin(body: unknown): LoginInput {
   return loginSchema.parse(body);
@@ -52,6 +56,10 @@ export function toCreateUserPayload(input: RegisterInput): CreateUserPayload {
     email: input.email,
     username: input.username,
     password: input.password,
-    role: USER_ROLES.STAFF,
+    role: USER_ROLES.GUEST,
   };
+}
+
+export function parseVerifyEmail(body: unknown) {
+  return verifyEmailSchema.parse(body);
 }

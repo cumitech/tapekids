@@ -1,45 +1,40 @@
-# kids-event-cameroon
+# Kids Events Cameroon
 
-<div align="center" style="margin: 30px;">
-    <a href="https://refine.dev">
-    <img alt="refine logo" src="https://refine.ams3.cdn.digitaloceanspaces.com/readme/refine-readme-banner.png">
-    </a>
-</div>
-<br/>
+Young Foundations Cameroon operations app: camps, Creations, and Cub Corner. Built with Next.js 15 (App Router), Refine, Sequelize, and MySQL.
 
-This [Refine](https://github.com/refinedev/refine) project was generated with [create refine-app](https://github.com/refinedev/refine/tree/master/packages/create-refine-app).
+## Requirements
 
-## Getting Started
+- Node.js 20 or newer
+- MySQL 8
+- Copy `.env.example` to `.env` and set `SESSION_SECRET`, database credentials, and `APP_URL` / `NEXT_PUBLIC_APP_URL`
 
-A React Framework for building internal tools, admin panels, dashboards & B2B apps with unmatched flexibility ✨
-
-Refine's hooks and components simplifies the development process and eliminates the repetitive tasks by providing industry-standard solutions for crucial aspects of a project, including authentication, access control, routing, networking, state management, and i18n.
-
-## Available Scripts
-
-### Running the development server.
+## Local setup
 
 ```bash
-    npm run dev
+npm install
+npm run db:migrate
+npm run db:seed
+npm run dev
 ```
 
-### Building for production.
+The Refine CLI does not treat `-p` as a port. Use `PORT=5000 npm run dev` (or `set PORT=5000` on Windows) when you need a specific port.
 
-```bash
-    npm run build
-```
+Seeded logins (password from `SEED_PASSWORD`, default `SeedPass123!`):
 
-### Running the production server.
+- `superadmin@seed.kidsevent.cm` — same dashboard access as admin
+- `admin@seed.kidsevent.cm` — admin
+- `staff@seed.kidsevent.cm` — staff
+- `guest@seed.kidsevent.cm` — guest portal only
 
-```bash
-    npm run start
-```
+Public self-registration creates a **guest** account. When Mailgun is configured, the user must confirm email before signing in. Staff accounts are created by admins (or seed), not the public form.
 
-## Learn More
+## Production notes
 
-To learn more about **Refine**, please check out the [Documentation](https://refine.dev/docs)
-
-- **REST Data Provider** [Docs](https://refine.dev/docs/core/providers/data-provider/#overview)
+- `npm run build` then `npm run start`. `next.config.mjs` uses `output: "standalone"`.
+- Event images are stored under `data/uploads` next to the app (or `UPLOAD_DIR`). They are served by `/api/uploads/...`, not copied into `public/`.
+- CamPay: set `CAMPAY_ENABLED`, credentials, and register the webhook `{APP_URL}/api/payments/campay/webhook`. DEV uses the test amount; PROD uses event fees.
+- Mailgun: set `MAILGUN_API_KEY` and `MAILGUN_DOMAIN`. Invitation queue still works without mail; use **Send** on the event page once mail is configured.
+- Do not commit `.env`.
 
 ## License
 
