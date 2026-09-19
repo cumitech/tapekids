@@ -6,7 +6,7 @@ import {
   INVITATION_STATUSES,
 } from "@/constants/event-participation";
 import { parseCreateInvitationBatch } from "@/data/dtos/invitation-batch.dto";
-import { parseAcceptInvitation } from "@/data/dtos/invitation.dto";
+import { parseAcceptInvitation, parseNewInvitePassword } from "@/data/dtos/invitation.dto";
 import { contentTranslationRepository } from "@/data/repositories/content-translation.repository";
 import { EventMembershipRepository } from "@/data/repositories/event-membership.repository";
 import { InvitationBatchRepository } from "@/data/repositories/invitation-batch.repository";
@@ -225,7 +225,11 @@ export class InvitationService {
     };
   }
 
-  async acceptByToken(token: string, body?: unknown) {
+  async acceptByToken(
+    token: string,
+    body?: unknown,
+    actor?: { id: string } | null
+  ) {
     const invitation = await this.requireByToken(token);
     if (this.isExpired(invitation.expiresAt)) {
       throw new ValidationException("This invitation has expired.");
@@ -239,15 +243,22 @@ export class InvitationService {
       kind
     );
 
-    const { password } = parseAcceptInvitation(body);
-
+    const person = await personRepository.findById(invitation.personId);
+    const accountExists = await authService.hasAccountForPerson(person);
+    const parsed = parseAcceptInvitation(body);
+    const password = accountExists
+      ? parsed.password
+      : parseNewInvitePassword(body).password;
+    const session = await authService.completeGuestInvite(
+      person,
+      password,
+      actor
+    );
     const accepted =
       invitation.status === INVITATION_STATUSES.ACCEPTED
         ? invitation
         : await invitationRepository.markAccepted(invitation.id);
     await eventMembershipRepository.markRegistered(membership.id);
-    const person = await personRepository.findById(invitation.personId);
-    const session = await authService.completeGuestInvite(person, password);
     if (invitation.status !== INVITATION_STATUSES.ACCEPTED) {
       await notificationService.registrationConfirmed({
         to: person.email,
@@ -276,7 +287,11 @@ export class InvitationService {
   async getByToken(token: string) {
     const invitation = await this.requireByToken(token);
     const event = await eventService.getById(invitation.eventId);
-    return { invitation, event, person: invitation.person ?? null };
+    const person = invitation.person ?? null;
+    const needsPassword = person
+      ? !(await authService.hasAccountForPerson(person))
+      : true;
+    return { invitation, event, person, needsPassword };
   }
 
   private async requireByToken(token: string) {

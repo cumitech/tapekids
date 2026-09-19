@@ -1,5 +1,6 @@
 import { jsonOk } from "@/lib/api/http";
 import { publicRoute } from "@/lib/api/route-handler";
+import { optionalUser } from "@/lib/api/session";
 import { normalizeInviteToken } from "@/lib/invitations/token";
 import { invitationService } from "@/services/invitations/invitation.service";
 
@@ -13,10 +14,12 @@ export const GET = publicRoute<{ token: string }>(async ({ params }) => {
 
 export const POST = publicRoute<{ token: string }>(async ({ request, params }) => {
   const body = await request.json().catch(() => ({}));
+  const actor = await optionalUser(request);
   return jsonOk(
     await invitationService.acceptByToken(
       normalizeInviteToken(params.token),
-      body
+      body,
+      actor
     ),
     "Invitation accepted"
   );

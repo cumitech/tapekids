@@ -26,8 +26,7 @@ import { cva, VariantProps } from "class-variance-authority";
 import { PanelLeftIcon } from "lucide-react";
 import * as React from "react";
 
-const SIDEBAR_COOKIE_NAME = "sidebar_state";
-const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+import { STORAGE_KEYS, UI_COOKIE_MAX_AGE } from "@/constants/storage-keys";
 const SIDEBAR_WIDTH = "16rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "4rem";
@@ -54,6 +53,31 @@ function useSidebar() {
   return context;
 }
 
+function readStoredSidebarOpen(): boolean | undefined {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEYS.UI_PREFERENCES);
+    if (raw) {
+      const parsed = JSON.parse(raw) as { sidebarOpen?: unknown };
+      if (parsed.sidebarOpen === true || parsed.sidebarOpen === false) {
+        return parsed.sidebarOpen;
+      }
+    }
+    const stored = window.localStorage.getItem(STORAGE_KEYS.SIDEBAR);
+    if (stored === "true") {
+      return true;
+    }
+    if (stored === "false") {
+      return false;
+    }
+  } catch {
+    return undefined;
+  }
+  return undefined;
+}
+
 function SidebarProvider({
   defaultOpen = true,
   open: openProp,
@@ -72,7 +96,9 @@ function SidebarProvider({
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
-  const [_open, _setOpen] = React.useState(defaultOpen);
+  const [_open, _setOpen] = React.useState(
+    () => readStoredSidebarOpen() ?? defaultOpen
+  );
   const open = openProp ?? _open;
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
@@ -83,9 +109,9 @@ function SidebarProvider({
         _setOpen(openState);
       }
 
-      // This sets the cookie to keep the sidebar state.
-      if (typeof document !== "undefined") {
-        document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(STORAGE_KEYS.SIDEBAR, String(openState));
+        document.cookie = `${STORAGE_KEYS.SIDEBAR}=${openState}; path=/; max-age=${UI_COOKIE_MAX_AGE}; samesite=lax`;
       }
     },
     [setOpenProp, open]

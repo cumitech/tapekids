@@ -1,6 +1,7 @@
 import type { AuthProvider } from "@refinedev/core";
 
 import { withLocalePath } from "@/lib/locale";
+import { safeInternalPath } from "@/lib/navigation/safe-path";
 import { rolesFromUnknown } from "@/lib/permissions";
 import {
   clearSession,
@@ -21,6 +22,8 @@ type LoginParams = {
   username?: string;
   confirmPassword?: string;
   providerName?: string;
+  remember?: boolean;
+  redirect?: string;
 };
 
 type AuthEnvelope = {
@@ -55,10 +58,10 @@ export const authProvider: AuthProvider = {
 
     try {
       const { data } = await http.post<AuthEnvelope>("/auth/login", { email, password });
-      setSession(sessionFromResponse(data));
+      setSession(sessionFromResponse(data), { remember: params.remember !== false });
       return {
         success: true,
-        redirectTo: localizedPath("/dashboard"),
+        redirectTo: safeInternalPath(params.redirect, localizedPath("/dashboard")),
       };
     } catch (error) {
       const message =
@@ -88,7 +91,7 @@ export const authProvider: AuthProvider = {
         password,
         confirmPassword: params.confirmPassword || password,
       });
-      setSession(sessionFromResponse(data));
+      setSession(sessionFromResponse(data), { remember: true });
       return {
         success: true,
         redirectTo: localizedPath("/dashboard"),

@@ -1,5 +1,5 @@
 import { DEFAULT_LOCALE, type AppLocale } from "@/constants/locales";
-import { STORAGE_KEYS } from "@/constants/storage-keys";
+import { STORAGE_KEYS, UI_COOKIE_MAX_AGE } from "@/constants/storage-keys";
 import { isAppLocale } from "@/lib/locale";
 import type { ThemeMode, UiPreferencesState } from "@/types/ui-preferences";
 import { setLocaleCookie } from "@/utils/locale-cookie";
@@ -66,12 +66,18 @@ export function loadUiPreferences(): UiPreferencesState {
 
   return {
     sidebarOpen:
+      parseSidebarOpen(window.localStorage.getItem(STORAGE_KEYS.SIDEBAR)) ??
       parseSidebarOpen(readCookie(STORAGE_KEYS.SIDEBAR)) ??
+      parseSidebarOpen(readCookie("sidebar_state")) ??
       defaultUiPreferences.sidebarOpen,
     theme:
       parseTheme(window.localStorage.getItem(STORAGE_KEYS.THEME)) ??
+      parseTheme(readCookie(STORAGE_KEYS.THEME)) ??
       defaultUiPreferences.theme,
-    locale: parseLocale(readCookie(STORAGE_KEYS.LOCALE)) ?? defaultUiPreferences.locale,
+    locale:
+      parseLocale(window.localStorage.getItem(STORAGE_KEYS.LOCALE)) ??
+      parseLocale(readCookie(STORAGE_KEYS.LOCALE)) ??
+      defaultUiPreferences.locale,
   };
 }
 
@@ -82,8 +88,13 @@ export function saveUiPreferences(state: UiPreferencesState) {
 
   window.localStorage.setItem(STORAGE_KEYS.UI_PREFERENCES, JSON.stringify(state));
   window.localStorage.setItem(STORAGE_KEYS.THEME, state.theme);
+  window.localStorage.setItem(STORAGE_KEYS.LOCALE, state.locale);
+  window.localStorage.setItem(STORAGE_KEYS.SIDEBAR, String(state.sidebarOpen));
   setLocaleCookie(state.locale);
-  document.cookie = `${STORAGE_KEYS.SIDEBAR}=${state.sidebarOpen}; path=/; max-age=${
-    60 * 60 * 24 * 7
-  }; samesite=lax`;
+  writePreferenceCookie(STORAGE_KEYS.SIDEBAR, String(state.sidebarOpen));
+  writePreferenceCookie(STORAGE_KEYS.THEME, state.theme);
+}
+
+function writePreferenceCookie(name: string, value: string) {
+  document.cookie = `${name}=${value}; path=/; max-age=${UI_COOKIE_MAX_AGE}; samesite=lax`;
 }

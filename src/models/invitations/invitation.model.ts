@@ -5,6 +5,7 @@ export type InvitePayload = {
   invitation?: { status: string };
   event?: { title: string };
   person?: Person | null;
+  needsPassword?: boolean;
   accountCreated?: boolean;
   token?: string;
   user?: AuthSession["user"];

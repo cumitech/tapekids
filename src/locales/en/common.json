@@ -437,6 +437,7 @@
   "invite": {
     "title": "Invitation",
     "completeProfile": "Create a password to open your account.",
+    "signInToAccept": "You already have an account. Sign in to accept this invitation.",
     "completeProfileHint": "Your name and email were added by the organiser. Fill in the rest from your dashboard after you sign in.",
     "createPassword": "Create a password",
     "accept": "Save and continue",

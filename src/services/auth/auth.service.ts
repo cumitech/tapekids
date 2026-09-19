@@ -122,20 +122,38 @@ export class AuthService {
     };
   }
 
+  async hasAccountForPerson(person: Person): Promise<boolean> {
+    const user =
+      (await userRepository.findByPersonId(person.id)) ??
+      (await userRepository.findByEmail(person.email));
+    return Boolean(user);
+  }
+
   async completeGuestInvite(
     person: Person,
-    password: string
+    password: string | undefined,
+    actor?: { id: string } | null
   ): Promise<{ created: boolean; token: string; user: PublicUser }> {
-    const passwordHash = await bcrypt.hash(password, 10);
     const existing =
       (await userRepository.findByPersonId(person.id)) ??
       (await userRepository.findByEmail(person.email));
 
     if (existing) {
-      if (!existing.personId) {
-        await userRepository.linkPerson(existing.id, person.id);
+      const signedIn = actor?.id === existing.id;
+      if (!signedIn) {
+        if (!password) {
+          throw new ValidationException(
+            "Sign in with your existing password to accept this invitation."
+          );
+        }
+        const matches = await bcrypt.compare(password, existing.password);
+        if (!matches) {
+          throw new UnauthorizedException("Invalid email or password.");
+        }
       }
-      const user = await userRepository.updatePassword(existing.id, passwordHash);
+      const user = existing.personId
+        ? existing
+        : await userRepository.linkPerson(existing.id, person.id);
       return {
         created: false,
         token: signSession(user),
@@ -143,11 +161,15 @@ export class AuthService {
       };
     }
 
+    if (!password) {
+      throw new ValidationException("Create a password to open your account.");
+    }
+
     const user = await userRepository.create({
       id: nanoid(),
       email: person.email,
       username: person.email.split("@")[0] || "guest",
-      password: passwordHash,
+      password: await bcrypt.hash(password, 10),
       role: USER_ROLES.GUEST,
       verified: true,
       personId: person.id,

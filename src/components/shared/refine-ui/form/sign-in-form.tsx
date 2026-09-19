@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { CircleHelp } from "lucide-react";
 
@@ -20,10 +20,19 @@ import { Separator } from "@/components/shared/ui/separator";
 import { AuthFormFrame } from "@/components/shared/refine-ui/form/auth-form-frame";
 import { InputPassword } from "@/components/shared/refine-ui/form/input-password";
 import { useLocale } from "@/hooks/core/use-locale.hook";
+import { getRememberMe } from "@/utils/auth-storage";
 
-export const SignInForm = () => {
-  const [rememberMe, setRememberMe] = useState(false);
-  const [email, setEmail] = useState("");
+type SignInFormProps = {
+  defaultEmail?: string;
+  redirectTo?: string;
+};
+
+export const SignInForm = ({
+  defaultEmail = "",
+  redirectTo,
+}: SignInFormProps = {}) => {
+  const [rememberMe, setRememberMe] = useState(true);
+  const [email, setEmail] = useState(defaultEmail);
   const [password, setPassword] = useState("");
   const [formError, setFormError] = useState("");
   const translate = useTranslate();
@@ -34,6 +43,13 @@ export const SignInForm = () => {
 
   const { mutate: login, isPending } = useLogin();
 
+  useEffect(() => {
+    setRememberMe(getRememberMe());
+    if (defaultEmail) {
+      setEmail(defaultEmail);
+    }
+  }, [defaultEmail]);
+
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError("");
@@ -42,6 +58,8 @@ export const SignInForm = () => {
       {
         email,
         password,
+        remember: rememberMe,
+        redirect: redirectTo,
       },
       {
         onSuccess: (result) => {

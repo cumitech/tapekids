@@ -1,8 +1,6 @@
-import { STORAGE_KEYS } from "@/constants/storage-keys";
+import { STORAGE_KEYS, UI_COOKIE_MAX_AGE } from "@/constants/storage-keys";
 import { DEFAULT_LOCALE, type AppLocale } from "@/constants/locales";
 import { isAppLocale, localeFromPathname } from "@/lib/locale";
-
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
 function canUseDocument(): boolean {
   return typeof document !== "undefined";
@@ -27,7 +25,10 @@ export function setLocaleCookie(locale: AppLocale): void {
     return;
   }
 
-  document.cookie = `${STORAGE_KEYS.LOCALE}=${locale}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax`;
+  document.cookie = `${STORAGE_KEYS.LOCALE}=${locale}; path=/; max-age=${UI_COOKIE_MAX_AGE}; samesite=lax`;
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(STORAGE_KEYS.LOCALE, locale);
+  }
 }
 
 export function getClientLocale(): AppLocale {

@@ -89,6 +89,14 @@ export async function requireUser(request: Request): Promise<User> {
   return userRepository.findById(payload.sub);
 }
 
+export async function optionalUser(request: Request): Promise<User | null> {
+  try {
+    return await requireUser(request);
+  } catch {
+    return null;
+  }
+}
+
 export async function requireAdmin(request: Request): Promise<User> {
   const user = await requireUser(request);
   if (user.role !== USER_ROLES.ADMIN) {
