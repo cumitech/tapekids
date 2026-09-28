@@ -202,6 +202,12 @@ function useWaitingListColumns({
         cell: ({ row }) => formatPhoneDisplay(row.original.phone) || "-",
       },
       {
+        id: "event",
+        enableSorting: false,
+        header: translate("waitingList.event"),
+        cell: ({ row }) => eventTitleOf(row.original) || "-",
+      },
+      {
         id: "createdAt",
         accessorKey: "createdAt",
         header: translate("waitingList.registeredAt"),
@@ -226,6 +232,24 @@ function useWaitingListColumns({
     ],
     [busyRef, locale, recordsRef, selectedRef, translate]
   );
+}
+
+function eventTitleOf(row: WaitingListEntry) {
+  const details = row.details;
+  if (!details) {
+    return "";
+  }
+  if (typeof details === "string") {
+    try {
+      return eventTitleOf({
+        ...row,
+        details: JSON.parse(details) as WaitingListEntry["details"],
+      });
+    } catch {
+      return "";
+    }
+  }
+  return typeof details.eventTitle === "string" ? details.eventTitle : "";
 }
 
 function messageFromError(error: unknown, fallback: string) {

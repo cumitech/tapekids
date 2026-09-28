@@ -8,7 +8,6 @@ import frCommon from "@/locales/fr/common.json";
 export const i18n = createInstance();
 
 void i18n.init({
-  initImmediate: false,
   lng: DEFAULT_LOCALE,
   fallbackLng: DEFAULT_LOCALE,
   supportedLngs: [...LOCALES],

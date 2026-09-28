@@ -454,7 +454,10 @@
     "approveSelected": "Approuver la sélection ({{count}})",
     "approveFailed": "Impossible d'approuver cette inscription.",
     "approved": "Approuvé. La personne est maintenant dans Personnes, avec trophées : Non.",
-    "approvedPartial": "{{approved}} approuvé(s). {{failed}} n'ont pas pu être approuvés."
+    "approvedPartial": "{{approved}} approuvé(s). {{failed}} n'ont pas pu être approuvés.",
+    "forEvent": "Cette inscription concerne {{title}}.",
+    "changeYfId": "Utiliser un autre identifiant Young Foundations",
+    "event": "Événement"
   },
   "sponsors": {
     "titles": {
@@ -633,6 +636,26 @@
     "public": {
       "back": "Retour aux événements",
       "viewDetails": "Voir les détails"
+    },
+    "join": {
+      "title": "Lien à partager",
+      "description": "Partagez ce lien pour l'événement. La personne saisit son identifiant Young Foundations. S'il est déjà dans l'annuaire, elle ouvre son compte. Sinon, elle remplit la liste d'attente de cet événement.",
+      "generate": "Générer le lien",
+      "regenerate": "Générer un nouveau lien",
+      "regenerateConfirm": "Le lien actuel ne fonctionnera plus. Générer un nouveau lien ?",
+      "copy": "Copier",
+      "copied": "Copié",
+      "empty": "Pas encore de lien à partager.",
+      "failed": "Impossible de préparer le lien.",
+      "loading": "Chargement du lien…"
+    },
+    "joinPublic": {
+      "prompt": "Saisissez votre identifiant Young Foundations pour continuer.",
+      "continue": "Continuer",
+      "checking": "Vérification…",
+      "notFound": "Cet identifiant Young Foundations n'est pas encore dans l'annuaire. Complétez la liste d'attente de cet événement.",
+      "missing": "Ce lien n'est pas valide.",
+      "failed": "Impossible de vérifier cet identifiant Young Foundations."
     },
     "roster": "Liste des participants",
     "batches": "Lots d'invitations",

@@ -454,7 +454,10 @@
     "approveSelected": "Approve selected ({{count}})",
     "approveFailed": "Could not approve this registration.",
     "approved": "Approved. They are now in People, with trophies set to No.",
-    "approvedPartial": "Approved {{approved}}. {{failed}} could not be approved."
+    "approvedPartial": "Approved {{approved}}. {{failed}} could not be approved.",
+    "forEvent": "This registration is for {{title}}.",
+    "changeYfId": "Use a different Young Foundations ID",
+    "event": "Event"
   },
   "sponsors": {
     "titles": {
@@ -633,6 +636,26 @@
     "public": {
       "back": "Back to events",
       "viewDetails": "View details"
+    },
+    "join": {
+      "title": "Share link",
+      "description": "Share this link for the event. The visitor enters a Young Foundations ID. If that ID is already in the directory, they open their account. If it is not, they complete the waiting list for this event.",
+      "generate": "Generate link",
+      "regenerate": "Generate a new link",
+      "regenerateConfirm": "The current link will stop working. Generate a new one?",
+      "copy": "Copy",
+      "copied": "Copied",
+      "empty": "No share link yet.",
+      "failed": "Could not prepare the share link.",
+      "loading": "Loading the share link…"
+    },
+    "joinPublic": {
+      "prompt": "Enter your Young Foundations ID to continue.",
+      "continue": "Continue",
+      "checking": "Checking…",
+      "notFound": "We do not have this Young Foundations ID yet. Complete the waiting list for this event.",
+      "missing": "This link is not valid.",
+      "failed": "Could not check that Young Foundations ID."
     },
     "roster": "Roster",
     "batches": "Invitation batches",

@@ -3,5 +3,6 @@ export type WaitingListEntry = {
   fullName: string;
   email: string;
   phone?: string | null;
+  details?: { eventTitle?: string } | string | null;
   createdAt?: string;
 };

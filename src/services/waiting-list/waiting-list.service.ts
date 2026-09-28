@@ -53,6 +53,15 @@ export class WaitingListService {
       throw new ConflictException("This email is already in the directory.");
     }
 
+    if (input.yfId) {
+      const existingYf = await personRepository.findByYfId(input.yfId);
+      if (existingYf) {
+        throw new ConflictException(
+          "This Young Foundations ID already belongs to someone in the directory."
+        );
+      }
+    }
+
     try {
       return await waitingListRepository.create({
         id: nanoid(),

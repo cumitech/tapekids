@@ -25,6 +25,17 @@ export class EventRepository {
     return event;
   }
 
+  async findByJoinToken(joinToken: string): Promise<Event | null> {
+    return Event.findOne({ where: { joinToken } });
+  }
+
+  async setJoinToken(id: string, joinToken: string): Promise<void> {
+    const [updated] = await Event.update({ joinToken }, { where: { id } });
+    if (!updated) {
+      throw new NotFoundException("Event", id);
+    }
+  }
+
   async findBySlug(slug: string): Promise<Event | null> {
     return Event.findOne({ where: { slug } });
   }

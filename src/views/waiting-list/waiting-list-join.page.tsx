@@ -23,19 +23,33 @@ import type { PersonFormValues } from "@/types/forms";
 import { http } from "@/utils/axios";
 import { PublicShell } from "@/views/auth/public-shell";
 
-export function WaitingListJoinPage() {
+type WaitingListJoinPageProps = {
+  embedded?: boolean;
+  event?: { id: string; title: string };
+  initialYfId?: string;
+  onChangeYfId?: () => void;
+};
+
+export function WaitingListJoinForm({
+  embedded = false,
+  event,
+  initialYfId = "",
+  onChangeYfId,
+}: WaitingListJoinPageProps = {}) {
   const translate = useTranslate();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
-  const form = useForm<PersonFormValues>({ defaultValues: emptyPersonForm });
+  const form = useForm<PersonFormValues>({
+    defaultValues: { ...emptyPersonForm, yfId: initialYfId },
+  });
   const steps = usePersonFormSteps(form.trigger, true);
   const stepLabels = PERSON_FORM_STEPS.map((name) =>
     translate(`people.sections.${name}`)
   );
 
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function onSubmit(formEvent: FormEvent<HTMLFormElement>) {
+    formEvent.preventDefault();
     setError("");
     if (!steps.isLast) {
       await steps.goNext();
@@ -48,7 +62,12 @@ export function WaitingListJoinPage() {
 
     setBusy(true);
     try {
-      await http.post("/waiting-list", personFormToPayload(form.getValues()));
+      const payload = personFormToPayload(form.getValues());
+      await http.post("/waiting-list", {
+        ...payload,
+        yfId: initialYfId || payload.yfId,
+        ...(event ? { eventId: event.id, eventTitle: event.title } : {}),
+      });
       setDone(true);
     } catch (cause) {
       setError(messageFromError(cause, translate("waitingList.registerFailed")));
@@ -57,15 +76,16 @@ export function WaitingListJoinPage() {
     }
   }
 
-  return (
-    <PublicShell>
+  const frame = (
       <AuthFormFrame className="max-w-6xl">
         <CardHeader className="px-0">
           <CardTitle className="text-2xl font-semibold text-primary sm:text-3xl">
             {translate("waitingList.joinTitle")}
           </CardTitle>
           <CardDescription className="font-medium text-muted-foreground">
-            {translate("waitingList.joinDescription")}
+            {event
+              ? translate("waitingList.forEvent", { title: event.title })
+              : translate("waitingList.joinDescription")}
           </CardDescription>
         </CardHeader>
         <Separator />
@@ -75,6 +95,16 @@ export function WaitingListJoinPage() {
           </p>
         ) : (
           <form className="flex flex-col gap-6" onSubmit={onSubmit}>
+            {onChangeYfId ? (
+              <p className="text-sm text-muted-foreground">
+                {translate("events.joinPublic.notFound")}
+              </p>
+            ) : null}
+            {onChangeYfId ? (
+              <Button type="button" variant="outline" onClick={onChangeYfId}>
+                {translate("waitingList.changeYfId")}
+              </Button>
+            ) : null}
             <FormStepper
               size="comfortable"
               labels={stepLabels}
@@ -131,8 +161,17 @@ export function WaitingListJoinPage() {
           </form>
         )}
       </AuthFormFrame>
-    </PublicShell>
   );
+
+  if (embedded) {
+    return frame;
+  }
+
+  return <PublicShell>{frame}</PublicShell>;
+}
+
+export function WaitingListJoinPage() {
+  return <WaitingListJoinForm />;
 }
 
 function messageFromError(error: unknown, fallback: string) {

@@ -1,9 +1,24 @@
 import { z } from "zod";
 
 import { createPersonSchema } from "@/data/dtos/person.dto";
+import { isStandardEmail, normalizeEmail } from "@/lib/email";
+
+const requiredEmail = z.string().trim().transform((value, ctx) => {
+  const email = normalizeEmail(value);
+  if (!email || !isStandardEmail(email, 128)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Invalid email",
+    });
+    return z.NEVER;
+  }
+  return email;
+});
 
 export const registerWaitingListSchema = createPersonSchema.extend({
-  email: z.string().trim().email().max(128).toLowerCase(),
+  email: requiredEmail,
+  eventId: z.string().trim().max(20).optional(),
+  eventTitle: z.string().trim().max(128).optional(),
 });
 
 export const approveWaitingListSchema = z.object({

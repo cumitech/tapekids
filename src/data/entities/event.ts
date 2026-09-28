@@ -30,6 +30,7 @@ export class Event extends Model<
   declare eventType: CreationOptional<string>;
   declare minAge: CreationOptional<number | null>;
   declare maxAge: CreationOptional<number | null>;
+  declare joinToken: CreationOptional<string | null>;
   declare createdById: string;
 }
 
@@ -116,6 +117,11 @@ export function initEvent(sequelize: Sequelize) {
       maxAge: {
         type: DataTypes.INTEGER,
         allowNull: true,
+      },
+      joinToken: {
+        type: DataTypes.STRING(48),
+        allowNull: true,
+        unique: true,
       },
       createdById: {
         type: DataTypes.STRING(20),

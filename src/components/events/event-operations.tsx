@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslate } from "@refinedev/core";
 import Link from "next/link";
 
+import { EventJoinLink } from "@/components/events/event-join-link";
 import { PaymentList } from "@/components/payments/payment-list";
 import { StatusBadge } from "@/components/portal/status-badge";
 import { Button } from "@/components/shared/ui/button";
@@ -39,6 +40,9 @@ type BatchRow = {
 export function EventOperations({ eventId }: { eventId: string }) {
   return (
     <div className="grid gap-8 xl:grid-cols-2">
+      <div className="xl:col-span-2">
+        <EventJoinLink eventId={eventId} />
+      </div>
       <EventRoster eventId={eventId} />
       <InvitationBatchHistory eventId={eventId} />
       <div className="xl:col-span-2">
