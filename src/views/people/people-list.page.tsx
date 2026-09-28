@@ -1,104 +1,46 @@
 "use client";
 
-import { useMemo } from "react";
-import type { ColumnDef } from "@tanstack/react-table";
+import { useCallback, useState } from "react";
+import { useTranslate } from "@refinedev/core";
+import { Upload } from "lucide-react";
 
+import { PeopleImportDialog } from "@/components/people/people-import-dialog";
 import { PersonForm } from "@/components/people/person-form.component";
 import { ResourceRowActions } from "@/components/shared/refine-ui/buttons/resource-row-actions";
-import { columnFilter } from "@/components/shared/refine-ui/data-table/data-table-column-filter";
 import { DataTable } from "@/components/shared/refine-ui/data-table/data-table";
 import { ListView, ListViewHeader } from "@/components/shared/refine-ui/views/list-view";
+import { Button } from "@/components/shared/ui/button";
 import { useCachedTable } from "@/hooks/core/use-cached-table.hook";
 import { useDashboardFormModal } from "@/hooks/core/use-dashboard-form-modal.hook";
-import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
-import { formatPhoneDisplay } from "@/lib/phone";
+import { usePeopleDirectoryColumns } from "@/hooks/people/use-people-directory-columns.hook";
+import { clearListQueryCache } from "@/lib/client/list-query-cache";
 import type { Person } from "@/models/people/person.model";
 
 export function PeopleListPage() {
-  const { openCreate, openEdit } = useDashboardFormModal();
-  const labels = useResourceLabels("people", [
-    "firstName",
-    "lastName",
-    "email",
-    "phone",
-    "region",
-    "division",
-    "subDivision",
-    "town",
-    "churchName",
-  ]);
-
-  const columns = useMemo<ColumnDef<Person>[]>(
-    () => [
-      {
-        id: "lastName",
-        accessorKey: "lastName",
-        header: labels.fields.lastName,
-      },
-      {
-        id: "firstName",
-        accessorKey: "firstName",
-        header: labels.fields.firstName,
-      },
-      { id: "email", accessorKey: "email", header: labels.fields.email },
-      {
-        id: "phone",
-        accessorKey: "phone",
-        header: labels.fields.phone,
-        cell: ({ row }) => formatPhoneDisplay(row.original.phone) || "-",
-      },
-      {
-        id: "region",
-        accessorKey: "region",
-        header: labels.fields.region,
-        ...columnFilter(),
-      },
-      {
-        id: "division",
-        accessorKey: "division",
-        header: labels.fields.division,
-        ...columnFilter(),
-      },
-      {
-        id: "subDivision",
-        accessorKey: "subDivision",
-        header: labels.fields.subDivision,
-        ...columnFilter(),
-      },
-      {
-        id: "town",
-        accessorKey: "town",
-        header: labels.fields.town,
-        ...columnFilter(),
-      },
-      {
-        id: "churchName",
-        accessorKey: "churchName",
-        header: labels.fields.churchName,
-        ...columnFilter(),
-      },
-      {
-        id: "actions",
-        header: labels.tableActions,
-        cell: ({ row }) => (
-          <ResourceRowActions
-            id={row.original.id}
-            onEdit={() =>
-              openEdit("people", row.original.id, ({ close }) => (
-                <PersonForm
-                  mode="edit"
-                  id={row.original.id}
-                  onCancel={close}
-                  onSuccess={close}
-                />
-              ))
-            }
-          />
-        ),
-      },
-    ],
-    [labels, openEdit]
+  const translate = useTranslate();
+  const { openEdit } = useDashboardFormModal();
+  const [importOpen, setImportOpen] = useState(false);
+  const renderActions = useCallback(
+    (row: Person) => (
+      <ResourceRowActions
+        id={row.id}
+        onEdit={() =>
+          openEdit("people", row.id, ({ close }) => (
+            <PersonForm
+              mode="edit"
+              id={row.id}
+              onCancel={close}
+              onSuccess={close}
+            />
+          ))
+        }
+      />
+    ),
+    [openEdit]
   );
+  const columns = usePeopleDirectoryColumns<Person>({
+    renderActions,
+  });
 
   const { table } = useCachedTable<Person>({
     resource: "people",
@@ -107,14 +49,21 @@ export function PeopleListPage() {
 
   return (
     <ListView>
-      <ListViewHeader
-        onCreate={() =>
-          openCreate("people", ({ close }) => (
-            <PersonForm mode="create" onCancel={close} onSuccess={close} />
-          ))
-        }
-      />
+      <ListViewHeader canCreate={false}>
+        <Button type="button" variant="outline" onClick={() => setImportOpen(true)}>
+          <Upload className="mr-2 h-4 w-4" />
+          {translate("people.import.action")}
+        </Button>
+      </ListViewHeader>
       <DataTable table={table} />
+      <PeopleImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImported={() => {
+          clearListQueryCache("people");
+          void table.refineCore.tableQuery.refetch();
+        }}
+      />
     </ListView>
   );
 }

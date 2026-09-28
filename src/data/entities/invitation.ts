@@ -16,6 +16,8 @@ import {
   EVENT_MEMBERSHIP_KINDS,
   INVITATION_STATUSES,
 } from "@/constants/event-participation";
+import type { Event } from "./event";
+import type { InvitationBatch } from "./invitation-batch";
 import type { Person } from "./person";
 
 export class Invitation extends Model<
@@ -30,10 +32,13 @@ export class Invitation extends Model<
   declare token: string;
   declare emailSnapshot: string;
   declare status: InvitationStatus;
+  declare linksOpen: CreationOptional<boolean>;
   declare sentAt: CreationOptional<Date | null>;
   declare acceptedAt: CreationOptional<Date | null>;
   declare expiresAt: CreationOptional<Date | null>;
   declare person?: NonAttribute<Person>;
+  declare event?: NonAttribute<Event>;
+  declare batch?: NonAttribute<InvitationBatch>;
 }
 
 export function initInvitation(sequelize: Sequelize) {
@@ -73,6 +78,11 @@ export function initInvitation(sequelize: Sequelize) {
         type: DataTypes.STRING(20),
         allowNull: false,
         defaultValue: INVITATION_STATUSES.QUEUED,
+      },
+      linksOpen: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
       },
       sentAt: {
         type: DataTypes.DATE,

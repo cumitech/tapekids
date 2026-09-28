@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ClipboardList } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useTranslate } from "@refinedev/core";
 
 import { Button } from "@/components/shared/ui/button";
@@ -15,22 +14,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/shared/ui/dialog";
-import { STORAGE_KEYS } from "@/constants/storage-keys";
+import { GUEST_PROFILE_PATH } from "@/constants/guest-portal";
 import { useMe } from "@/hooks/core/use-me.hook";
 import { useLocale } from "@/hooks/core/use-locale.hook";
-
-const SNOOZE_MS = 24 * 60 * 60 * 1000;
+import { isGuestProfilePath } from "@/lib/people/profile-completeness";
 
 function preventDismiss(event: Event) {
   event.preventDefault();
-}
-
-function readSnoozed() {
-  if (typeof window === "undefined") {
-    return true;
-  }
-  const until = Number(window.localStorage.getItem(STORAGE_KEYS.ONBOARDING_SNOOZE) || 0);
-  return until > Date.now();
 }
 
 export function GuestOnboardingAlert() {
@@ -38,14 +28,8 @@ export function GuestOnboardingAlert() {
   const { path } = useLocale();
   const pathname = usePathname();
   const { loading, profileComplete } = useMe();
-  const onProfile = Boolean(pathname?.includes("/dashboard/profile"));
-  const [snoozed, setSnoozed] = useState(true);
-
-  useEffect(() => {
-    setSnoozed(readSnoozed());
-  }, [profileComplete]);
-
-  const open = !loading && !profileComplete && !onProfile && !snoozed;
+  const onProfile = isGuestProfilePath(pathname);
+  const open = !loading && !profileComplete && !onProfile;
 
   return (
     <Dialog open={open}>
@@ -73,23 +57,9 @@ export function GuestOnboardingAlert() {
             asChild
             className="bg-white text-primary hover:bg-white/90"
           >
-            <Link href={path("/dashboard/profile")}>
+            <Link href={path(GUEST_PROFILE_PATH)}>
               {translate("onboarding.updateProfile")}
             </Link>
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            className="text-primary-foreground hover:bg-white/10 hover:text-primary-foreground"
-            onClick={() => {
-              window.localStorage.setItem(
-                STORAGE_KEYS.ONBOARDING_SNOOZE,
-                String(Date.now() + SNOOZE_MS)
-              );
-              setSnoozed(true);
-            }}
-          >
-            {translate("onboarding.later")}
           </Button>
         </DialogFooter>
       </DialogContent>

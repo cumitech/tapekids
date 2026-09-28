@@ -7,6 +7,9 @@ import { getCampayAccessToken, invalidateCampayToken, campayTokenSource } from "
 
 const TIMEOUT_MS = 15_000;
 
+/** CamPay holds /collect/ open until the phone approves or declines the prompt. */
+export const CAMPAY_COLLECT_TIMEOUT_MS = 90_000;
+
 export function campayUrl(path: string): string {
   const root = campayConfig().apiRoot;
   const suffix = path.startsWith("/") ? path : `/${path}`;
@@ -16,7 +19,12 @@ export function campayUrl(path: string): string {
 export async function campayRequest<T>(
   method: "get" | "post",
   path: string,
-  options: { body?: unknown; params?: unknown; isRetry?: boolean } = {}
+  options: {
+    body?: unknown;
+    params?: unknown;
+    isRetry?: boolean;
+    timeout?: number;
+  } = {}
 ): Promise<T> {
   const token = await getCampayAccessToken({
     forceRefresh: Boolean(options.isRetry && campayTokenSource() === "static"),
@@ -28,7 +36,7 @@ export async function campayRequest<T>(
       url: campayUrl(path),
       data: options.body,
       params: options.params,
-      timeout: TIMEOUT_MS,
+      timeout: options.timeout ?? TIMEOUT_MS,
       headers: {
         Authorization: `Token ${token}`,
         "Content-Type": "application/json",

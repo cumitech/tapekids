@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
+import { useTranslate } from "@refinedev/core";
 
 import { EventForm } from "@/components/events/event-form.component";
 import { EventImage } from "@/components/events/event-image";
@@ -16,12 +17,14 @@ import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
 import type { Event } from "@/models/events/event.model";
 
 export function EventsListPage() {
+  const translate = useTranslate();
   const { openCreate, openEdit } = useDashboardFormModal();
   const labels = useResourceLabels("events", [
     "title",
     "imageUrl",
     "city",
     "venue",
+    "eventType",
     "startsAt",
     "scheduleStatus",
   ]);
@@ -40,6 +43,16 @@ export function EventsListPage() {
         ),
       },
       { id: "title", accessorKey: "title", header: labels.fields.title },
+      {
+        id: "eventType",
+        accessorKey: "eventType",
+        header: labels.fields.eventType,
+        cell: ({ row }) =>
+          translate(
+            `events.types.${row.original.eventType === "day_event" ? "day_event" : "camp"}`
+          ),
+        ...columnFilter(),
+      },
       {
         id: "city",
         accessorKey: "city",
@@ -83,7 +96,7 @@ export function EventsListPage() {
         ),
       },
     ],
-    [labels, openEdit]
+    [labels, openEdit, translate]
   );
 
   const { table } = useCachedTable<Event>({

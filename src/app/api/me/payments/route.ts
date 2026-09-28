@@ -4,6 +4,7 @@ import { toPaymentJson } from "@/lib/payments/public";
 import { meService } from "@/services/me/me.service";
 
 export const runtime = "nodejs";
+export const maxDuration = 120;
 
 export const GET = authedRoute(async ({ user }) => {
   const result = await meService.listPayments(user);

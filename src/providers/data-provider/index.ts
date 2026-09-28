@@ -58,8 +58,7 @@ export const dataProvider = {
       return {
         data: {
           email: profile.user.email,
-          firstName: "",
-          lastName: "",
+          fullName: "",
           ...(profile.person ?? {}),
           id: "me",
         },

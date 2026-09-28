@@ -2,9 +2,15 @@ import type { Person } from "@/models/people/person.model";
 import type { AuthSession } from "@/utils/auth-storage";
 
 export type InvitePayload = {
-  invitation?: { status: string };
-  event?: { title: string };
+  invitation?: { status: string; kind?: string | null };
+  event?: {
+    title: string;
+    minAge?: number | null;
+    maxAge?: number | null;
+    startsAt?: string;
+  };
   person?: Person | null;
+  needsYfId?: boolean;
   needsPassword?: boolean;
   accountCreated?: boolean;
   token?: string;

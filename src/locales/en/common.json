@@ -44,7 +44,8 @@
     "clear": "Clear",
     "apply": "Apply",
     "undo": "Undo",
-    "clone": "Clone"
+    "clone": "Clone",
+    "export": "Export Excel"
   },
   "documentTitle": {
     "default": "Kids Events Cameroon",
@@ -132,18 +133,12 @@
     "adminEyebrow": "Administration",
     "adminTitle": "Admin workspace",
     "adminDescription": "Oversee people, events, invitations, and the audit trail from one place.",
-    "staffEyebrow": "Staff",
-    "staffTitle": "Staff dashboard",
-    "staffDescription": "Register people, build mailing lists, and send event invitations.",
-    "staffHome": "Home",
     "adminHome": "Admin home",
-    "staffNavGroup": "Daily work",
     "adminNavDirectory": "Directory",
+    "adminNavReporting": "Reporting",
     "adminNavOversight": "Oversight",
-    "roleStaff": "Staff",
     "roleAdmin": "Admin",
-    "roleSuperAdmin": "Super-admin",
-    "staffAddPerson": "Add a person",
+    "roleGuest": "Guest",
     "guestEyebrow": "Your portal",
     "guestTitle": "Welcome, {{name}}",
     "guestDescription": "Pay for your place, then keep your profile accurate.",
@@ -154,6 +149,15 @@
     "statPeople": "People",
     "statLists": "Lists",
     "statEvents": "Events",
+    "statTrophyCampers": "Trophy campers",
+    "statTrophyCampersShort": "Campers",
+    "statTrophyParticipants": "Trophy participants",
+    "statTrophyParticipantsShort": "Participants",
+    "statInvitationsSent": "Invitations sent",
+    "statInvitationsSentShort": "Invites",
+    "statAmountCollected": "Amount collected",
+    "statAmountCollectedShort": "Collected",
+    "statTotalEvents": "Total events",
     "statCamp": "Camp",
     "statSponsors": "Sponsors",
     "statAudit": "Audit",
@@ -163,11 +167,78 @@
     "noMembershipsTitle": "No events yet",
     "noMembershipsDescription": "When you are invited to a camp or asked to sponsor, it will appear here.",
     "sections": {
-      "people": "Add campers, families, and coordinators with the details each event needs.",
+      "people": "Import trophy campers, trophy participants, and chaperones from Excel.",
+      "waiting-list": "Review people without trophies and approve them into the directory.",
       "mailing-lists": "Group people and queue invitations when it is time to write.",
-      "events": "Plan camps with venues, dates, and participant or sponsor funds.",
+      "events": "Plan camps and day gatherings with a venue, dates, and a published page.",
+      "payments": "Review camper, coordinator, and sponsor payments across events.",
+      "sponsors": "See people who sponsored an event, including those who asked to stay anonymous.",
+      "reports": "Open trophy, chaperone, and sponsor lists, then export formatted Excel reports.",
       "audit-logs": "Review who changed people, events, payments, and invitations.",
+      "app-settings": "Open or close invitation links, batches, and individual invitations.",
       "profile": "Keep your own contact details, location, and family information up to date."
+    }
+  },
+  "prepareEvent": {
+    "entry": "Start here",
+    "title": "Prepare an event",
+    "description": "Import people, create the event, then send the invitation.",
+    "start": "Start",
+    "progress": "Step {{step}} of {{total}}",
+    "continue": "Continue",
+    "back": "Back",
+    "eventPending": "Loading the event…",
+    "importHint": "Import an Excel file. The same file updates existing people and does not create duplicates.",
+    "importReady": "The directory already has people. Import more, or continue.",
+    "eventHint": "Save the camp or day event. It stays selected for the next steps.",
+    "eventSaved": "This event is already saved. Continue, or save any changes below.",
+    "listHintCamp": "The audience is set to campers. Choose who should receive the invitation.",
+    "listHintDay": "Choose the participants and chaperones for this day event. The audience starts as campers, and you can change it.",
+    "listSaved": "This mailing list is already saved. Continue, or save any changes below.",
+    "sendHint": "This event is already selected. Review the message, then send.",
+    "doneTitle": "Invitation ready",
+    "doneBody": "Queued for this event.",
+    "resend": "Retry unsent",
+    "another": "Write another invitation",
+    "openEvent": "Open event",
+    "openList": "Open mailing list",
+    "steps": {
+      "import": "Import",
+      "event": "Event",
+      "list": "Mailing list",
+      "send": "Send"
+    }
+  },
+  "appSettings": {
+    "titles": {
+      "list": "App settings",
+      "create": "App settings",
+      "edit": "App settings",
+      "show": "App settings"
+    },
+    "description": "Every application setting is listed here, including invitation links for the whole app, a batch, or one person.",
+    "settingsTitle": "Settings",
+    "failed": "Could not update this setting.",
+    "close": "Close",
+    "reopen": "Reopen",
+    "linkOpen": "Link open",
+    "linkClosed": "Link closed",
+    "batchClosed": "Batch closed",
+    "batchesTitle": "Invitation batches",
+    "invitationsTitle": "Individual invitations",
+    "closeBatch": "Close batch",
+    "reopenBatch": "Reopen batch",
+    "closeInvitation": "Close link",
+    "reopenInvitation": "Reopen link",
+    "extendInvitation": "Extend 30 days",
+    "extendBatch": "Extend 30 days",
+    "expires": "Expires {{date}}",
+    "invitationLinks": {
+      "title": "Invitation links",
+      "open": "All invitation links are open.",
+      "closed": "All invitation links are closed.",
+      "close": "Close invitation links",
+      "reopen": "Reopen invitation links"
     }
   },
   "onboarding": {
@@ -181,6 +252,16 @@
     "brand": "Kids Events Cameroon",
     "signIn": "Sign in",
     "register": "Register",
+    "waitingList": "Waiting list",
+    "waitingListEyebrow": "For people without a trophy",
+    "waitingListTitle": "Join the waiting list",
+    "waitingListBody": "This is for interested people who do not have a trophy and still want to take part. Complete the person details step by step, then wait for an administrator to review your request. Approval adds you to the people directory with trophies set to No. It does not create an account.",
+    "waitingListCta": "Register on the waiting list",
+    "sponsors": "Sponsors",
+    "sponsorsEyebrow": "Parents and individuals",
+    "sponsorsTitle": "Sponsor a gathering",
+    "sponsorsBody": "Give toward a camp or day event. Share your name and email, choose whether to stay anonymous, then pay from your phone. A receipt is sent to the email you provide once the payment is confirmed.",
+    "sponsorsCta": "Sponsor now",
     "dashboard": "Dashboard",
     "welcome": "Shalom",
     "headline": "Young Foundations Cameroon",
@@ -200,13 +281,19 @@
     "study": "The Laodicean Church Age",
     "footer": "Kids Events Cameroon",
     "footerTagline": "Young Foundations fellowship across Cameroon: camps, Creations, and Cub Corner.",
+    "partners": {
+      "vgr": "Voice Of God Recordings",
+      "tabernacle": "Branham Tabernacle",
+      "message": "TheMessage.com",
+      "open": "{{name}}, official website"
+    },
     "eventsTitle": "Upcoming gatherings",
     "eventsEmpty": "Published camps and Creations gatherings will appear here."
   },
   "locale": {
     "label": "Language",
-    "en": "English",
-    "fr": "Français"
+    "fr": "Français",
+    "en": "English"
   },
   "theme": {
     "label": "Theme",
@@ -264,12 +351,16 @@
       "show": "Person"
     },
     "fields": {
-      "firstName": "First name",
-      "lastName": "Last name",
+      "fullName": "Full name",
       "email": "Email",
       "phone": "Phone",
       "dateOfBirth": "Date of birth",
       "gender": "Gender",
+      "shirtSize": "Shirt size",
+      "category": "Category",
+      "yfId": "YF ID",
+      "points": "Points",
+      "ageYears": "Age",
       "address": "Address",
       "churchName": "Church name",
       "churchPastorName": "Pastor's name",
@@ -281,7 +372,27 @@
       "parentGuardianName": "Name",
       "parentGuardianPhone": "Phone",
       "medicalNotes": "Medical notes",
-      "country": "Country"
+      "country": "Country",
+      "isTrophy": "Trophies"
+    },
+    "categories": {
+      "trophy_camper": "Trophy camper",
+      "trophy_participant": "Trophy participant",
+      "chaperone": "Chaperone / Encadreur"
+    },
+    "import": {
+      "action": "Import Excel",
+      "title": "Import people from Excel",
+      "hint": "Upload a Young Foundations export (.xlsx). Columns used: YF ID, Points, Name, Gender, Age, Address, Country, Email, Phone, DOB, Trophy. Choose the category for every row in this file.",
+      "chooseCategory": "Select category",
+      "file": "Excel file",
+      "submit": "Import",
+      "importing": "Importing…",
+      "missing": "Choose a category and an Excel file.",
+      "failed": "Could not import this file.",
+      "networkFailed": "Network error while importing. Check your connection and try again. The same file will not create duplicates.",
+      "result": "Created {{created}}, updated {{updated}}, unchanged {{unchanged}}, skipped {{skipped}}.",
+      "rowError": "Row {{row}}: {{message}}"
     },
     "sections": {
       "identity": "Personal details",
@@ -290,21 +401,132 @@
       "guardians": "Parents / guardians",
       "notes": "Medical notes"
     },
-    "createHint": "Name, email, and phone are enough to start. The person completes the rest when they accept an invitation.",
+    "createHint": "Full name, email, and phone are enough to start. The person completes the rest when they accept an invitation.",
     "guardiansHint": "Add up to three parents or guardians. At least one row stays available.",
     "addGuardian": "Add guardian",
     "removeGuardian": "Remove guardian",
     "guardianNamePlaceholder": "Full name",
     "guardianRow": "Guardian {{n}}",
     "genderPlaceholder": "Select gender",
+    "shirtSizePlaceholder": "Select shirt size",
     "genders": {
       "female": "Female",
       "male": "Male"
+    },
+    "shirtSizes": {
+      "XS": "XS",
+      "S": "S",
+      "SM": "S",
+      "M": "M",
+      "MD": "M",
+      "L": "L",
+      "LG": "L",
+      "XL": "XL",
+      "2XL": "2XL",
+      "XXL": "2XL",
+      "3XL": "3XL",
+      "XXXL": "3XL"
     },
     "steps": {
       "next": "Continue",
       "back": "Back",
       "progress": "Step {{current}} of {{total}}"
+    }
+  },
+  "waitingList": {
+    "titles": {
+      "list": "Waiting list",
+      "create": "Waiting list",
+      "edit": "Waiting list",
+      "show": "Waiting list"
+    },
+    "joinTitle": "Join the waiting list",
+    "joinDescription": "Complete each step of the person record. An administrator reviews the list and approves who joins.",
+    "submit": "Register",
+    "submitting": "Registering…",
+    "submitted": "You are on the waiting list. You will be added once an administrator approves you.",
+    "registerFailed": "Could not join the waiting list.",
+    "registeredAt": "Registered",
+    "select": "Select",
+    "selectAll": "Select all on this page",
+    "approve": "Approve",
+    "approving": "Approving…",
+    "approveSelected": "Approve selected ({{count}})",
+    "approveFailed": "Could not approve this registration.",
+    "approved": "Approved. They are now in People, with trophies set to No.",
+    "approvedPartial": "Approved {{approved}}. {{failed}} could not be approved."
+  },
+  "sponsors": {
+    "titles": {
+      "list": "Sponsors",
+      "create": "Sponsor",
+      "edit": "Sponsor",
+      "show": "Sponsor"
+    },
+    "fields": {
+      "person": "Person",
+      "email": "Email",
+      "anonymous": "Anonymous",
+      "event": "Event",
+      "amount": "Amount",
+      "status": "Status",
+      "paymentPhone": "Payment phone",
+      "trackingId": "Payment ID"
+    },
+    "joinTitle": "Sponsor",
+    "joinDescription": "Tell us who you are, choose an event, then pay with the phone number that will receive the mobile-money request.",
+    "anonymous": "Stay anonymous",
+    "anonymousYes": "Yes",
+    "anonymousNo": "No",
+    "event": "Event",
+    "eventPlaceholder": "Choose an event",
+    "paymentPhone": "Phone number for payment",
+    "paymentHint": "Enter the telephone number that should receive the payment request.",
+    "detailsRequired": "Enter your name, email, and event.",
+    "phoneRequired": "Enter the phone number for payment.",
+    "emailRequired": "An email address is required before you can sponsor.",
+    "eventRequired": "Choose an event to sponsor.",
+    "amountMinimum": "The minimum amount is {{amount}} XAF.",
+    "pay": "Pay now",
+    "paying": "Starting payment…",
+    "waiting": "Waiting for payment confirmation. A receipt will be emailed when it succeeds.",
+    "paid": "Payment confirmed. A receipt has been sent to your email.",
+    "failed": "Could not start this sponsorship."
+  },
+  "reports": {
+    "titles": {
+      "list": "Reports",
+      "create": "Reports",
+      "edit": "Reports",
+      "show": "Report"
+    },
+    "exporting": "Exporting…",
+    "exportFailed": "Could not export this report.",
+    "kinds": {
+      "trophy-campers": {
+        "title": "Trophy campers",
+        "description": "People registered as trophy campers for multi-day camps."
+      },
+      "trophy-participants": {
+        "title": "Trophy participants",
+        "description": "People registered as trophy participants for day events."
+      },
+      "chaperones": {
+        "title": "Chaperones / Encadreurs",
+        "description": "Chaperones and encadreurs across camps and events."
+      },
+      "sponsors": {
+        "title": "Sponsors",
+        "description": "People linked as sponsors on events, with the event name and status."
+      },
+      "participants": {
+        "title": "Participants",
+        "description": "Campers and day-event participants linked to an event."
+      },
+      "waiting-list": {
+        "title": "Waiting list",
+        "description": "People without trophies who asked to take part and are waiting for approval."
+      }
     }
   },
   "mailingLists": {
@@ -373,15 +595,25 @@
       "city": "City",
       "startsAt": "Starts",
       "endsAt": "Ends",
+      "eventType": "Type",
       "scheduleStatus": "Status",
       "imageUrl": "Event image",
-      "isPublished": "Show on the public website",
-      "requiresParticipantFee": "Participant fee required",
-      "participantFeeAmount": "Participant fee (XAF)",
+      "isPublished": "Published",
+      "requiresParticipantFee": "Fee required",
+      "participantFeeAmount": "Fee",
       "currency": "Currency",
       "coordinatorFundAmount": "Coordinator fund (XAF)",
-      "sponsorFundAmount": "Sponsor fund (XAF)"
+      "sponsorFundAmount": "Sponsor fund (XAF)",
+      "minAge": "Minimum age",
+      "maxAge": "Maximum age"
     },
+    "types": {
+      "camp": "Camp",
+      "day_event": "Day event"
+    },
+    "typeHint": "A camp lasts more than one day and is for trophy campers. A day event starts and ends the same day and is for trophy participants.",
+    "ageRangeHint": "Leave both blank if any age can attend. A camper's age is their completed years on the first day, calculated from their date of birth.",
+    "ageRangeInvalid": "Minimum age cannot be greater than maximum age.",
     "schedule": {
       "upcoming": "Upcoming",
       "active": "Happening now",
@@ -416,12 +648,23 @@
       "edit": "Pay now",
       "show": "Payment"
     },
+    "fields": {
+      "trackingId": "Payment ID",
+      "person": "Person",
+      "event": "Event",
+      "kind": "Kind",
+      "amount": "Amount",
+      "status": "Status",
+      "createdAt": "When"
+    },
     "title": "Collect payment",
     "kind": "Payment for",
     "method": "Method",
     "momo": "Mobile money",
     "link": "Payment link",
+    "username": "Username",
     "phone": "MoMo number",
+    "amountPlaceholder": "Enter amount",
     "charge": "Start payment",
     "started": "Payment started",
     "waiting": "Waiting for payment confirmation…",
@@ -448,10 +691,17 @@
   },
   "invite": {
     "title": "Invitation",
+    "ageRange": "Campers must be {{range}} on the first day of this event.",
     "completeProfile": "Create a password to open your account.",
+    "enterYfId": "Enter your Young Foundations ID to accept this invitation and open your profile.",
+    "enterYfIdAndPassword": "Enter your Young Foundations ID and create a password. Use your email and this password to sign in next time.",
     "signInToAccept": "You already have an account. Sign in to accept this invitation.",
     "completeProfileHint": "Your name and email were added by the organiser. Fill in the rest from your dashboard after you sign in.",
     "createPassword": "Create a password",
+    "yfId": "Young Foundations ID",
+    "yfIdPlaceholder": "2790694",
+    "yfIdHint": "Use the YF ID from your Young Foundations record, for example 2790694.",
+    "yfIdRequired": "Enter your Young Foundations ID.",
     "accept": "Save and continue",
     "accepted": "Invitation accepted. Opening your dashboard…",
     "acceptedWithAccount": "Invitation accepted. Opening your dashboard…",
@@ -501,7 +751,8 @@
     "description": "Support a camp by reviewing your sponsorship and completing the fund when it is due.",
     "homeCard": "Events you sponsor and the funds attached to them.",
     "emptyTitle": "No sponsorships yet",
-    "emptyDescription": "When you are invited as a sponsor, the event and any fund amount will show here."
+    "emptyDescription": "When you are invited as a sponsor, the event and any fund amount will show here.",
+    "sponsorCta": "Sponsor"
   },
   "profile": {
     "titles": {
@@ -514,7 +765,7 @@
     "description": "Keep your contact details, location, and family information up to date.",
     "homeCard": "Update your personal and family information.",
     "unavailableTitle": "Profile unavailable",
-    "unavailableDescription": "We could not load your profile. Sign in again, or ask staff for help."
+    "unavailableDescription": "We could not load your profile. Sign in again, or ask an admin for help."
   },
   "portal": {
     "pay": "Pay now",
@@ -542,11 +793,18 @@
         "sending": "Sending",
         "sent": "Sent",
         "failed": "Failed"
+      },
+      "invitation": {
+        "queued": "Queued",
+        "sent": "Sent",
+        "failed": "Failed",
+        "accepted": "Accepted",
+        "expired": "Expired"
       }
     }
   },
   "content": {
-    "translationHint": "Add English and French copy. Missing French falls back to English.",
+    "translationHint": "Add French first, then English if needed. Missing English falls back to French.",
     "languages": "Languages"
   },
   "a11y": {

@@ -1,5 +1,5 @@
 import { DEFAULT_COUNTRY } from "@/constants/geo";
-import { MAX_GUARDIANS } from "@/constants/person";
+import { MAX_GUARDIANS, canonicalShirtSize, type PersonCategory } from "@/constants/person";
 import { normalizeStoredPhone } from "@/lib/phone";
 import type { GuardianFormValue, PersonFormValues } from "@/types/forms";
 
@@ -25,12 +25,12 @@ export const GUARDIAN_RELATION = "guardian";
 
 export interface Person {
   id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
+  fullName: string;
+  email?: string | null;
   phone?: string | null;
   dateOfBirth?: string | null;
   gender?: string | null;
+  shirtSize?: string | null;
   address?: string | null;
   churchName?: string | null;
   churchPastorName?: string | null;
@@ -43,6 +43,11 @@ export interface Person {
   parentGuardianName?: string | null;
   parentGuardianPhone?: string | null;
   medicalNotes?: string | null;
+  yfId?: string | null;
+  points?: number | null;
+  ageYears?: number | null;
+  isTrophy?: boolean;
+  category?: PersonCategory | null;
   emergencyContacts?: Array<{
     id?: string;
     name: string;
@@ -56,12 +61,12 @@ export function emptyGuardian(): GuardianFormValue {
 }
 
 export const emptyPersonForm: PersonFormValues = {
-  firstName: "",
-  lastName: "",
+  fullName: "",
   email: "",
   phone: "",
   dateOfBirth: "",
   gender: "",
+  shirtSize: "",
   address: "",
   churchName: "",
   churchPastorName: "",
@@ -73,6 +78,11 @@ export const emptyPersonForm: PersonFormValues = {
   subDivision: "",
   guardians: [emptyGuardian()],
   medicalNotes: "",
+  yfId: "",
+  points: "",
+  ageYears: "",
+  isTrophy: false,
+  category: "",
 };
 
 export function guardiansFromRecord(record?: Person | null): GuardianFormValue[] {
@@ -111,12 +121,12 @@ export function filledGuardians(values: GuardianFormValue[]) {
 
 export function personToFormValues(record?: Person | null): PersonFormValues {
   return {
-    firstName: record?.firstName ?? "",
-    lastName: record?.lastName ?? "",
+    fullName: record?.fullName ?? "",
     email: record?.email ?? "",
     phone: normalizeStoredPhone(record?.phone) ?? "",
     dateOfBirth: dateOnlyInput(record?.dateOfBirth),
     gender: record?.gender ?? "",
+    shirtSize: canonicalShirtSize(record?.shirtSize ?? ""),
     address: record?.address ?? "",
     churchName: record?.churchName ?? "",
     churchPastorName: record?.churchPastorName ?? "",
@@ -128,6 +138,11 @@ export function personToFormValues(record?: Person | null): PersonFormValues {
     subDivision: record?.subDivision ?? "",
     guardians: guardiansFromRecord(record),
     medicalNotes: record?.medicalNotes ?? "",
+    yfId: record?.yfId ?? "",
+    points: record?.points != null ? String(record.points) : "",
+    ageYears: record?.ageYears != null ? String(record.ageYears) : "",
+    isTrophy: Boolean(record?.isTrophy),
+    category: record?.category ?? "",
   };
 }
 
@@ -136,12 +151,12 @@ export function personFormToPayload(values: PersonFormValues) {
   const first = guardians[0];
 
   return {
-    firstName: values.firstName,
-    lastName: values.lastName,
-    email: values.email,
+    fullName: values.fullName,
+    email: values.email || null,
     phone: normalizeStoredPhone(values.phone),
     dateOfBirth: values.dateOfBirth || null,
     gender: values.gender || null,
+    shirtSize: values.shirtSize || null,
     address: values.address || null,
     churchName: values.churchName || null,
     churchPastorName: values.churchPastorName || null,
@@ -154,6 +169,11 @@ export function personFormToPayload(values: PersonFormValues) {
     parentGuardianName: first?.name ?? null,
     parentGuardianPhone: first?.phone ?? null,
     medicalNotes: values.medicalNotes || null,
+    yfId: values.yfId || null,
+    points: values.points ? Number(values.points) : null,
+    ageYears: values.ageYears ? Number(values.ageYears) : null,
+    isTrophy: Boolean(values.isTrophy),
+    category: values.category || null,
     emergencyContacts: guardians.map((guardian) => ({
       name: guardian.name,
       phone: guardian.phone,

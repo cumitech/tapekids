@@ -5,6 +5,7 @@ import type { Payment } from "@/data/entities/payment";
 import type { Person } from "@/data/entities/person";
 import { isMailConfigured } from "@/lib/integrations/env";
 import { logger } from "@/lib/logger";
+import { personGreetingName } from "@/lib/people/display-name";
 import {
   invitationMail,
   passwordChangedMail,
@@ -91,7 +92,7 @@ export class NotificationService {
       return false;
     }
 
-    const firstName = input.person?.firstName;
+    const firstName = personGreetingName(input.person);
     const eventTitle = input.event?.title ?? "the event";
     const amount = String(input.payment.amount);
     const currency = input.payment.currency;
@@ -106,6 +107,7 @@ export class NotificationService {
           amount,
           currency,
           kind,
+          trackingId: input.payment.trackingId,
         })
       );
     }
@@ -117,12 +119,18 @@ export class NotificationService {
           eventTitle,
           amount,
           currency,
+          trackingId: input.payment.trackingId,
         })
       );
     }
     if (input.payment.status === PAYMENT_STATUSES.WAIVED) {
       return this.sendQuiet(
-        paymentWaivedMail({ to, firstName, eventTitle })
+        paymentWaivedMail({
+          to,
+          firstName,
+          eventTitle,
+          trackingId: input.payment.trackingId,
+        })
       );
     }
     return false;

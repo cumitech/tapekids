@@ -11,21 +11,38 @@ import { Button } from "@/components/shared/ui/button";
 import { Input } from "@/components/shared/ui/input";
 import { RichTextEditor } from "@/components/shared/form/rich-text-editor";
 import { useInvitationQueue } from "@/hooks/invitations/use-invitation-queue.hook";
+import type { InvitationDeliveryResult } from "@/lib/invitations/delivery-notice";
+import { DEFAULT_LOCALE } from "@/constants/locales";
+import { pickFromLocaleMap } from "@/lib/content-i18n/pick";
 
 type InvitationQueueFormProps = {
   mailingListId: string;
+  eventId?: string;
+  lockEvent?: boolean;
+  onSent?: (result: InvitationDeliveryResult) => void;
 };
 
-export function InvitationQueueForm({ mailingListId }: InvitationQueueFormProps) {
+export function InvitationQueueForm({
+  mailingListId,
+  eventId,
+  lockEvent = false,
+  onSent,
+}: InvitationQueueFormProps) {
   const translate = useTranslate();
-  const queue = useInvitationQueue(mailingListId);
+  const queue = useInvitationQueue(mailingListId, { eventId, onSent });
 
   return (
     <section className="rounded-xl border border-border bg-white p-5 shadow-[0_1px_4px_rgba(15,23,42,0.08)] dark:bg-card">
       <h3 className="text-lg font-semibold">{queue.actionLabel}</h3>
       <div className="grid items-start gap-8 lg:grid-cols-2">
         <div className="flex min-w-0 flex-col gap-3">
-          <EventSelect value={queue.eventId} onChange={queue.setEventId} />
+          {lockEvent ? (
+            <p className="text-sm font-medium">
+              {queue.event?.title || translate("prepareEvent.eventPending")}
+            </p>
+          ) : (
+            <EventSelect value={queue.eventId} onChange={queue.setEventId} required />
+          )}
           <MembershipKindSelect
             label={translate("mailingLists.fields.kind")}
             value={queue.kind}
@@ -37,7 +54,10 @@ export function InvitationQueueForm({ mailingListId }: InvitationQueueFormProps)
           >
             {(tabLocale) => (
               <>
-                <LabeledField label={translate("mailingLists.fields.subject")}>
+                <LabeledField
+                  label={translate("mailingLists.fields.subject")}
+                  required={tabLocale === DEFAULT_LOCALE}
+                >
                   <Input
                     value={queue.subject[tabLocale]}
                     onChange={(change) =>
@@ -48,7 +68,10 @@ export function InvitationQueueForm({ mailingListId }: InvitationQueueFormProps)
                     }
                   />
                 </LabeledField>
-                <LabeledField label={translate("mailingLists.fields.body")}>
+                <LabeledField
+                  label={translate("mailingLists.fields.body")}
+                  required={tabLocale === DEFAULT_LOCALE}
+                >
                   <RichTextEditor
                     disabled={!queue.eventId}
                     value={queue.body[tabLocale]}
@@ -76,8 +99,10 @@ export function InvitationQueueForm({ mailingListId }: InvitationQueueFormProps)
         <InvitationEmailPreview
           event={queue.event}
           locale={queue.previewLocale}
-          subject={queue.subject[queue.previewLocale] || queue.subject.en}
-          body={queue.body[queue.previewLocale] || queue.body.en}
+          subject={pickFromLocaleMap(queue.subject, queue.previewLocale)}
+          body={pickFromLocaleMap(queue.body, queue.previewLocale, {
+            html: true,
+          })}
         />
       </div>
     </section>

@@ -4,6 +4,7 @@ import { useTranslate } from "@refinedev/core";
 
 import { APP_NAME } from "@/constants/brand";
 import type { AppLocale } from "@/constants/locales";
+import { fieldForLocale } from "@/lib/content-i18n/pick";
 import { formatEventRange } from "@/lib/invitations/invitation-copy";
 import { mailGreeting } from "@/lib/mail/greeting";
 import { RichText } from "@/components/shared/rich-text";
@@ -23,10 +24,17 @@ export function InvitationEmailPreview({
   body,
 }: InvitationEmailPreviewProps) {
   const translate = useTranslate();
-  const copy = event?.translations?.[locale];
   const title =
-    copy?.title || event?.title || translate("mailingLists.selectEvent");
-  const venue = copy?.venue || event?.venue;
+    fieldForLocale(event?.translations, locale, "title", event?.title, {
+      alwaysUseRoot: true,
+    }) || translate("mailingLists.selectEvent");
+  const venue = fieldForLocale(
+    event?.translations,
+    locale,
+    "venue",
+    event?.venue,
+    { alwaysUseRoot: true }
+  );
   const where = [venue, event?.city].filter(Boolean).join(", ");
   const when = formatEventRange(event?.startsAt, event?.endsAt, locale);
   const details = [
@@ -49,9 +57,6 @@ export function InvitationEmailPreview({
         <h3 className="text-lg font-semibold">
           {translate("mailingLists.invitationPreview")}
         </h3>
-        <p className="text-sm text-muted-foreground">
-          {translate("mailingLists.invitationPreviewHint")}
-        </p>
       </div>
       <div className="overflow-hidden rounded-xl border bg-[#e8eeed] shadow-sm">
         <p className="border-b bg-white px-4 py-2 text-xs text-muted-foreground">

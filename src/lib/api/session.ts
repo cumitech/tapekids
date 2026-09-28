@@ -1,10 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-import {
-  isAdminRole,
-  isStaffDashboardRole,
-  type UserRole,
-} from "@/constants/user-roles";
+import { isAdminRole, type UserRole } from "@/constants/user-roles";
 import type { User } from "@/data/entities/user";
 import { ForbiddenException } from "@/exceptions/forbidden.exception";
 import { UnauthorizedException } from "@/exceptions/unauthorized.exception";
@@ -118,10 +114,3 @@ export async function requireAdmin(request: Request): Promise<User> {
   return user;
 }
 
-export async function requireStaffOrAdmin(request: Request): Promise<User> {
-  const user = await requireUser(request);
-  if (!isStaffDashboardRole(user.role)) {
-    throw new ForbiddenException();
-  }
-  return user;
-}

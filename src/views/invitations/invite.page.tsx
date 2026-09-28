@@ -11,10 +11,13 @@ export function InvitePage() {
   const translate = useTranslate();
   const invite = useInviteAcceptance();
   const person = invite.payload?.person;
-  const name = [person?.firstName, person?.lastName].filter(Boolean).join(" ");
-  const showCreatePassword = Boolean(invite.payload?.needsPassword);
+  const name = person?.fullName?.trim() || "";
+  const showAcceptForm = invite.needsYfId || invite.needsPassword;
   const showSignIn =
-    Boolean(invite.payload) && !invite.needsPassword && !invite.signedIn;
+    Boolean(invite.payload) &&
+    !invite.needsYfId &&
+    !invite.needsPassword &&
+    !invite.signedIn;
 
   return (
     <PublicShell>
@@ -25,7 +28,11 @@ export function InvitePage() {
         <p className="text-sm text-muted-foreground">
           {showSignIn
             ? translate("invite.signInToAccept")
-            : translate("invite.completeProfile")}
+            : invite.needsYfId && invite.needsPassword
+              ? translate("invite.enterYfIdAndPassword")
+              : invite.needsYfId
+                ? translate("invite.enterYfId")
+                : translate("invite.completeProfile")}
         </p>
         {name || person?.email ? (
           <p className="text-sm">
@@ -39,9 +46,13 @@ export function InvitePage() {
         {invite.message ? (
           <p className="text-sm text-muted-foreground">{invite.message}</p>
         ) : null}
-        {showCreatePassword ? (
+        {showAcceptForm ? (
           <InviteAcceptForm
             passwords={invite.passwords}
+            yfId={invite.yfId}
+            setYfId={invite.setYfId}
+            needsYfId={invite.needsYfId}
+            needsPassword={invite.needsPassword}
             canSubmit={invite.canSubmit}
             submit={invite.submit}
           />

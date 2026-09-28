@@ -1,12 +1,7 @@
 "use strict";
 
 const bcrypt = require("bcryptjs");
-const { customAlphabet } = require("nanoid");
-
-const nanoid = customAlphabet(
-  "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-  20
-);
+const { recordId } = require("../seed-id");
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -45,7 +40,7 @@ module.exports = {
 
     await queryInterface.bulkInsert("users", [
       {
-        id: nanoid(),
+        id: recordId(),
         email,
         username,
         password: passwordHash,

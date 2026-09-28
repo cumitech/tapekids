@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { LOCALES } from "@/constants/locales";
+import { DEFAULT_LOCALE, LOCALES } from "@/constants/locales";
 import { STORAGE_KEYS } from "@/constants/storage-keys";
-import {
-  isAppLocale,
-  negotiateLocale,
-} from "@/lib/locale";
+import { isAppLocale } from "@/lib/locale";
 
 const LOCALE_COOKIE = {
   path: "/",
@@ -18,7 +15,7 @@ function localeFromRequest(request: NextRequest) {
   if (isAppLocale(cookieLocale)) {
     return cookieLocale;
   }
-  return negotiateLocale(request.headers.get("accept-language"));
+  return DEFAULT_LOCALE;
 }
 
 function withLocaleCookie(response: NextResponse, locale: string) {

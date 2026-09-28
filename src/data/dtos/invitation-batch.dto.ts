@@ -1,7 +1,7 @@
-import { DEFAULT_LOCALE } from "@/constants/locales";
 import { z } from "zod";
 
 import { membershipKindSchema } from "@/data/dtos/event-participation.dto";
+import { pickTranslatedField } from "@/lib/content-i18n/pick";
 import { isEmptyHtml } from "@/lib/html";
 
 export const createInvitationBatchSchema = z
@@ -36,10 +36,14 @@ export const createInvitationBatchSchema = z
     }
   )
   .superRefine((value, ctx) => {
-    const subject =
-      value.translations?.[DEFAULT_LOCALE]?.subject?.trim() || value.subject?.trim();
-    const body =
-      value.translations?.[DEFAULT_LOCALE]?.body?.trim() || value.body?.trim();
+    const subject = pickTranslatedField(
+      value.translations,
+      "subject",
+      value.subject
+    );
+    const body = pickTranslatedField(value.translations, "body", value.body, {
+      html: true,
+    });
     if (!subject) {
       ctx.addIssue({
         code: "custom",

@@ -26,7 +26,7 @@ export function GuestPortalLayout({ children }: PropsWithChildren) {
   return (
     <AppModalProvider>
       <MeProvider>
-      <div className={cn("flex min-h-svh min-w-0 flex-col", LAYOUT_CHROME_BG)}>
+      <div className={cn("flex min-h-svh min-w-0 flex-col overflow-x-clip", LAYOUT_CHROME_BG)}>
         <LayoutHeaderBar className="px-3 sm:px-6">
           <Link
             href={path("/dashboard")}
@@ -65,7 +65,7 @@ export function GuestPortalLayout({ children }: PropsWithChildren) {
             </MobileNavSheet>
           </div>
         </LayoutHeaderBar>
-        <main className="mx-auto flex w-full min-w-0 max-w-3xl flex-1 flex-col px-4 py-6 sm:px-6">
+        <main className="mx-auto flex w-full min-w-0 max-w-3xl flex-1 flex-col overflow-x-clip px-4 py-6 sm:px-6">
           <GuestOnboardingAlert />
           <ResourceRouteGuard>{children}</ResourceRouteGuard>
         </main>

@@ -1,8 +1,10 @@
+export const GUEST_PROFILE_PATH = "/dashboard/profile";
+
 export const GUEST_NAV_ITEMS = [
   { href: "/dashboard", labelKey: "dashboard.title" },
   { href: "/dashboard/camp", labelKey: "camp.titles.list" },
   { href: "/dashboard/sponsorships", labelKey: "sponsorships.titles.list" },
-  { href: "/dashboard/profile", labelKey: "profile.titles.list" },
+  { href: GUEST_PROFILE_PATH, labelKey: "profile.titles.list" },
 ] as const;
 
 export const GUEST_HOME_CARDS = [
@@ -21,7 +23,7 @@ export const GUEST_HOME_CARDS = [
     count: "sponsor" as const,
   },
   {
-    href: "/dashboard/profile",
+    href: GUEST_PROFILE_PATH,
     labelKey: "profile.titles.list",
     descriptionKey: "profile.homeCard",
     tint: "sage" as const,

@@ -13,7 +13,7 @@ export const Header = () => {
   const translate = useTranslate();
   const { isAdmin } = useRoleFlags();
   const roleLabel = translate(
-    isAdmin ? "dashboard.roleAdmin" : "dashboard.roleStaff"
+    isAdmin ? "dashboard.roleAdmin" : "dashboard.roleGuest"
   );
 
   return (

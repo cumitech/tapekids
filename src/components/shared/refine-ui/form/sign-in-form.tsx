@@ -7,6 +7,7 @@ import { CircleHelp } from "lucide-react";
 import { useLogin, useLink, useNotification, useTranslate } from "@refinedev/core";
 import { Button } from "@/components/shared/ui/button";
 import { Input } from "@/components/shared/ui/input";
+import { RequiredMark } from "@/components/shared/form/required-mark";
 import { Label } from "@/components/shared/ui/label";
 import { Checkbox } from "@/components/shared/ui/checkbox";
 import {
@@ -97,7 +98,10 @@ export const SignInForm = ({
       <CardContent className="px-0">
         <form onSubmit={handleSignIn}>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="email">{translate("auth.email")}</Label>
+            <Label htmlFor="email">
+              {translate("auth.email")}
+              <RequiredMark required />
+            </Label>
             <Input
               id="email"
               type="email"
@@ -108,7 +112,10 @@ export const SignInForm = ({
             />
           </div>
           <div className="relative mt-4 flex flex-col gap-2 sm:mt-6">
-            <Label htmlFor="password">{translate("auth.password")}</Label>
+            <Label htmlFor="password">
+              {translate("auth.password")}
+              <RequiredMark required />
+            </Label>
             <InputPassword
               value={password}
               onChange={(e) => setPassword(e.target.value)}

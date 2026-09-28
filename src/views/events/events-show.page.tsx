@@ -39,8 +39,6 @@ const EVENT_FIELDS = [
   "currency",
   "requiresParticipantFee",
   "participantFeeAmount",
-  "coordinatorFundAmount",
-  "sponsorFundAmount",
 ] as const;
 
 export function EventsShowPage() {
@@ -114,14 +112,6 @@ export function EventsShowPage() {
                   requiresParticipantFee: record.requiresParticipantFee,
                   participantFeeAmount: moneyOrDash(
                     record.participantFeeAmount,
-                    currency
-                  ),
-                  coordinatorFundAmount: moneyOrDash(
-                    record.coordinatorFundAmount,
-                    currency
-                  ),
-                  sponsorFundAmount: moneyOrDash(
-                    record.sponsorFundAmount,
                     currency
                   ),
                 }}

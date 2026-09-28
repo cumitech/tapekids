@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslate } from "@refinedev/core";
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 
+import { RequiredMark } from "@/components/shared/form/required-mark";
 import { Label } from "@/components/shared/ui/label";
 import { Button } from "@/components/shared/ui/button";
 import {
@@ -87,8 +88,11 @@ export function PhoneField({
 
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      <div className="flex gap-1.5">
+      <Label htmlFor={id}>
+        {label}
+        <RequiredMark required={required} />
+      </Label>
+      <div className="flex min-w-0 items-stretch gap-1.5">
         <Popover
           open={open}
           onOpenChange={(next) => {
@@ -107,13 +111,16 @@ export function PhoneField({
               aria-label={translate("form.countryCode", "Country code")}
               title={translate("form.countryCode", "Country code")}
               disabled={disabled}
-              className="h-12 w-[6.25rem] shrink-0 justify-between px-2 font-normal md:h-9 md:w-[5.5rem] md:px-1.5"
+              className="h-12 w-[5.25rem] shrink-0 justify-between px-2 font-normal sm:w-[5.5rem] md:h-9 md:px-1.5"
             >
               <span className="truncate">+{selected.dial}</span>
               <ChevronsUpDownIcon className="size-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="start" className="w-72 p-0">
+          <PopoverContent
+            align="start"
+            className="w-[min(18rem,var(--radix-popover-content-available-width))] p-0"
+          >
             <Command shouldFilter={false}>
               <CommandInput
                 value={query}
@@ -155,6 +162,7 @@ export function PhoneField({
           required={required}
           disabled={disabled}
           value={parsed.local}
+          className="min-w-0 flex-1"
           placeholder={translate("form.phonePlaceholder", "6XXXXXXXX")}
           onChange={(event) => onChange(composePhone(iso, event.target.value))}
         />

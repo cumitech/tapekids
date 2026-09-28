@@ -1,29 +1,27 @@
 import { parseListQuery } from "@/data/types/pagination";
 import { jsonList, jsonOk } from "@/lib/api/http";
-import { readJsonBody, searchParamsOf, staffRoute } from "@/lib/api/route-handler";
+import { readJsonBody, searchParamsOf, adminRoute } from "@/lib/api/route-handler";
+import { toPaymentJson } from "@/lib/payments/public";
 import { paymentService } from "@/services/payments/payment.service";
 
 export const runtime = "nodejs";
 
-export const GET = staffRoute(async ({ request }) => {
+export const GET = adminRoute(async ({ request }) => {
   const searchParams = searchParamsOf(request);
   const query = parseListQuery(searchParams);
   const eventId = searchParams.get("eventId");
   const personId = searchParams.get("personId");
 
-  if (eventId) {
-    const result = await paymentService.listByEvent(eventId, query);
-    return jsonList(result.data, result.total);
-  }
-  if (personId) {
-    const result = await paymentService.listByPerson(personId, query);
-    return jsonList(result.data, result.total);
-  }
+  const result = eventId
+    ? await paymentService.listByEvent(eventId, query)
+    : personId
+      ? await paymentService.listByPerson(personId, query)
+      : await paymentService.list(query);
 
-  return jsonList([], 0);
+  return jsonList(result.data.map(toPaymentJson), result.total);
 });
 
-export const POST = staffRoute(async ({ request }) => {
+export const POST = adminRoute(async ({ request }) => {
   const result = await paymentService.initiate(await readJsonBody(request));
   return jsonOk(result, "Payment started", 201);
 });

@@ -10,6 +10,7 @@ import {
 } from "@refinedev/core";
 import { Button } from "@/components/shared/ui/button";
 import { Input } from "@/components/shared/ui/input";
+import { RequiredMark } from "@/components/shared/form/required-mark";
 import { Label } from "@/components/shared/ui/label";
 import {
   CardContent,
@@ -82,7 +83,10 @@ export const SignUpForm = () => {
       <CardContent className="px-0">
         <form onSubmit={handleSignUp}>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="email">{translate("auth.email")}</Label>
+            <Label htmlFor="email">
+              {translate("auth.email")}
+              <RequiredMark required />
+            </Label>
             <Input
               id="email"
               type="email"
@@ -94,7 +98,10 @@ export const SignUpForm = () => {
           </div>
 
           <div className="relative mt-4 flex flex-col gap-2 sm:mt-6">
-            <Label htmlFor="password">{translate("auth.password")}</Label>
+            <Label htmlFor="password">
+              {translate("auth.password")}
+              <RequiredMark required />
+            </Label>
             <InputPassword
               id="password"
               value={password}
@@ -106,6 +113,7 @@ export const SignUpForm = () => {
           <div className="relative mt-4 flex flex-col gap-2 sm:mt-6">
             <Label htmlFor="confirmPassword">
               {translate("auth.confirmPassword")}
+              <RequiredMark required />
             </Label>
             <InputPassword
               id="confirmPassword"

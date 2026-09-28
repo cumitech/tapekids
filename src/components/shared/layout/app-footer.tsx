@@ -6,7 +6,7 @@ import { AppLogoMark } from "@/components/shared/brand/app-logo";
 import { cn } from "@/lib/utils";
 
 const PALETTE = [
-  { className: "bg-[#182356]", label: "Navy" },
+  { className: "bg-[#2a4078]", label: "Navy" },
   { className: "bg-[#466d6b]", label: "Sage" },
   { className: "bg-warning", label: "Warning" },
   { className: "bg-destructive", label: "Danger" },
@@ -19,7 +19,7 @@ export function AppFooter({ className }: { className?: string }) {
   return (
     <footer
       className={cn(
-        "relative overflow-hidden bg-gradient-to-r from-[#182356] via-[#24356e] to-[#466d6b] text-white",
+        "relative overflow-hidden bg-gradient-to-r from-[#2a4078] via-[#3d5a86] to-[#466d6b] text-white",
         className
       )}
     >
@@ -28,7 +28,7 @@ export function AppFooter({ className }: { className?: string }) {
       <span className="pointer-events-none absolute bottom-0 right-1/3 h-1 w-40 bg-destructive/70" />
       <div className="relative mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6 md:flex-row md:flex-wrap md:items-center md:justify-between md:px-8">
         <div className="flex min-w-0 items-center gap-3">
-          <AppLogoMark className="size-11 text-white" />
+          <AppLogoMark className="size-16 text-white" />
           <div>
             <p className="font-serif text-base tracking-tight">
               {translate("brand.name")}

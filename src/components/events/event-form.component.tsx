@@ -12,10 +12,21 @@ import { RichTextEditor } from "@/components/shared/form/rich-text-editor";
 import { Button } from "@/components/shared/ui/button";
 import { Checkbox } from "@/components/shared/ui/checkbox";
 import { Input } from "@/components/shared/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shared/ui/select";
 import { DEFAULT_COUNTRY } from "@/constants/geo";
+import { EVENT_TYPES } from "@/constants/event-type";
+import { DEFAULT_LOCALE, type AppLocale } from "@/constants/locales";
 import { useEventForm } from "@/hooks/events/use-event-form.hook";
+import type { Event } from "@/models/events/event.model";
 import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
-import { isEmptyHtml } from "@/lib/html";
+import { requireAnyLocaleField } from "@/lib/content-i18n/pick";
+import { eventSpanError } from "@/lib/events/event-span";
 
 const FIELD_KEYS = [
   "title",
@@ -25,20 +36,19 @@ const FIELD_KEYS = [
   "city",
   "startsAt",
   "endsAt",
+  "eventType",
   "imageUrl",
   "isPublished",
   "requiresParticipantFee",
   "participantFeeAmount",
   "currency",
-  "coordinatorFundAmount",
-  "sponsorFundAmount",
 ] as const;
 
 type EventFormProps = {
   mode: "create" | "edit";
   id?: string;
   onCancel?: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (record: Event) => void;
 };
 
 export function EventForm({ mode, id, onCancel, onSuccess }: EventFormProps) {
@@ -67,26 +77,33 @@ export function EventForm({ mode, id, onCancel, onSuccess }: EventFormProps) {
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
       <LocalizedTabs>
-        {(locale) => (
+        {(locale: AppLocale) => (
           <>
             <FormField
               label={labels.fields.title}
               error={errors.translations?.[locale]?.title?.message}
+              required={locale === DEFAULT_LOCALE}
             >
               <Input
-                {...register(`translations.${locale}.title`, {
-                  required: locale === "en",
-                })}
+                {...register(
+                  `translations.${locale}.title`,
+                  requireAnyLocaleField(locale, "title", labels.fields.title)
+                )}
               />
             </FormField>
             <FormField
               label={labels.fields.summary}
               error={errors.translations?.[locale]?.summary?.message}
+              required={locale === DEFAULT_LOCALE}
             >
               <Input
                 maxLength={280}
                 {...register(`translations.${locale}.summary`, {
-                  required: locale === "en",
+                  ...requireAnyLocaleField(
+                    locale,
+                    "summary",
+                    labels.fields.summary
+                  ),
                   maxLength: 280,
                 })}
               />
@@ -94,16 +111,16 @@ export function EventForm({ mode, id, onCancel, onSuccess }: EventFormProps) {
             <FormField
               label={labels.fields.description}
               error={errors.translations?.[locale]?.description?.message}
+              required={locale === DEFAULT_LOCALE}
             >
               <Controller
                 name={`translations.${locale}.description`}
                 control={control}
-                rules={{
-                  validate: (value) =>
-                    locale !== "en" ||
-                    !isEmptyHtml(value) ||
-                    labels.fields.description,
-                }}
+                rules={requireAnyLocaleField(
+                  locale,
+                  "description",
+                  labels.fields.description
+                )}
                 render={({ field }) => (
                   <RichTextEditor
                     value={field.value}
@@ -113,11 +130,15 @@ export function EventForm({ mode, id, onCancel, onSuccess }: EventFormProps) {
                 )}
               />
             </FormField>
-            <FormField label={labels.fields.venue}>
+            <FormField
+              label={labels.fields.venue}
+              required={locale === DEFAULT_LOCALE}
+            >
               <Input
-                {...register(`translations.${locale}.venue`, {
-                  required: locale === "en",
-                })}
+                {...register(
+                  `translations.${locale}.venue`,
+                  requireAnyLocaleField(locale, "venue", labels.fields.venue)
+                )}
               />
             </FormField>
           </>
@@ -145,15 +166,44 @@ export function EventForm({ mode, id, onCancel, onSuccess }: EventFormProps) {
           subDivision: translate("people.fields.subDivision"),
           town: labels.fields.city,
         }}
+        required={{ town: true }}
       />
       <div className="grid gap-4 sm:grid-cols-2">
-        <FormField label={labels.fields.startsAt}>
+        <FormField label={labels.fields.startsAt} required>
           <Input type="datetime-local" {...register("startsAt", { required: true })} />
         </FormField>
-        <FormField label={labels.fields.endsAt}>
-          <Input type="datetime-local" {...register("endsAt")} />
+        <FormField label={labels.fields.endsAt} error={errors.endsAt?.message} required>
+          <Input
+            type="datetime-local"
+            {...register("endsAt", {
+              validate: (value) =>
+                eventSpanError(watch("eventType"), watch("startsAt"), value) ??
+                true,
+            })}
+          />
         </FormField>
       </div>
+      <Controller
+        control={control}
+        name="eventType"
+        render={({ field }) => (
+          <FormField label={labels.fields.eventType} required>
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={EVENT_TYPES.CAMP}>
+                  {translate("events.types.camp")}
+                </SelectItem>
+                <SelectItem value={EVENT_TYPES.DAY_EVENT}>
+                  {translate("events.types.day_event")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </FormField>
+        )}
+      />
       <label className="flex items-center gap-2 text-sm">
         <Checkbox
           checked={Boolean(isPublished)}
@@ -178,12 +228,6 @@ export function EventForm({ mode, id, onCancel, onSuccess }: EventFormProps) {
         </FormField>
         <FormField label={labels.fields.currency}>
           <Input {...register("currency")} />
-        </FormField>
-        <FormField label={labels.fields.coordinatorFundAmount}>
-          <Input type="number" min={0} step={1} {...register("coordinatorFundAmount")} />
-        </FormField>
-        <FormField label={labels.fields.sponsorFundAmount}>
-          <Input type="number" min={0} step={1} {...register("sponsorFundAmount")} />
         </FormField>
       </div>
       <div className="flex flex-col-reverse gap-2 sm:flex-row">

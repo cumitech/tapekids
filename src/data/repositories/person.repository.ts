@@ -1,9 +1,11 @@
+import { Op } from "sequelize";
 import type { InferCreationAttributes } from "sequelize";
 
 import { EmergencyContact, Person } from "@/data/entities";
 import { listSearchWhere } from "@/data/list-where";
 import type { ListQuery, PaginatedResult } from "@/data/types/pagination";
 import { NotFoundException } from "@/exceptions/not-found.exception";
+import { normalizeYfId } from "@/lib/people/yf-id";
 
 export type PersonCreatePayload = InferCreationAttributes<Person>;
 export type PersonUpdatePayload = Partial<
@@ -25,6 +27,30 @@ export class PersonRepository {
     return person;
   }
 
+  async findByYfId(yfId: string): Promise<Person | null> {
+    const normalized = normalizeYfId(yfId);
+    if (!normalized) {
+      return null;
+    }
+    const exact = await Person.findOne({ where: { yfId: normalized } });
+    if (exact) {
+      return exact;
+    }
+    return Person.findOne({ where: { yfId } });
+  }
+
+  async findByYfIds(yfIds: string[]): Promise<Person[]> {
+    const ids = yfIds
+      .map((value) => normalizeYfId(value))
+      .filter(Boolean);
+    if (ids.length === 0) {
+      return [];
+    }
+    return Person.findAll({
+      where: { yfId: { [Op.in]: ids } },
+    });
+  }
+
   async findByEmail(email: string): Promise<Person | null> {
     return Person.findOne({ where: { email } });
   }
@@ -43,14 +69,14 @@ export class PersonRepository {
   async list(query: ListQuery): Promise<PaginatedResult<Person>> {
     const where = listSearchWhere(query, [
       "email",
-      "firstName",
-      "lastName",
+      "fullName",
       "phone",
       "churchName",
       "town",
       "region",
       "division",
       "subDivision",
+      "yfId",
     ]);
 
     if (query.idsOnly) {

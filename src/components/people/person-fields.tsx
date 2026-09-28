@@ -16,7 +16,9 @@ import { FormField } from "@/components/shared/form/form-field";
 import { FormSection } from "@/components/shared/form/form-section";
 import { GeoFields } from "@/components/shared/form/geo-fields.component";
 import { PhoneField } from "@/components/shared/form/phone-field";
+import { PersonCategorySelect } from "@/components/people/person-category-select";
 import { Button } from "@/components/shared/ui/button";
+import { Checkbox } from "@/components/shared/ui/checkbox";
 import { Input } from "@/components/shared/ui/input";
 import {
   Select,
@@ -26,7 +28,12 @@ import {
   SelectValue,
 } from "@/components/shared/ui/select";
 import { Textarea } from "@/components/shared/ui/textarea";
-import { PERSON_GENDERS, MAX_GUARDIANS, MIN_GUARDIANS } from "@/constants/person";
+import { PERSON_GENDERS, SHIRT_SIZES, MAX_GUARDIANS, MIN_GUARDIANS } from "@/constants/person";
+import { ageInYears } from "@/lib/people/age";
+import {
+  PROFILE_GEO_FIELDS,
+  requiredIfComplete,
+} from "@/lib/people/profile-completeness";
 import { cn } from "@/lib/utils";
 import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
 import {
@@ -71,12 +78,16 @@ function StepBlock({
 }
 
 export const PERSON_FIELD_KEYS = [
-  "firstName",
-  "lastName",
+  "fullName",
   "email",
   "phone",
   "dateOfBirth",
   "gender",
+  "shirtSize",
+  "category",
+  "yfId",
+  "points",
+  "ageYears",
   "address",
   "churchName",
   "churchPastorName",
@@ -104,6 +115,10 @@ type PersonFieldsProps = {
   setValue: UseFormSetValue<PersonFormValues>;
   lockEmail?: boolean;
   identityHint?: string;
+  requireComplete?: boolean;
+  emailRequired?: boolean;
+  showDirectoryFields?: boolean;
+  showAge?: boolean;
 };
 
 export function PersonFields({
@@ -118,6 +133,10 @@ export function PersonFields({
   setValue,
   lockEmail = false,
   identityHint,
+  requireComplete = false,
+  emailRequired = false,
+  showDirectoryFields = true,
+  showAge = false,
 }: PersonFieldsProps) {
   const translate = useTranslate();
   const labels = useResourceLabels("people", PERSON_FIELD_KEYS);
@@ -131,10 +150,6 @@ export function PersonFields({
     church: translate("people.sections.church", "Church"),
     guardians: translate("people.sections.guardians", "Parents / guardians"),
     notes: translate("people.sections.notes", "Medical notes"),
-    guardiansHint: translate(
-      "people.guardiansHint",
-      "Add up to three parents or guardians. At least one row stays available.",
-    ),
     addGuardian: translate("people.addGuardian", "Add guardian"),
     removeGuardian: translate("people.removeGuardian", "Remove guardian"),
     guardianNamePlaceholder: translate(
@@ -149,6 +164,7 @@ export function PersonFields({
     subDivision: watch("subDivision"),
     town: watch("town"),
   };
+  const ageYears = ageInYears(watch("dateOfBirth"));
   const isSectionActive = (name: PersonFormStep) =>
     layout === "identity"
       ? name === "identity"
@@ -162,53 +178,84 @@ export function PersonFields({
         direction={direction}
       >
         <FormSection title={copy.identity} description={identityHint}>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField
-              label={labels.fields.firstName}
-              error={errors.firstName?.message}
+              label={labels.fields.fullName}
+              error={errors.fullName?.message}
+              required
             >
-              <Input {...register("firstName", { required: true })} />
-            </FormField>
-            <FormField
-              label={labels.fields.lastName}
-              error={errors.lastName?.message}
-            >
-              <Input {...register("lastName", { required: true })} />
-            </FormField>
-            <FormField
-              label={labels.fields.email}
-              error={errors.email?.message}
-            >
-              <Input
-                type="email"
-                readOnly={lockEmail}
-                {...register("email", { required: true })}
-              />
+              <Input {...register("fullName", { required: true })} />
             </FormField>
             <Controller
               control={control}
               name="phone"
+              rules={requiredIfComplete(requireComplete)}
               render={({ field }) => (
                 <PhoneField
                   label={labels.fields.phone}
                   value={field.value ?? ""}
                   onChange={field.onChange}
                   error={errors.phone?.message}
+                  required={requireComplete}
                 />
               )}
             />
+            {showDirectoryFields ? (
+              <Controller
+                control={control}
+                name="category"
+                render={({ field }) => (
+                  <FormField
+                    label={labels.fields.category}
+                    error={errors.category?.message}
+                  >
+                    <PersonCategorySelect
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormField>
+                )}
+              />
+            ) : null}
+            <FormField
+              label={labels.fields.email}
+              error={errors.email?.message}
+              required={emailRequired || requireComplete}
+            >
+              <Input
+                type="email"
+                readOnly={lockEmail}
+                {...register(
+                  "email",
+                  emailRequired || requireComplete ? { required: true } : {}
+                )}
+              />
+            </FormField>
             {layout === "full" ? (
-              <>
-                <FormField label={labels.fields.dateOfBirth}>
-                  <Input type="date" {...register("dateOfBirth")} />
+              <div
+                className={cn(
+                  "grid grid-cols-1 gap-4 sm:col-span-2",
+                  showAge ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3",
+                )}
+              >
+                <FormField
+                  label={labels.fields.dateOfBirth}
+                  required={requireComplete}
+                >
+                  <Input
+                    type="date"
+                    {...register("dateOfBirth", requiredIfComplete(requireComplete))}
+                  />
                 </FormField>
                 <Controller
                   control={control}
                   name="gender"
+                  rules={requiredIfComplete(requireComplete)}
                   render={({ field }) => (
                     <FormField
                       label={labels.fields.gender}
                       error={errors.gender?.message}
+                      required={requireComplete}
                     >
                       <Select
                         value={field.value || undefined}
@@ -233,6 +280,82 @@ export function PersonFields({
                     </FormField>
                   )}
                 />
+                <Controller
+                  control={control}
+                  name="shirtSize"
+                  rules={requiredIfComplete(requireComplete)}
+                  render={({ field }) => (
+                    <FormField
+                      label={labels.fields.shirtSize}
+                      error={errors.shirtSize?.message}
+                      required={requireComplete}
+                    >
+                      <Select
+                        value={field.value || undefined}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue
+                            placeholder={translate(
+                              "people.shirtSizePlaceholder",
+                              "Select shirt size",
+                            )}
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SHIRT_SIZES.map((size) => (
+                            <SelectItem key={size} value={size}>
+                              {translate(`people.shirtSizes.${size}`)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormField>
+                  )}
+                />
+                {showAge ? (
+                  <FormField label={labels.fields.ageYears}>
+                    <Input
+                      value={ageYears ?? ""}
+                      readOnly
+                      disabled
+                      aria-readonly
+                      className="cursor-default bg-muted text-foreground disabled:opacity-100"
+                    />
+                  </FormField>
+                ) : null}
+              </div>
+            ) : null}
+            {showDirectoryFields ? (
+              <>
+                <FormField label={labels.fields.yfId} error={errors.yfId?.message}>
+                  <Input {...register("yfId")} />
+                </FormField>
+                <FormField label={labels.fields.points} error={errors.points?.message}>
+                  <Input type="number" min={0} step={1} {...register("points")} />
+                </FormField>
+                <FormField label={labels.fields.ageYears}>
+                  <Input
+                    value={ageYears ?? ""}
+                    readOnly
+                    disabled
+                    aria-readonly
+                    className="cursor-default bg-muted text-foreground disabled:opacity-100"
+                  />
+                </FormField>
+                <Controller
+                  control={control}
+                  name="isTrophy"
+                  render={({ field }) => (
+                    <label className="flex items-center gap-2 text-sm sm:col-span-2">
+                      <Checkbox
+                        checked={Boolean(field.value)}
+                        onCheckedChange={(checked) => field.onChange(checked === true)}
+                      />
+                      {labels.fields.isTrophy}
+                    </label>
+                  )}
+                />
               </>
             ) : null}
           </div>
@@ -248,11 +371,9 @@ export function PersonFields({
           <GeoFields
             value={geoValue}
             onChange={(next) => {
-              setValue("country", next.country);
-              setValue("region", next.region);
-              setValue("division", next.division);
-              setValue("subDivision", next.subDivision);
-              setValue("town", next.town);
+              (Object.keys(next) as Array<keyof typeof next>).forEach((key) => {
+                setValue(key, next[key], { shouldValidate: requireComplete });
+              });
             }}
             labels={{
               region: labels.fields.region,
@@ -260,9 +381,32 @@ export function PersonFields({
               subDivision: labels.fields.subDivision,
               town: labels.fields.town,
             }}
+            required={
+              requireComplete
+                ? {
+                    region: true,
+                    division: true,
+                    subDivision: true,
+                    town: true,
+                  }
+                : undefined
+            }
           />
-          <FormField label={labels.fields.address}>
-            <Input {...register("address")} />
+          {requireComplete
+            ? PROFILE_GEO_FIELDS.map((name) => (
+                <input
+                  key={name}
+                  type="hidden"
+                  {...register(name, requiredIfComplete(true))}
+                />
+              ))
+            : null}
+          <FormField
+            label={labels.fields.address}
+            error={errors.address?.message}
+            required={requireComplete}
+          >
+            <Input {...register("address", requiredIfComplete(requireComplete))} />
           </FormField>
         </FormSection>
       </StepBlock>
@@ -272,7 +416,7 @@ export function PersonFields({
         keepMounted={keepMounted}
         direction={direction}
       >
-        <FormSection title={copy.guardians} description={copy.guardiansHint}>
+        <FormSection title={copy.guardians}>
           <div className="flex flex-col gap-4">
             {fields.map((field, index) => (
               <div key={field.id} className="flex flex-col gap-2">
@@ -283,25 +427,30 @@ export function PersonFields({
                     "Guardian {{n}}",
                   )}
                 </p>
-                <div className="grid items-end gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+                <div className="grid min-w-0 items-end gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
                   <FormField
                     label={labels.fields.parentGuardianName}
                     error={errors.guardians?.[index]?.name?.message}
+                    required={requireComplete && index === 0}
                   >
                     <Input
-                      {...register(`guardians.${index}.name` as const)}
+                      {...register(`guardians.${index}.name` as const, {
+                        ...requiredIfComplete(requireComplete && index === 0),
+                      })}
                       placeholder={copy.guardianNamePlaceholder}
                     />
                   </FormField>
                   <Controller
                     control={control}
                     name={`guardians.${index}.phone`}
+                    rules={requiredIfComplete(requireComplete && index === 0)}
                     render={({ field: phoneField }) => (
                       <PhoneField
                         label={labels.fields.parentGuardianPhone}
                         value={phoneField.value ?? ""}
                         onChange={phoneField.onChange}
                         error={errors.guardians?.[index]?.phone?.message}
+                        required={requireComplete && index === 0}
                       />
                     )}
                   />
@@ -342,16 +491,32 @@ export function PersonFields({
         direction={direction}
       >
         <FormSection title={copy.church}>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label={labels.fields.churchName}>
-              <Input {...register("churchName")} />
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+            <FormField
+              label={labels.fields.churchName}
+              error={errors.churchName?.message}
+              required={requireComplete}
+            >
+              <Input {...register("churchName", requiredIfComplete(requireComplete))} />
             </FormField>
-            <FormField label={labels.fields.churchPastorName}>
-              <Input {...register("churchPastorName")} />
+            <FormField
+              label={labels.fields.churchPastorName}
+              error={errors.churchPastorName?.message}
+              required={requireComplete}
+            >
+              <Input
+                {...register("churchPastorName", requiredIfComplete(requireComplete))}
+              />
             </FormField>
             <div className="sm:col-span-2">
-              <FormField label={labels.fields.churchAddress}>
-                <Input {...register("churchAddress")} />
+              <FormField
+                label={labels.fields.churchAddress}
+                error={errors.churchAddress?.message}
+                required={requireComplete}
+              >
+                <Input
+                  {...register("churchAddress", requiredIfComplete(requireComplete))}
+                />
               </FormField>
             </div>
           </div>

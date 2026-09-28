@@ -20,9 +20,11 @@ const bitter = Bitter({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#182356",
+  themeColor: "#2a4078",
   width: "device-width",
   initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
@@ -38,7 +40,6 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
       { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
@@ -51,7 +52,7 @@ export const metadata: Metadata = {
     shortcut: ["/favicon.ico"],
   },
   other: {
-    "msapplication-TileColor": "#182356",
+    "msapplication-TileColor": "#2a4078",
     "msapplication-config": "/browserconfig.xml",
     "mobile-web-app-capable": "yes",
   },

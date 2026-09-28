@@ -4,6 +4,7 @@ import {
   type CreationOptional,
   type InferAttributes,
   type InferCreationAttributes,
+  type NonAttribute,
   type Sequelize,
 } from "sequelize";
 
@@ -11,6 +12,7 @@ import type {
   EventMembershipKind,
   InvitationBatchStatus,
 } from "@/constants/event-participation";
+import type { Event } from "./event";
 import {
   EVENT_MEMBERSHIP_KINDS,
   INVITATION_BATCH_STATUSES,
@@ -28,7 +30,9 @@ export class InvitationBatch extends Model<
   declare body: string;
   declare sentById: string;
   declare status: InvitationBatchStatus;
+  declare linksOpen: CreationOptional<boolean>;
   declare sentAt: CreationOptional<Date | null>;
+  declare event?: NonAttribute<Event>;
 }
 
 export function initInvitationBatch(sequelize: Sequelize) {
@@ -67,6 +71,11 @@ export function initInvitationBatch(sequelize: Sequelize) {
         type: DataTypes.STRING(20),
         allowNull: false,
         defaultValue: INVITATION_BATCH_STATUSES.DRAFT,
+      },
+      linksOpen: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
       },
       sentAt: {
         type: DataTypes.DATE,

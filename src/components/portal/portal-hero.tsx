@@ -6,10 +6,34 @@ import { PageBackButton } from "@/components/shared/navigation/page-back-button"
 import { PORTAL_TONES, type PortalTone } from "@/components/portal/portal-tone";
 import { cn } from "@/lib/utils";
 
+type PortalStatAccent = "glass" | "ivory" | "gold";
+
 type PortalStat = {
   label: string;
   shortLabel?: string;
   value: string | number;
+  accent?: PortalStatAccent;
+};
+
+const STAT_ACCENTS: Record<
+  PortalStatAccent,
+  { card: string; label: string; value: string }
+> = {
+  glass: {
+    card: "bg-white/12 backdrop-blur-sm",
+    label: "text-white/70",
+    value: "text-white",
+  },
+  ivory: {
+    card: "bg-white shadow-[0_8px_20px_rgba(24,35,86,0.18)]",
+    label: "text-[#466d6b]",
+    value: "text-[#182356]",
+  },
+  gold: {
+    card: "bg-[#f59f21] shadow-[0_8px_20px_rgba(24,35,86,0.18)]",
+    label: "text-[#182356]/70",
+    value: "text-[#182356]",
+  },
 };
 
 export function PortalHero({
@@ -20,6 +44,7 @@ export function PortalHero({
   eyebrow,
   stats,
   showBack = false,
+  backHref,
 }: {
   title: string;
   description?: string;
@@ -28,6 +53,7 @@ export function PortalHero({
   eyebrow?: string;
   stats?: PortalStat[];
   showBack?: boolean;
+  backHref?: string;
 }) {
   if (!tone) {
     return (
@@ -35,7 +61,10 @@ export function PortalHero({
         <div className="flex max-w-2xl flex-col gap-2">
           <div className="flex min-w-0 items-center gap-2">
             {showBack ? (
-              <PageBackButton className="text-foreground hover:bg-muted" />
+              <PageBackButton
+                href={backHref}
+                className="text-foreground hover:bg-muted"
+              />
             ) : null}
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               {title}
@@ -75,7 +104,10 @@ export function PortalHero({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="flex min-w-0 items-start gap-3 sm:gap-4">
             {showBack ? (
-              <PageBackButton className="mt-0.5 text-white hover:bg-white/15 hover:text-white" />
+              <PageBackButton
+                href={backHref}
+                className="mt-0.5 text-white hover:bg-white/15 hover:text-white"
+              />
             ) : null}
             <span
               className={cn(
@@ -114,23 +146,48 @@ export function PortalHero({
               stats.length === 1 && "max-w-full sm:max-w-xs",
               stats.length === 2 && "grid-cols-2",
               stats.length === 3 && "grid-cols-3",
-              stats.length >= 4 && "grid-cols-2 sm:grid-cols-4"
+              stats.length === 4 && "grid-cols-2 sm:grid-cols-4",
+              stats.length >= 5 && "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
             )}
           >
-            {stats.map((stat) => (
-              <div
-                key={stat.label}
-                className="min-w-0 rounded-xl bg-white/12 px-2 py-2 text-center backdrop-blur-sm sm:px-4 sm:py-3 sm:text-left"
-              >
-                <p className="text-[10px] font-medium uppercase leading-tight tracking-wide text-white/70 sm:text-xs">
-                  <span className="sm:hidden">{stat.shortLabel ?? stat.label}</span>
-                  <span className="hidden sm:inline">{stat.label}</span>
-                </p>
-                <p className="mt-0.5 text-lg font-semibold tabular-nums sm:mt-1 sm:text-2xl">
-                  {stat.value}
-                </p>
-              </div>
-            ))}
+            {stats.map((stat) => {
+              const accent = STAT_ACCENTS[stat.accent ?? "glass"];
+              const bold = stat.accent === "ivory" || stat.accent === "gold";
+              return (
+                <div
+                  key={stat.label}
+                  className={cn(
+                    "min-w-0 rounded-xl text-center sm:text-left",
+                    bold ? "px-3 py-3 sm:px-5 sm:py-4" : "px-2 py-2 sm:px-4 sm:py-3",
+                    accent.card,
+                  )}
+                >
+                  <p
+                    className={cn(
+                      "font-medium uppercase leading-tight tracking-wide",
+                      bold
+                        ? "text-[10px] font-semibold tracking-[0.14em] sm:text-xs"
+                        : "text-[10px] sm:text-xs",
+                      accent.label,
+                    )}
+                  >
+                    <span className="sm:hidden">{stat.shortLabel ?? stat.label}</span>
+                    <span className="hidden sm:inline">{stat.label}</span>
+                  </p>
+                  <p
+                    className={cn(
+                      "tabular-nums",
+                      bold
+                        ? "mt-1 text-2xl font-bold tracking-tight sm:text-3xl"
+                        : "mt-0.5 text-lg font-semibold sm:mt-1 sm:text-2xl",
+                      accent.value,
+                    )}
+                  >
+                    {stat.value}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         ) : null}
       </div>

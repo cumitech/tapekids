@@ -9,9 +9,10 @@ import type { Event } from "@/models/events/event.model";
 type EventSelectProps = {
   value: string;
   onChange: (value: string) => void;
+  required?: boolean;
 };
 
-export function EventSelect({ value, onChange }: EventSelectProps) {
+export function EventSelect({ value, onChange, required }: EventSelectProps) {
   const translate = useTranslate();
   const { query } = useList<Event>({
     resource: "events",
@@ -48,6 +49,7 @@ export function EventSelect({ value, onChange }: EventSelectProps) {
       onChange={onChange}
       placeholder={translate("mailingLists.selectEvent")}
       options={options}
+      required={required}
     />
   );
 }

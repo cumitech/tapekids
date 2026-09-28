@@ -3,13 +3,18 @@
 import { createElement, useMemo } from "react";
 import {
   CalendarDays,
+  FileSpreadsheet,
+  HandCoins,
   HeartHandshake,
   LayoutDashboard,
   Mail,
   ScrollText,
+  Settings,
   Tent,
   UserRound,
   Users,
+  Wallet,
+  ClipboardList,
 } from "lucide-react";
 import type { ResourceProps } from "@refinedev/core";
 import { useTranslate } from "@refinedev/core";
@@ -38,12 +43,19 @@ export function useRefineResources(): ResourceProps[] {
       {
         name: "people",
         list: "/dashboard/people",
-        create: "/dashboard/people/create",
         edit: "/dashboard/people/edit/:id",
         show: "/dashboard/people/show/:id",
         meta: {
           label: translate(`${resourceI18nKey("people")}.titles.list`),
           icon: createElement(Users, ICON),
+        },
+      },
+      {
+        name: "waiting-list",
+        list: "/dashboard/waiting-list",
+        meta: {
+          label: translate(`${resourceI18nKey("waiting-list")}.titles.list`),
+          icon: createElement(ClipboardList, ICON),
         },
       },
       {
@@ -69,11 +81,43 @@ export function useRefineResources(): ResourceProps[] {
         },
       },
       {
+        name: "sponsors",
+        list: "/dashboard/sponsors",
+        meta: {
+          label: translate(`${resourceI18nKey("sponsors")}.titles.list`),
+          icon: createElement(HandCoins, ICON),
+        },
+      },
+      {
+        name: "payments",
+        list: "/dashboard/payments",
+        meta: {
+          label: translate(`${resourceI18nKey("payments")}.titles.list`),
+          icon: createElement(Wallet, ICON),
+        },
+      },
+      {
+        name: "reports",
+        list: "/dashboard/reports",
+        meta: {
+          label: translate(`${resourceI18nKey("reports")}.titles.list`),
+          icon: createElement(FileSpreadsheet, ICON),
+        },
+      },
+      {
         name: "audit-logs",
         list: "/dashboard/audit-logs",
         meta: {
           label: translate(`${resourceI18nKey("audit-logs")}.titles.list`),
           icon: createElement(ScrollText, ICON),
+        },
+      },
+      {
+        name: "app-settings",
+        list: "/dashboard/app-settings",
+        meta: {
+          label: translate(`${resourceI18nKey("app-settings")}.titles.list`),
+          icon: createElement(Settings, ICON),
         },
       },
       {

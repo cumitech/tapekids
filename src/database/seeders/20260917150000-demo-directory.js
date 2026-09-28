@@ -1,20 +1,17 @@
 "use strict";
 
-const { customAlphabet } = require("nanoid");
 const {
   SEED_LOGINS,
   upsertSeedLogins,
 } = require("../seed-accounts");
 const { EVENT_COPY } = require("../seed-event-copy");
+const { recordId, tokenId } = require("../seed-id");
 
-const nanoid = customAlphabet(
-  "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-  48
-);
-const translationId = customAlphabet(
-  "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-  20
-);
+const SEED_EVENT_SLUGS = [
+  "yaounde-christmas-camp-2026",
+  "douala-sports-saturday-2026",
+  "bamenda-easter-retreat-2027",
+];
 
 function translationRows(now, entityType, entityId, byLocale) {
   const rows = [];
@@ -25,7 +22,7 @@ function translationRows(now, entityType, entityId, byLocale) {
       }
       rows.push(
         stamp(now, {
-          id: translationId(),
+          id: recordId(),
           entityType,
           entityId,
           locale,
@@ -39,16 +36,23 @@ function translationRows(now, entityType, entityId, byLocale) {
 }
 
 async function clearSeed(queryInterface) {
+  const slugList = SEED_EVENT_SLUGS.map((slug) =>
+    queryInterface.sequelize.escape(slug)
+  ).join(", ");
+  const seedEventIds = `(SELECT id FROM events WHERE slug IN (${slugList}) OR id LIKE 'sd%')`;
+
   const statements = [
     "SET FOREIGN_KEY_CHECKS = 0",
-    "DELETE FROM payments WHERE id LIKE 'sd%'",
+    `DELETE FROM payments WHERE eventId IN ${seedEventIds} OR id LIKE 'sd%'`,
+    `DELETE FROM invitations WHERE eventId IN ${seedEventIds} OR id LIKE 'sd%'`,
+    `DELETE FROM invitation_batches WHERE eventId IN ${seedEventIds} OR id LIKE 'sd%'`,
+    `DELETE FROM event_memberships WHERE eventId IN ${seedEventIds} OR id LIKE 'sd%'`,
+    `DELETE FROM content_translations WHERE entityType = 'event' AND entityId IN ${seedEventIds}`,
+    `DELETE FROM audit_logs WHERE entity = 'events' AND entityId IN ${seedEventIds}`,
     "DELETE FROM content_translations WHERE entityId LIKE 'sd%'",
-    "DELETE FROM invitations WHERE id LIKE 'sd%'",
-    "DELETE FROM invitation_batches WHERE id LIKE 'sd%'",
     "DELETE FROM mailing_list_members WHERE id LIKE 'sd%'",
     "DELETE FROM mailing_lists WHERE id LIKE 'sd%'",
-    "DELETE FROM event_memberships WHERE id LIKE 'sd%'",
-    "DELETE FROM events WHERE id LIKE 'sd%'",
+    `DELETE FROM events WHERE slug IN (${slugList}) OR id LIKE 'sd%'`,
     "DELETE FROM audit_logs WHERE id LIKE 'sd%'",
     "DELETE FROM users WHERE id LIKE 'sd%'",
     "DELETE FROM users WHERE email IN ('superadmin@seed.kidsevent.cm','admin@seed.kidsevent.cm','staff@seed.kidsevent.cm','guest@seed.kidsevent.cm')",
@@ -74,12 +78,17 @@ module.exports = {
     const now = new Date();
     const sentAt = new Date("2026-09-01T10:00:00.000Z");
     const acceptedAt = new Date("2026-09-08T14:20:00.000Z");
+    const eventIds = {
+      sdevent001: recordId(),
+      sdevent002: recordId(),
+      sdevent003: recordId(),
+    };
 
     const people = [
       stamp(now, {
         id: "sdperson01",
-        firstName: "Marie",
-        lastName: "Ngu",
+        fullName: "Marie Ngu",
+        category: "trophy_camper",
         email: "marie.ngu@seed.kidsevent.cm",
         phone: "677201101",
         dateOfBirth: "1988-04-12",
@@ -93,8 +102,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdperson02",
-        firstName: "Paul",
-        lastName: "Tchinda",
+        fullName: "Paul Tchinda",
+        category: "trophy_camper",
         email: "paul.tchinda@seed.kidsevent.cm",
         phone: "699334455",
         dateOfBirth: "1985-11-03",
@@ -108,8 +117,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdperson03",
-        firstName: "Esther",
-        lastName: "Fon",
+        fullName: "Esther Fon",
+        category: "trophy_camper",
         email: "esther.fon@seed.kidsevent.cm",
         phone: "675889900",
         dateOfBirth: "1992-07-19",
@@ -123,8 +132,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdperson04",
-        firstName: "Jean-Pierre",
-        lastName: "Mbarga",
+        fullName: "Jean-Pierre Mbarga",
+        category: "trophy_camper",
         email: "jp.mbarga@seed.kidsevent.cm",
         phone: "670112244",
         dateOfBirth: "1990-01-28",
@@ -138,8 +147,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdperson05",
-        firstName: "Grace",
-        lastName: "Atangana",
+        fullName: "Grace Atangana",
+        category: "trophy_camper",
         email: "grace.atangana@seed.kidsevent.cm",
         phone: "655778899",
         dateOfBirth: "1978-09-09",
@@ -153,8 +162,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdperson06",
-        firstName: "Samuel",
-        lastName: "Ewane",
+        fullName: "Samuel Ewane",
+        category: "trophy_camper",
         email: "samuel.ewane@seed.kidsevent.cm",
         phone: "694556677",
         dateOfBirth: "1975-02-14",
@@ -168,8 +177,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdperson07",
-        firstName: "Amina",
-        lastName: "Ngo",
+        fullName: "Amina Ngo",
+        category: "trophy_camper",
         email: "amina.ngo@seed.kidsevent.cm",
         phone: "671223344",
         dateOfBirth: "2014-03-22",
@@ -183,8 +192,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdperson08",
-        firstName: "Daniel",
-        lastName: "Fokou",
+        fullName: "Daniel Fokou",
+        category: "trophy_camper",
         email: "daniel.fokou@seed.kidsevent.cm",
         phone: "673445566",
         dateOfBirth: "2013-08-05",
@@ -198,8 +207,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdperson09",
-        firstName: "Blessing",
-        lastName: "Nyong",
+        fullName: "Blessing Nyong",
+        category: "trophy_camper",
         email: "blessing.nyong@seed.kidsevent.cm",
         phone: "676778899",
         dateOfBirth: "2015-12-11",
@@ -213,8 +222,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdperson10",
-        firstName: "Joel",
-        lastName: "Kameni",
+        fullName: "Joel Kameni",
+        category: "trophy_camper",
         email: "joel.kameni@seed.kidsevent.cm",
         phone: "680334455",
         dateOfBirth: "2012-06-30",
@@ -228,8 +237,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdperson11",
-        firstName: "Sarah",
-        lastName: "Mbe",
+        fullName: "Sarah Mbe",
+        category: "trophy_camper",
         email: "sarah.mbe@seed.kidsevent.cm",
         phone: "681223355",
         dateOfBirth: "2016-01-18",
@@ -243,8 +252,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdperson12",
-        firstName: "Emmanuel",
-        lastName: "Tabe",
+        fullName: "Emmanuel Tabe",
+        category: "trophy_camper",
         email: "emmanuel.tabe@seed.kidsevent.cm",
         phone: "682990011",
         dateOfBirth: "2011-10-02",
@@ -307,11 +316,10 @@ module.exports = {
 
     const logins = await upsertSeedLogins(queryInterface);
     const adminId = logins.admin.id;
-    const staffId = logins.staff.id;
 
     await queryInterface.bulkInsert("events", [
       stamp(now, {
-        id: "sdevent001",
+        id: eventIds.sdevent001,
         title: EVENT_COPY.sdevent001.en.title,
         slug: "yaounde-christmas-camp-2026",
         summary: EVENT_COPY.sdevent001.en.summary,
@@ -330,7 +338,7 @@ module.exports = {
         createdById: adminId,
       }),
       stamp(now, {
-        id: "sdevent002",
+        id: eventIds.sdevent002,
         title: EVENT_COPY.sdevent002.en.title,
         slug: "douala-sports-saturday-2026",
         summary: EVENT_COPY.sdevent002.en.summary,
@@ -349,7 +357,7 @@ module.exports = {
         createdById: adminId,
       }),
       stamp(now, {
-        id: "sdevent003",
+        id: eventIds.sdevent003,
         title: EVENT_COPY.sdevent003.en.title,
         slug: "bamenda-easter-retreat-2027",
         summary: EVENT_COPY.sdevent003.en.summary,
@@ -389,7 +397,7 @@ module.exports = {
         name: "Yaoundé church families",
         description: "Mixed list of campers, parents who sponsor, and coordinators in Centre.",
         audienceKind: "mixed",
-        createdById: staffId,
+        createdById: adminId,
       }),
     ]);
 
@@ -410,98 +418,98 @@ module.exports = {
     await queryInterface.bulkInsert("event_memberships", [
       stamp(now, {
         id: "sdmem00001",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson07",
         kind: "camper",
         status: "registered",
       }),
       stamp(now, {
         id: "sdmem00002",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson08",
         kind: "camper",
         status: "registered",
       }),
       stamp(now, {
         id: "sdmem00003",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson09",
         kind: "camper",
         status: "invited",
       }),
       stamp(now, {
         id: "sdmem00004",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson10",
         kind: "camper",
         status: "invited",
       }),
       stamp(now, {
         id: "sdmem00005",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson11",
         kind: "camper",
         status: "cancelled",
       }),
       stamp(now, {
         id: "sdmem00006",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson03",
         kind: "coordinator",
         status: "registered",
       }),
       stamp(now, {
         id: "sdmem00007",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson04",
         kind: "coordinator",
         status: "invited",
       }),
       stamp(now, {
         id: "sdmem00008",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson05",
         kind: "sponsor",
         status: "registered",
       }),
       stamp(now, {
         id: "sdmem00009",
-        eventId: "sdevent002",
+        eventId: eventIds.sdevent002,
         personId: "sdperson08",
         kind: "camper",
         status: "registered",
       }),
       stamp(now, {
         id: "sdmem00010",
-        eventId: "sdevent002",
+        eventId: eventIds.sdevent002,
         personId: "sdperson12",
         kind: "camper",
         status: "registered",
       }),
       stamp(now, {
         id: "sdmem00011",
-        eventId: "sdevent002",
+        eventId: eventIds.sdevent002,
         personId: "sdperson02",
         kind: "coordinator",
         status: "registered",
       }),
       stamp(now, {
         id: "sdmem00012",
-        eventId: "sdevent002",
+        eventId: eventIds.sdevent002,
         personId: "sdperson06",
         kind: "sponsor",
         status: "registered",
       }),
       stamp(now, {
         id: "sdmem00013",
-        eventId: "sdevent003",
+        eventId: eventIds.sdevent003,
         personId: "sdperson10",
         kind: "camper",
         status: "invited",
       }),
       stamp(now, {
         id: "sdmem00014",
-        eventId: "sdevent003",
+        eventId: eventIds.sdevent003,
         personId: "sdperson03",
         kind: "coordinator",
         status: "invited",
@@ -511,7 +519,7 @@ module.exports = {
     await queryInterface.bulkInsert("invitation_batches", [
       stamp(now, {
         id: "sdbatch001",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         mailingListId: "sdlist0001",
         kind: "camper",
         subject: "You are invited to Yaoundé Christmas Camp 2026",
@@ -522,7 +530,7 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdbatch002",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         mailingListId: "sdlist0002",
         kind: "coordinator",
         subject: "Coordinator briefing: Christmas Camp",
@@ -533,27 +541,27 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdbatch003",
-        eventId: "sdevent003",
+        eventId: eventIds.sdevent003,
         mailingListId: null,
         kind: "camper",
         subject: "Draft: Bamenda Easter Retreat",
         body: "This batch is still a draft. Do not send until the programme is published.",
-        sentById: staffId,
+        sentById: adminId,
         status: "draft",
         sentAt: null,
       }),
     ]);
 
     await queryInterface.bulkInsert("content_translations", [
-      ...translationRows(now, "event", "sdevent001", {
+      ...translationRows(now, "event", eventIds.sdevent001, {
         en: EVENT_COPY.sdevent001.en,
         fr: EVENT_COPY.sdevent001.fr,
       }),
-      ...translationRows(now, "event", "sdevent002", {
+      ...translationRows(now, "event", eventIds.sdevent002, {
         en: EVENT_COPY.sdevent002.en,
         fr: EVENT_COPY.sdevent002.fr,
       }),
-      ...translationRows(now, "event", "sdevent003", {
+      ...translationRows(now, "event", eventIds.sdevent003, {
         en: EVENT_COPY.sdevent003.en,
         fr: EVENT_COPY.sdevent003.fr,
       }),
@@ -625,10 +633,10 @@ module.exports = {
       stamp(now, {
         id: "sdinvite01",
         batchId: "sdbatch001",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson07",
         kind: "camper",
-        token: nanoid(),
+        token: tokenId(),
         emailSnapshot: "amina.ngo@seed.kidsevent.cm",
         status: "accepted",
         sentAt,
@@ -638,10 +646,10 @@ module.exports = {
       stamp(now, {
         id: "sdinvite02",
         batchId: "sdbatch001",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson08",
         kind: "camper",
-        token: nanoid(),
+        token: tokenId(),
         emailSnapshot: "daniel.fokou@seed.kidsevent.cm",
         status: "accepted",
         sentAt,
@@ -651,10 +659,10 @@ module.exports = {
       stamp(now, {
         id: "sdinvite03",
         batchId: "sdbatch001",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson09",
         kind: "camper",
-        token: nanoid(),
+        token: tokenId(),
         emailSnapshot: "blessing.nyong@seed.kidsevent.cm",
         status: "sent",
         sentAt,
@@ -664,10 +672,10 @@ module.exports = {
       stamp(now, {
         id: "sdinvite04",
         batchId: "sdbatch001",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson10",
         kind: "camper",
-        token: nanoid(),
+        token: tokenId(),
         emailSnapshot: "joel.kameni@seed.kidsevent.cm",
         status: "sent",
         sentAt,
@@ -677,10 +685,10 @@ module.exports = {
       stamp(now, {
         id: "sdinvite05",
         batchId: "sdbatch001",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson11",
         kind: "camper",
-        token: nanoid(),
+        token: tokenId(),
         emailSnapshot: "sarah.mbe@seed.kidsevent.cm",
         status: "expired",
         sentAt,
@@ -690,10 +698,10 @@ module.exports = {
       stamp(now, {
         id: "sdinvite06",
         batchId: "sdbatch002",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson03",
         kind: "coordinator",
-        token: nanoid(),
+        token: tokenId(),
         emailSnapshot: "esther.fon@seed.kidsevent.cm",
         status: "accepted",
         sentAt,
@@ -703,10 +711,10 @@ module.exports = {
       stamp(now, {
         id: "sdinvite07",
         batchId: "sdbatch002",
-        eventId: "sdevent001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson04",
         kind: "coordinator",
-        token: nanoid(),
+        token: tokenId(),
         emailSnapshot: "jp.mbarga@seed.kidsevent.cm",
         status: "queued",
         sentAt: null,
@@ -716,10 +724,10 @@ module.exports = {
       stamp(now, {
         id: "sdinvite08",
         batchId: "sdbatch003",
-        eventId: "sdevent003",
+        eventId: eventIds.sdevent003,
         personId: "sdperson10",
         kind: "camper",
-        token: nanoid(),
+        token: tokenId(),
         emailSnapshot: "joel.kameni@seed.kidsevent.cm",
         status: "queued",
         sentAt: null,
@@ -731,7 +739,8 @@ module.exports = {
     await queryInterface.bulkInsert("payments", [
       stamp(now, {
         id: "sdpay00001",
-        eventId: "sdevent001",
+        trackingId: "PAYDEMO0001",
+        eventId: eventIds.sdevent001,
         personId: "sdperson07",
         kind: "participant_fee",
         amount: "15000.00",
@@ -741,7 +750,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdpay00002",
-        eventId: "sdevent001",
+        trackingId: "PAYDEMO0002",
+        eventId: eventIds.sdevent001,
         personId: "sdperson08",
         kind: "participant_fee",
         amount: "15000.00",
@@ -751,7 +761,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdpay00003",
-        eventId: "sdevent001",
+        trackingId: "PAYDEMO0003",
+        eventId: eventIds.sdevent001,
         personId: "sdperson09",
         kind: "participant_fee",
         amount: "15000.00",
@@ -761,7 +772,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdpay00004",
-        eventId: "sdevent001",
+        trackingId: "PAYDEMO0004",
+        eventId: eventIds.sdevent001,
         personId: "sdperson11",
         kind: "participant_fee",
         amount: "15000.00",
@@ -771,7 +783,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdpay00005",
-        eventId: "sdevent001",
+        trackingId: "PAYDEMO0005",
+        eventId: eventIds.sdevent001,
         personId: "sdperson05",
         kind: "sponsor_fund",
         amount: "100000.00",
@@ -781,7 +794,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdpay00006",
-        eventId: "sdevent001",
+        trackingId: "PAYDEMO0006",
+        eventId: eventIds.sdevent001,
         personId: "sdperson03",
         kind: "coordinator_fund",
         amount: "50000.00",
@@ -791,7 +805,8 @@ module.exports = {
       }),
       stamp(now, {
         id: "sdpay00007",
-        eventId: "sdevent002",
+        trackingId: "PAYDEMO0007",
+        eventId: eventIds.sdevent002,
         personId: "sdperson06",
         kind: "sponsor_fund",
         amount: "25000.00",
@@ -807,7 +822,7 @@ module.exports = {
         actorId: adminId,
         action: "create",
         entity: "events",
-        entityId: "sdevent001",
+        entityId: eventIds.sdevent001,
         changes: JSON.stringify({ title: "Yaoundé Christmas Camp 2026" }),
         metadata: JSON.stringify({ source: "seed" }),
         createdAt: now,

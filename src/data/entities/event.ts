@@ -27,6 +27,9 @@ export class Event extends Model<
   declare coordinatorFundAmount: CreationOptional<string | null>;
   declare sponsorFundAmount: CreationOptional<string | null>;
   declare imageUrl: CreationOptional<string | null>;
+  declare eventType: CreationOptional<string>;
+  declare minAge: CreationOptional<number | null>;
+  declare maxAge: CreationOptional<number | null>;
   declare createdById: string;
 }
 
@@ -99,6 +102,19 @@ export function initEvent(sequelize: Sequelize) {
       },
       imageUrl: {
         type: DataTypes.STRING(1024),
+        allowNull: true,
+      },
+      eventType: {
+        type: DataTypes.STRING(32),
+        allowNull: false,
+        defaultValue: "camp",
+      },
+      minAge: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      maxAge: {
+        type: DataTypes.INTEGER,
         allowNull: true,
       },
       createdById: {

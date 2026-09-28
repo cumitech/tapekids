@@ -6,22 +6,19 @@ import {
   type ContentEntityType,
   type TranslationsByLocale,
 } from "@/constants/content-i18n";
-import { DEFAULT_LOCALE, LOCALES, type AppLocale } from "@/constants/locales";
+import { LOCALES, type AppLocale } from "@/constants/locales";
 import { ContentTranslation } from "@/data/entities";
 import { nanoid } from "@/lib/api/id";
-import { isEmptyHtml } from "@/lib/html";
+import {
+  isFilledContentField,
+  isHtmlContentField,
+  pickTranslatedField,
+} from "@/lib/content-i18n/pick";
 
 export type LocalizedRecord<T> = T & {
   locale: AppLocale;
   translations?: Record<AppLocale, Record<string, string>>;
 };
-
-function isFilled(field: string, value: string) {
-  if (field === "description" || field === "body") {
-    return !isEmptyHtml(value);
-  }
-  return value.trim().length > 0;
-}
 
 function asPlain<T>(record: T): T {
   const maybe = record as { toJSON?: () => T };
@@ -61,7 +58,7 @@ export class ContentTranslationRepository {
       const copy = translations[locale] ?? {};
       for (const field of fields) {
         const value = copy[field];
-        if (typeof value !== "string" || !isFilled(field, value)) {
+        if (!isFilledContentField(field, value)) {
           continue;
         }
         rows.push({
@@ -70,7 +67,7 @@ export class ContentTranslationRepository {
           entityId,
           locale,
           field,
-          value: field === "description" || field === "body" ? value : value.trim(),
+          value: isHtmlContentField(field) ? value : value.trim(),
         });
       }
     }
@@ -119,13 +116,11 @@ export class ContentTranslationRepository {
       const translations = byEntity.get(record.id) ?? emptyTranslations();
 
       for (const field of fields) {
-        const fromLocale = translations[locale]?.[field];
-        const fromDefault = translations[DEFAULT_LOCALE]?.[field];
         const fromParent = resolved[field];
         resolved[field] =
-          (fromLocale && isFilled(field, fromLocale) ? fromLocale : undefined) ??
-          (fromDefault && isFilled(field, fromDefault) ? fromDefault : undefined) ??
-          fromParent;
+          pickTranslatedField(translations, field, fromParent, {
+            prefer: locale,
+          }) || fromParent;
       }
 
       return {
@@ -142,7 +137,9 @@ export class ContentTranslationRepository {
     entityType: ContentEntityType
   ) {
     const fields = CONTENT_FIELDS[entityType];
-    const byId = new Map(localized.map((item) => [item.id, item as Record<string, unknown>]));
+    const byId = new Map(
+      localized.map((item) => [item.id, item as Record<string, unknown>])
+    );
     for (const record of records) {
       if (!record) {
         continue;

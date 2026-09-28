@@ -5,10 +5,12 @@ import { Loader2 } from "lucide-react";
 import { useState, useRef } from "react";
 
 import { EventSelect } from "@/components/events/event-select";
+import { FormField } from "@/components/shared/form/form-field";
 import { LabeledSelect } from "@/components/shared/form/labeled-select";
 import { PhoneField } from "@/components/shared/form/phone-field";
 import { MembershipKindSelect } from "@/components/shared/form/membership-kind-select";
 import { Button } from "@/components/shared/ui/button";
+import { Input } from "@/components/shared/ui/input";
 import {
   EVENT_MEMBERSHIP_KINDS,
   PAYMENT_STATUSES,
@@ -25,10 +27,14 @@ import { PAYMENT_METHODS, type PaymentMethod } from "@/lib/payments/charge";
 
 type PaymentCheckoutProps = {
   personId: string;
+  accountName?: string | null;
   defaultPhone?: string | null;
+  currency?: string | null;
   eventId?: string;
   kind?: EventMembershipKind;
   lockSelection?: boolean;
+  allowAmount?: boolean;
+  minAmount?: number;
   hideTitle?: boolean;
   endpoint?: string;
   redirectPath?: string;
@@ -37,7 +43,7 @@ type PaymentCheckoutProps = {
 };
 
 type ChargeResult = {
-  payment?: { id: string; status: string };
+  payment?: { id: string; status: string; trackingId?: string };
   ussdCode?: string;
   link?: string;
   waived?: boolean;
@@ -46,10 +52,14 @@ type ChargeResult = {
 
 export function PaymentCheckout({
   personId,
+  accountName,
   defaultPhone,
+  currency,
   eventId: eventIdProp,
   kind: kindProp,
   lockSelection = false,
+  allowAmount = false,
+  minAmount,
   hideTitle = false,
   endpoint = "/payments",
   redirectPath,
@@ -67,9 +77,15 @@ export function PaymentCheckout({
   );
   const [method, setMethod] = useState<PaymentMethod>(PAYMENT_METHODS.MOMO);
   const [phone, setPhone] = useState(defaultPhone ?? "");
+  const [amount, setAmount] = useState("");
   const [result, setResult] = useState<ChargeResult | null>(null);
   const [watching, setWatching] = useState(false);
   const refreshBase = endpoint === "/me/payments" ? "/me/payments" : "/payments";
+  const parsedAmount = Number(amount);
+  const amountFloor = minAmount ?? 1;
+  const amountReady =
+    !allowAmount ||
+    (Number.isInteger(parsedAmount) && parsedAmount >= amountFloor);
 
   const finishIfSettled = (status: string) => {
     if (settledRef.current) {
@@ -122,7 +138,7 @@ export function PaymentCheckout({
       )}
       {lockSelection ? null : (
         <>
-          <EventSelect value={eventId} onChange={setEventId} />
+          <EventSelect value={eventId} onChange={setEventId} required />
           <MembershipKindSelect
             label={translate("payments.kind")}
             value={kind}
@@ -130,6 +146,11 @@ export function PaymentCheckout({
           />
         </>
       )}
+      {allowAmount ? (
+        <FormField label={translate("payments.username")}>
+          <Input value={accountName ?? ""} readOnly disabled className="bg-muted text-foreground disabled:opacity-100" />
+        </FormField>
+      ) : null}
       <LabeledSelect
         label={translate("payments.method")}
         value={method}
@@ -145,10 +166,35 @@ export function PaymentCheckout({
         onChange={setPhone}
         required={method === PAYMENT_METHODS.MOMO}
       />
+      {allowAmount ? (
+        <FormField
+          label={
+            currency
+              ? `${translate("payments.fields.amount")} (${currency})`
+              : translate("payments.fields.amount")
+          }
+          required
+        >
+          <Input
+            type="number"
+            min={amountFloor}
+            step={1}
+            inputMode="numeric"
+            placeholder={translate("payments.amountPlaceholder")}
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+          />
+          {minAmount ? (
+            <p className="text-xs text-muted-foreground">
+              {translate("sponsors.amountMinimum", { amount: minAmount })}
+            </p>
+          ) : null}
+        </FormField>
+      ) : null}
       <div className="flex flex-wrap gap-2">
         <Button
           type="button"
-          disabled={busy || watching || !eventId}
+          disabled={busy || watching || !eventId || !amountReady}
           onClick={() =>
             run(async () => {
               const payload = await apiPost<ChargeResult>(endpoint, {
@@ -157,6 +203,7 @@ export function PaymentCheckout({
                 kind,
                 method,
                 phone: phone || undefined,
+                amount: allowAmount ? parsedAmount : undefined,
                 redirectPath,
               });
               setResult(payload);
@@ -196,6 +243,12 @@ export function PaymentCheckout({
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="size-4 animate-spin" />
           {translate("payments.waiting")}
+        </p>
+      ) : null}
+      {result?.payment?.trackingId ? (
+        <p className="text-sm">
+          {translate("payments.fields.trackingId")}:{" "}
+          <span className="font-mono font-medium">{result.payment.trackingId}</span>
         </p>
       ) : null}
       {result?.ussdCode ? (

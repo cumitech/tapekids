@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 import { PORTAL_SURFACE } from "@/constants/layout";
@@ -9,10 +10,12 @@ export function PortalEmpty({
   title,
   description,
   icon: Icon,
+  action,
 }: {
   title: string;
   description: string;
   icon?: LucideIcon;
+  action?: ReactNode;
 }) {
   return (
     <div
@@ -30,6 +33,7 @@ export function PortalEmpty({
       <p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-muted-foreground">
         {description}
       </p>
+      {action ? <div className="mt-6 flex justify-center">{action}</div> : null}
     </div>
   );
 }

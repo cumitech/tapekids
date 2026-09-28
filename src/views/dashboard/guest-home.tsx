@@ -14,7 +14,7 @@ import { useGuestHome } from "@/hooks/dashboard/use-guest-home.hook";
 import { useLocale } from "@/hooks/core/use-locale.hook";
 import { DashboardOpenProfileAction } from "@/views/dashboard/dashboard-hero-actions";
 
-const ICON = { className: "h-5 w-5" };
+const ICON = { className: "h-4 w-4" };
 const CARD_ICONS = {
   camp: Tent,
   sponsor: HeartHandshake,
@@ -52,7 +52,7 @@ export function GuestHome() {
         ]}
         actions={<DashboardOpenProfileAction />}
       />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid items-stretch gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
         {GUEST_HOME_CARDS.map((card) => (
           <PortalCard
             key={card.href}
@@ -93,6 +93,7 @@ export function GuestHome() {
                 key={membership.id}
                 membership={membership}
                 personId={home.personId}
+                accountName={home.accountName}
                 defaultPhone={home.defaultPhone}
                 redirectPath={
                   SPONSOR_PORTAL_KINDS.includes(membership.kind)

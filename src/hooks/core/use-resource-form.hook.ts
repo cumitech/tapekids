@@ -6,6 +6,8 @@ import type { BaseKey, BaseRecord, HttpError } from "@refinedev/core";
 import { useForm } from "@refinedev/react-hook-form";
 import type { DefaultValues, FieldValues } from "react-hook-form";
 
+import { mutationRecord } from "@/lib/forms/mutation-record";
+
 export type ResourceFormMode = "create" | "edit";
 
 type UseResourceFormParams<
@@ -22,7 +24,7 @@ type UseResourceFormParams<
   toPayload: (values: TFormValues) => TPayload;
   refetchOnMount?: boolean;
   onCancel?: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (record: TRecord) => void;
 };
 
 export function useResourceForm<
@@ -62,8 +64,11 @@ export function useResourceForm<
             refetchOnMount: "always",
           }
         : undefined,
-      onMutationSuccess: () => {
-        onSuccessRef.current?.();
+      onMutationSuccess: (response) => {
+        const record = mutationRecord<TRecord>(response);
+        if (record) {
+          onSuccessRef.current?.(record);
+        }
       },
     },
     defaultValues: seededValues as DefaultValues<TFormValues>,

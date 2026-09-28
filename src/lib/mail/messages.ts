@@ -1,7 +1,7 @@
 import type { MailMessage } from "@/adapters/mail";
 import { DEFAULT_LOCALE, type AppLocale } from "@/constants/locales";
 import { publicAppUrl } from "@/lib/app-url";
-import { formatEventRange } from "@/lib/invitations/invitation-copy";
+import { invitationMailDetails } from "@/lib/invitations/invitation-copy";
 import { composeMail } from "@/lib/mail/compose";
 
 export function invitationAcceptUrl(token: string) {
@@ -38,8 +38,6 @@ export function invitationMail(input: {
   locale?: AppLocale;
 }): MailMessage {
   const locale = input.locale ?? DEFAULT_LOCALE;
-  const where = [input.eventVenue, input.eventCity].filter(Boolean).join(", ");
-  const when = formatEventRange(input.startsAt, input.endsAt, locale);
   return composeMail({
     to: input.to,
     firstName: input.firstName,
@@ -47,11 +45,7 @@ export function invitationMail(input: {
     locale,
     headerTitle: locale === "fr" ? "Vous êtes invités" : "You are invited",
     htmlBody: input.body,
-    details: [
-      { label: locale === "fr" ? "Événement" : "Event", value: input.eventTitle },
-      { label: locale === "fr" ? "Quand" : "When", value: when },
-      { label: locale === "fr" ? "Où" : "Where", value: where },
-    ],
+    details: invitationMailDetails(input, locale),
     cta: {
       label: locale === "fr" ? "Accepter l'invitation" : "Accept invitation",
       url: invitationAcceptUrl(input.token),
@@ -153,6 +147,7 @@ export function paymentSucceededMail(input: {
   amount: string;
   currency: string;
   kind: string;
+  trackingId?: string;
 }): MailMessage {
   return composeMail({
     to: input.to,
@@ -160,7 +155,9 @@ export function paymentSucceededMail(input: {
     subject: `Payment received for ${input.eventTitle}`,
     paragraphs: [
       `We received your ${input.kind} gift of ${input.amount} ${input.currency} for ${input.eventTitle}.`,
-      "Thank you for helping this fellowship. Keep this email as your receipt.",
+      input.trackingId
+        ? `Your payment ID is ${input.trackingId}. Keep this email as your receipt.`
+        : "Thank you for helping this fellowship. Keep this email as your receipt.",
     ],
   });
 }
@@ -171,6 +168,7 @@ export function paymentFailedMail(input: {
   eventTitle: string;
   amount: string;
   currency: string;
+  trackingId?: string;
 }): MailMessage {
   return composeMail({
     to: input.to,
@@ -178,7 +176,9 @@ export function paymentFailedMail(input: {
     subject: `Payment unsuccessful for ${input.eventTitle}`,
     paragraphs: [
       `The payment of ${input.amount} ${input.currency} for ${input.eventTitle} did not complete.`,
-      "You can try again from your camp page, or reply if you need help.",
+      input.trackingId
+        ? `Payment ID: ${input.trackingId}. You can try again from your camp page, or reply if you need help.`
+        : "You can try again from your camp page, or reply if you need help.",
     ],
   });
 }
@@ -187,6 +187,7 @@ export function paymentWaivedMail(input: {
   to: string;
   firstName?: string;
   eventTitle: string;
+  trackingId?: string;
 }): MailMessage {
   return composeMail({
     to: input.to,
@@ -194,6 +195,7 @@ export function paymentWaivedMail(input: {
     subject: `Payment waived for ${input.eventTitle}`,
     paragraphs: [
       `No payment is due for ${input.eventTitle}. Coordinators marked this fee as waived.`,
-    ],
+      input.trackingId ? `Payment ID: ${input.trackingId}.` : "",
+    ].filter(Boolean),
   });
 }

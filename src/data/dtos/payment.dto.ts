@@ -15,6 +15,7 @@ export const initiatePaymentSchema = z.object({
   paymentKind: paymentKindSchema.optional(),
   method: paymentMethodSchema.default(PAYMENT_METHODS.MOMO),
   phone: z.string().trim().min(1).optional(),
+  amount: z.number().positive().max(50_000_000).optional(),
   redirectPath: z.string().trim().min(1).optional(),
 });
 

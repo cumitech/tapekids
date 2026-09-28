@@ -1,7 +1,7 @@
 import { APP_NAME } from "@/constants/brand";
+import { DEFAULT_LOCALE, type AppLocale } from "@/constants/locales";
 import { escapeHtml } from "@/lib/mail/html";
 import { sanitizeRichText } from "@/lib/sanitize-html";
-import type { AppLocale } from "@/constants/locales";
 
 export type MailCta = {
   label: string;
@@ -44,13 +44,14 @@ function richBodyHtml(html: string) {
 }
 
 export function renderTransactionalMailHtml(input: TransactionalMailLayout): string {
+  const locale = input.locale ?? DEFAULT_LOCALE;
   const brand = escapeHtml(input.brand || APP_NAME);
   const headerTitle = escapeHtml(input.headerTitle);
   const greeting = escapeHtml(input.greeting);
   const preheader = escapeHtml(input.preheader || "");
   const footer = escapeHtml(
     input.footer ||
-      (input.locale === "fr"
+      (locale === "fr"
         ? `${APP_NAME}. Young Foundations, Creations et Cub Corner. Placez Dieu et Sa Parole en premier.`
         : `${APP_NAME}. Young Foundations, Creations, and Cub Corner. Place God and His Word first.`)
   );
@@ -87,7 +88,7 @@ export function renderTransactionalMailHtml(input: TransactionalMailLayout): str
     : (input.paragraphs ?? []).map(paragraphHtml).join("");
 
   return `<!DOCTYPE html>
-<html lang="${input.locale === "fr" ? "fr" : "en"}">
+<html lang="${locale}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />

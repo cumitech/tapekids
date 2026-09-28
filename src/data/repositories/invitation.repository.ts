@@ -2,7 +2,7 @@ import type { InferCreationAttributes } from "sequelize";
 
 import type { InvitationStatus } from "@/constants/event-participation";
 import { INVITATION_STATUSES } from "@/constants/event-participation";
-import { Invitation, Person } from "@/data/entities";
+import { Event, Invitation, InvitationBatch, Person } from "@/data/entities";
 import { NotFoundException } from "@/exceptions/not-found.exception";
 
 export type InvitationCreatePayload = InferCreationAttributes<Invitation>;
@@ -36,6 +36,43 @@ export class InvitationRepository {
       where: { token },
       include: PERSON_INCLUDE,
     });
+  }
+
+  async listForSettings(): Promise<Invitation[]> {
+    return Invitation.findAll({
+      include: [
+        {
+          model: Person,
+          as: "person",
+          attributes: ["id", "fullName", "email"],
+        },
+        { model: Event, as: "event", attributes: ["id", "title"] },
+        {
+          model: InvitationBatch,
+          as: "batch",
+          attributes: ["id", "subject", "linksOpen"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+  }
+
+  async setExpiresAt(id: string, expiresAt: Date): Promise<Invitation> {
+    const invitation = await Invitation.findByPk(id);
+    if (!invitation) {
+      throw new NotFoundException("Invitation", id);
+    }
+    await invitation.update({ expiresAt });
+    return this.findById(id);
+  }
+
+  async setLinksOpen(id: string, linksOpen: boolean): Promise<Invitation> {
+    const invitation = await Invitation.findByPk(id);
+    if (!invitation) {
+      throw new NotFoundException("Invitation", id);
+    }
+    await invitation.update({ linksOpen });
+    return this.findById(id);
   }
 
   async listByBatch(batchId: string): Promise<Invitation[]> {

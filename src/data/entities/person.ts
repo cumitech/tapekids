@@ -7,17 +7,19 @@ import {
   type Sequelize,
 } from "sequelize";
 
+import type { PersonCategory } from "@/constants/person";
+
 export class Person extends Model<
   InferAttributes<Person>,
   InferCreationAttributes<Person>
 > {
   declare id: string;
-  declare firstName: string;
-  declare lastName: string;
-  declare email: string;
+  declare fullName: string;
+  declare email: CreationOptional<string | null>;
   declare phone: CreationOptional<string | null>;
   declare dateOfBirth: CreationOptional<Date | null>;
   declare gender: CreationOptional<string | null>;
+  declare shirtSize: CreationOptional<string | null>;
   declare address: CreationOptional<string | null>;
   declare churchName: CreationOptional<string | null>;
   declare churchPastorName: CreationOptional<string | null>;
@@ -30,6 +32,11 @@ export class Person extends Model<
   declare parentGuardianName: CreationOptional<string | null>;
   declare parentGuardianPhone: CreationOptional<string | null>;
   declare medicalNotes: CreationOptional<string | null>;
+  declare yfId: CreationOptional<string | null>;
+  declare points: CreationOptional<number | null>;
+  declare ageYears: CreationOptional<number | null>;
+  declare isTrophy: CreationOptional<boolean>;
+  declare category: CreationOptional<PersonCategory | null>;
 }
 
 export function initPerson(sequelize: Sequelize) {
@@ -39,18 +46,13 @@ export function initPerson(sequelize: Sequelize) {
         type: DataTypes.STRING(20),
         primaryKey: true,
       },
-      firstName: {
-        type: DataTypes.STRING(80),
-        allowNull: false,
-      },
-      lastName: {
-        type: DataTypes.STRING(80),
+      fullName: {
+        type: DataTypes.STRING(160),
         allowNull: false,
       },
       email: {
         type: DataTypes.STRING(128),
-        allowNull: false,
-        unique: true,
+        allowNull: true,
       },
       phone: {
         type: DataTypes.STRING(20),
@@ -62,6 +64,10 @@ export function initPerson(sequelize: Sequelize) {
       },
       gender: {
         type: DataTypes.STRING(16),
+        allowNull: true,
+      },
+      shirtSize: {
+        type: DataTypes.STRING(8),
         allowNull: true,
       },
       address: {
@@ -110,6 +116,28 @@ export function initPerson(sequelize: Sequelize) {
       },
       medicalNotes: {
         type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      yfId: {
+        type: DataTypes.STRING(32),
+        allowNull: true,
+        unique: true,
+      },
+      points: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      ageYears: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      isTrophy: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      category: {
+        type: DataTypes.STRING(32),
         allowNull: true,
       },
     },

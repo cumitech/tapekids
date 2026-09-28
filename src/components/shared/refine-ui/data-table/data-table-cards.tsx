@@ -38,6 +38,10 @@ function serialNumber(page: number, size: number, index: number) {
 
 function combinedPersonName<TData extends BaseRecord>(row: Row<TData>) {
   const record = row.original as Record<string, unknown>;
+  const full = String(record.fullName ?? "").trim();
+  if (full) {
+    return full;
+  }
   const first = String(record.firstName ?? "").trim();
   const last = String(record.lastName ?? "").trim();
   if (!first && !last) {
@@ -114,7 +118,7 @@ export function DataTableCards<TData extends BaseRecord>({
           if (HIDDEN_MOBILE_COLUMNS.has(cell.column.id)) {
             return false;
           }
-          if (personName && (cell.column.id === "firstName" || cell.column.id === "lastName")) {
+          if (personName && (cell.column.id === "fullName" || cell.column.id === "firstName" || cell.column.id === "lastName")) {
             return false;
           }
           return true;

@@ -15,7 +15,7 @@ type UseEventFormParams = {
   mode: "create" | "edit";
   id?: BaseKey;
   onCancel?: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (record: Event) => void;
 };
 
 export function useEventForm({

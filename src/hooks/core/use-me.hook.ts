@@ -20,6 +20,7 @@ type MeState = {
   profile: MeProfile | null;
   loading: boolean;
   profileComplete: boolean;
+  passwordChosen: boolean;
   reload: () => Promise<void>;
 };
 
@@ -58,6 +59,7 @@ function useMeState(enabled: boolean): MeState {
       profile,
       loading,
       profileComplete: isPersonProfileComplete(profile?.person),
+      passwordChosen: profile ? profile.user.passwordChosen !== false : true,
       reload,
     }),
     [loading, profile, reload]

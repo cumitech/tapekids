@@ -18,17 +18,37 @@ const EMPTY: GeoSelection = {
 type UseGeoCascadeParams = {
   value?: Partial<GeoSelection>;
   onChange: (next: GeoSelection) => void;
+  includeDivisions?: boolean;
 };
+
+const geoCache = new Map<string, string[]>();
+const geoPending = new Map<string, Promise<string[]>>();
 
 async function loadKind(kind: GeoKind, filters: Partial<GeoSelection>) {
   const params = new URLSearchParams({ kind });
   if (filters.region) params.set("region", filters.region);
   if (filters.division) params.set("division", filters.division);
-  try {
-    return await apiGet<string[]>(`/geo?${params.toString()}`);
-  } catch {
-    return [];
+  const key = params.toString();
+  const cached = geoCache.get(key);
+  if (cached) {
+    return cached;
   }
+  const pending = geoPending.get(key);
+  if (pending) {
+    return pending;
+  }
+
+  const request = apiGet<string[]>(`/geo?${key}`)
+    .then((names) => {
+      geoCache.set(key, names);
+      return names;
+    })
+    .catch(() => [])
+    .finally(() => {
+      geoPending.delete(key);
+    });
+  geoPending.set(key, request);
+  return request;
 }
 
 function withCameroon(value?: Partial<GeoSelection>): GeoSelection {
@@ -39,7 +59,11 @@ function withCameroon(value?: Partial<GeoSelection>): GeoSelection {
   };
 }
 
-export function useGeoCascade({ value, onChange }: UseGeoCascadeParams) {
+export function useGeoCascade({
+  value,
+  onChange,
+  includeDivisions = true,
+}: UseGeoCascadeParams) {
   const valueRef = useRef(value);
   valueRef.current = value;
 
@@ -69,16 +93,18 @@ export function useGeoCascade({ value, onChange }: UseGeoCascadeParams) {
       setCityOptions([]);
       return;
     }
-    void loadKind("divisions", { region: selection.region }).then((names) =>
-      setDivisionOptions(toGeoOptions(names))
-    );
+    if (includeDivisions) {
+      void loadKind("divisions", { region: selection.region }).then((names) =>
+        setDivisionOptions(toGeoOptions(names))
+      );
+    }
     void loadKind("cities", { region: selection.region }).then((names) =>
       setCityOptions(toGeoOptions(names))
     );
-  }, [selection.region]);
+  }, [includeDivisions, selection.region]);
 
   useEffect(() => {
-    if (!selection.region || !selection.division) {
+    if (!includeDivisions || !selection.region || !selection.division) {
       setSubDivisionOptions([]);
       return;
     }
@@ -86,7 +112,7 @@ export function useGeoCascade({ value, onChange }: UseGeoCascadeParams) {
       region: selection.region,
       division: selection.division,
     }).then((names) => setSubDivisionOptions(toGeoOptions(names)));
-  }, [selection.region, selection.division]);
+  }, [includeDivisions, selection.region, selection.division]);
 
   return {
     selection,

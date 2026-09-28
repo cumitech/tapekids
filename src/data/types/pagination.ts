@@ -7,6 +7,7 @@ export const PERSON_EQ_FILTERS = [
   "subDivision",
   "town",
   "churchName",
+  "category",
 ] as const;
 
 export const EQ_FILTER_FIELDS = [
@@ -14,6 +15,7 @@ export const EQ_FILTER_FIELDS = [
   "city",
   "venue",
   "audienceKind",
+  "eventType",
   "action",
   "entity",
 ] as const;
@@ -44,9 +46,13 @@ const ALLOWED_SORT = new Set([
   "updatedAt",
   "title",
   "startsAt",
-  "lastName",
+  "fullName",
   "email",
   "name",
+  "yfId",
+  "trackingId",
+  "category",
+  "eventType",
   "sentAt",
   "action",
   "entity",
@@ -64,10 +70,11 @@ export function parseListQuery(searchParams: URLSearchParams): ListQuery {
     searchParams.get("q")?.trim() ||
     searchParams.get("q_like")?.trim() ||
     searchParams.get("email_like")?.trim() ||
-    searchParams.get("firstName_like")?.trim() ||
-    searchParams.get("lastName_like")?.trim() ||
+    searchParams.get("fullName_like")?.trim() ||
     searchParams.get("phone_like")?.trim() ||
     searchParams.get("name_like")?.trim() ||
+    searchParams.get("yfId_like")?.trim() ||
+    searchParams.get("trackingId_like")?.trim() ||
     undefined;
 
   const eq: ListQuery["eq"] = {};

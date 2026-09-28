@@ -6,26 +6,12 @@ const { QueryTypes } = require("sequelize");
 const SEED_PASSWORD_FALLBACK = "SeedPass123!";
 
 const SEED_LOGINS = {
-  superAdmin: {
-    id: "sduser0000",
-    email: "superadmin@seed.kidsevent.cm",
-    username: "seed.superadmin",
-    role: "super-admin",
-    personId: null,
-  },
   admin: {
     id: "sduser0001",
     email: "admin@seed.kidsevent.cm",
     username: "seed.admin",
     role: "admin",
     personId: null,
-  },
-  staff: {
-    id: "sduser0002",
-    email: "staff@seed.kidsevent.cm",
-    username: "seed.staff",
-    role: "staff",
-    personId: "sdperson01",
   },
   guest: {
     id: "sduser0003",

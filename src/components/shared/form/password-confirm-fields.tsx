@@ -32,6 +32,7 @@ export function PasswordConfirmFields({
       <LabeledField
         htmlFor={passwordId}
         label={passwordLabel ?? translate("auth.password")}
+        required
       >
         <InputPassword
           id={passwordId}
@@ -45,6 +46,7 @@ export function PasswordConfirmFields({
       <LabeledField
         htmlFor={confirmId}
         label={translate("auth.confirmPassword")}
+        required
       >
         <InputPassword
           id={confirmId}

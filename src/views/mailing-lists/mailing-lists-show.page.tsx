@@ -77,7 +77,7 @@ export function MailingListsShowPage() {
                 >
                   <span>
                     {member.person
-                      ? `${member.person.firstName} ${member.person.lastName} (${member.person.email})`
+                      ? `${member.person.fullName}${member.person.email ? ` (${member.person.email})` : ""}`
                       : member.personId}
                   </span>
                   <Button

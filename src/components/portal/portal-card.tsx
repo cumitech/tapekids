@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useLink } from "@refinedev/core";
+import { ArrowRight } from "lucide-react";
 
 import {
   PORTAL_CARD_TINTS,
@@ -31,38 +32,36 @@ export function PortalCard({
   const palette = PORTAL_CARD_TINTS[tint];
   const body = (
     <>
-      <span className={cn("absolute inset-y-0 left-0 w-1.5", palette.rail)} />
-      {icon ? (
-        <span
-          className={cn(
-            "mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-lg",
-            palette.wrap
-          )}
-        >
-          {icon}
-        </span>
-      ) : null}
-      <span className="flex min-w-0 flex-col gap-1">
-        <span className="text-base font-semibold text-foreground">{title}</span>
-        <span className="text-sm leading-relaxed text-muted-foreground">
-          {description}
-        </span>
-        {meta ? (
+      <span className={cn("absolute inset-y-2 left-0 w-0.5 rounded-r-full", palette.rail)} />
+      <span className="flex min-w-0 items-center gap-2.5">
+        {icon ? (
           <span
             className={cn(
-              "pt-1 text-xs font-medium uppercase tracking-wide",
-              palette.meta
+              "flex size-8 shrink-0 items-center justify-center rounded-md",
+              palette.wrap
             )}
           >
-            {meta}
+            {icon}
           </span>
         ) : null}
+        <span className="min-w-0 text-sm font-semibold leading-tight text-foreground">
+          {title}
+        </span>
       </span>
+      <span className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+        {description}
+      </span>
+      {meta ? (
+        <span className="mt-auto inline-flex items-center gap-1 text-xs font-medium text-primary">
+          {meta}
+          <ArrowRight className="size-3" />
+        </span>
+      ) : null}
     </>
   );
 
   const className = cn(
-    "relative flex items-start gap-4 overflow-hidden p-5 pl-6",
+    "relative flex h-full flex-col gap-2 overflow-hidden px-3.5 py-3 pl-4",
     PORTAL_SURFACE,
     href && PORTAL_SURFACE_HOVER
   );

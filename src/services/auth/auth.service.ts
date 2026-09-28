@@ -1,3 +1,5 @@
+import { randomBytes } from "node:crypto";
+
 import bcrypt from "bcryptjs";
 
 import { AUTH_TOKEN_PURPOSES } from "@/constants/auth-tokens";
@@ -10,6 +12,7 @@ import {
   parseVerifyEmail,
   toCreateUserPayload,
 } from "@/data/dtos/auth.dto";
+import { passwordPairSchema } from "@/data/dtos/password.dto";
 import type { Person } from "@/data/entities/person";
 import { PasswordResetRepository } from "@/data/repositories/password-reset.repository";
 import { UserRepository } from "@/data/repositories/user.repository";
@@ -21,6 +24,7 @@ import { hashToken } from "@/lib/api/request-context";
 import { signSession, toPublicUser, type PublicUser } from "@/lib/api/session";
 import { isMailConfigured } from "@/lib/integrations/env";
 import { logger } from "@/lib/logger";
+import { yfGuestEmail, yfGuestHandle } from "@/lib/people/yf-id";
 import { auditService } from "@/services/audit/audit.service";
 import { notificationService } from "@/services/notifications/notification.service";
 
@@ -161,30 +165,51 @@ export class AuthService {
   }
 
   async hasAccountForPerson(person: Person): Promise<boolean> {
-    const user =
-      (await userRepository.findByPersonId(person.id)) ??
-      (await userRepository.findByEmail(person.email));
-    return Boolean(user);
+    const byPerson = await userRepository.findByPersonId(person.id);
+    if (byPerson) {
+      return true;
+    }
+    if (!person.email) {
+      return false;
+    }
+    return Boolean(await userRepository.findByEmail(person.email));
   }
 
   async completeGuestInvite(
     person: Person,
-    password: string | undefined,
-    actor?: { id: string } | null
+    options: {
+      password?: string;
+      verifiedByYfId?: boolean;
+      actor?: { id: string } | null;
+    } = {}
   ): Promise<{ created: boolean; token: string; user: PublicUser }> {
-    const existing =
-      (await userRepository.findByPersonId(person.id)) ??
-      (await userRepository.findByEmail(person.email));
+    const existingByPerson = await userRepository.findByPersonId(person.id);
+    const existingByEmail = person.email
+      ? await userRepository.findByEmail(person.email)
+      : null;
+    if (
+      existingByEmail &&
+      existingByEmail.personId &&
+      existingByEmail.personId !== person.id
+    ) {
+      throw new ConflictException(
+        "This email is already used by another account."
+      );
+    }
+    const existing = existingByPerson ?? existingByEmail;
 
     if (existing) {
-      const signedIn = actor?.id === existing.id;
-      if (!signedIn) {
-        if (!password) {
+      const signedIn = options.actor?.id === existing.id;
+      if (!signedIn && !options.verifiedByYfId) {
+        if (!options.password) {
           throw new ValidationException(
             "Sign in with your existing password to accept this invitation."
           );
         }
-        const matches = await bcrypt.compare(password, existing.password);
+        const matches = await bcrypt.compare(
+          options.password,
+          existing.password
+        );
         if (!matches) {
           throw new UnauthorizedException("Invalid email or password.");
         }
@@ -201,17 +226,23 @@ export class AuthService {
       };
     }
 
-    if (!password) {
+    const chosenPassword = options.password;
+    const password = chosenPassword ?? randomBytes(32).toString("hex");
+    if (!chosenPassword && !options.verifiedByYfId) {
       throw new ValidationException("Create a password to open your account.");
     }
 
+    const email = yfGuestEmail(person);
+    const username = email.split("@")[0] || `yf-${yfGuestHandle(person)}`;
+
     const user = await userRepository.create({
       id: nanoid(),
-      email: person.email,
-      username: person.email.split("@")[0] || "guest",
+      email,
+      username,
       password: await bcrypt.hash(password, 10),
       role: USER_ROLES.GUEST,
       verified: true,
+      passwordChosen: Boolean(chosenPassword),
       personId: person.id,
     });
 
@@ -226,6 +257,20 @@ export class AuthService {
       created: true,
       ...this.sessionFor(user),
     };
+  }
+
+  async choosePassword(userId: string, body: unknown) {
+    const input = passwordPairSchema.parse(body);
+    const user = await userRepository.choosePassword(
+      userId,
+      await bcrypt.hash(input.password, 10)
+    );
+    await auditService.record({
+      action: "password_set",
+      entity: "User",
+      entityId: user.id,
+    });
+    return toPublicUser(user);
   }
 
   private sessionFor(user: Awaited<ReturnType<UserRepository["findById"]>>): AuthSessionResult {

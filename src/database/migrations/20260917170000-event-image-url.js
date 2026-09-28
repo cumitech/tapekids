@@ -1,9 +1,11 @@
 "use strict";
 
+const { ensureColumn, dropColumnIfExists } = require("../migration-guard");
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.addColumn("events", "imageUrl", {
+    await ensureColumn(queryInterface, "events", "imageUrl", {
       type: Sequelize.STRING(1024),
       allowNull: true,
     });
@@ -26,6 +28,6 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.removeColumn("events", "imageUrl");
+    await dropColumnIfExists(queryInterface, "events", "imageUrl");
   },
 };

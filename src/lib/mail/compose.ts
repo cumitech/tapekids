@@ -1,7 +1,7 @@
 import type { MailMessage } from "@/adapters/mail";
 import { htmlToPlainText } from "@/lib/html";
 import { mailGreeting } from "@/lib/mail/greeting";
-import type { AppLocale } from "@/constants/locales";
+import { DEFAULT_LOCALE, type AppLocale } from "@/constants/locales";
 import {
   renderTransactionalMailHtml,
   type MailCta,
@@ -22,7 +22,7 @@ export function composeMail(input: {
   headerTitle?: string;
   brand?: string;
 }): MailMessage {
-  const locale = input.locale ?? "en";
+  const locale = input.locale ?? DEFAULT_LOCALE;
   const greeting = mailGreeting(input.firstName);
   const headerTitle =
     input.headerTitle ||

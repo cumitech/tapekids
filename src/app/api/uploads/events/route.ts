@@ -1,11 +1,11 @@
 import { jsonOk } from "@/lib/api/http";
-import { staffRoute } from "@/lib/api/route-handler";
+import { adminRoute } from "@/lib/api/route-handler";
 import { ValidationException } from "@/exceptions/validation.exception";
 import { uploadService } from "@/services/uploads/upload.service";
 
 export const runtime = "nodejs";
 
-export const POST = staffRoute(async ({ request }) => {
+export const POST = adminRoute(async ({ request }) => {
   const form = await request.formData();
   const file = form.get("file");
   if (!(file instanceof File)) {

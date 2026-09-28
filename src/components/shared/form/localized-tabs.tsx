@@ -1,7 +1,7 @@
 "use client";
 
+import { useState, type ReactNode } from "react";
 import { useTranslate } from "@refinedev/core";
-import type { ReactNode } from "react";
 
 import {
   Tabs,
@@ -9,8 +9,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/shared/ui/tabs";
-import { LOCALES, type AppLocale } from "@/constants/locales";
-import { useLocale } from "@/hooks/core/use-locale.hook";
+import { DEFAULT_LOCALE, type AppLocale } from "@/constants/locales";
+import { localesPreferDefault } from "@/lib/content-i18n/pick";
 
 type LocalizedTabsProps = {
   children: (locale: AppLocale) => ReactNode;
@@ -24,30 +24,31 @@ export function LocalizedTabs({
   onValueChange,
 }: LocalizedTabsProps) {
   const translate = useTranslate();
-  const { locale } = useLocale();
+  const locales = localesPreferDefault();
+  const [internal, setInternal] = useState<AppLocale>(DEFAULT_LOCALE);
+  const selected = value ?? internal;
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-sm text-muted-foreground">
-        {translate("content.translationHint")}
-      </p>
       <Tabs
-        {...(value
-          ? {
-              value,
-              onValueChange: (next: string) => onValueChange?.(next as AppLocale),
-            }
-          : { defaultValue: locale })}
+        value={selected}
+        onValueChange={(next: string) => {
+          const locale = next as AppLocale;
+          if (value == null) {
+            setInternal(locale);
+          }
+          onValueChange?.(locale);
+        }}
         className="gap-3"
       >
         <TabsList>
-          {LOCALES.map((item) => (
+          {locales.map((item) => (
             <TabsTrigger key={item} value={item}>
               {translate(`locale.${item}`)}
             </TabsTrigger>
           ))}
         </TabsList>
-        {LOCALES.map((item) => (
+        {locales.map((item) => (
           <TabsContent key={item} value={item} className="flex flex-col gap-4">
             {children(item)}
           </TabsContent>

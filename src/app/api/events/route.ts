@@ -5,18 +5,18 @@ import { jsonList } from "@/lib/api/http";
 import {
   readJsonBody,
   searchParamsOf,
-  staffRoute,
+  adminRoute,
 } from "@/lib/api/route-handler";
 import { eventService } from "@/services/events/event.service";
 
 export const runtime = "nodejs";
 
-export const GET = staffRoute(async ({ request }) => {
+export const GET = adminRoute(async ({ request }) => {
   const result = await eventService.list(parseListQuery(searchParamsOf(request)));
   return jsonList(result.data, result.total);
 });
 
-export const POST = staffRoute(async ({ request, user }) => {
+export const POST = adminRoute(async ({ request, user }) => {
   const event = await eventService.create(await readJsonBody(request), user.id);
   return NextResponse.json(event, { status: 201 });
 });

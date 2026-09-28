@@ -1,20 +1,22 @@
 "use strict";
 
+const { ensureColumn, dropColumnIfExists } = require("../migration-guard");
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.addColumn("people", "division", {
+    await ensureColumn(queryInterface, "people", "division", {
       type: Sequelize.STRING(80),
       allowNull: true,
     });
-    await queryInterface.addColumn("people", "subDivision", {
+    await ensureColumn(queryInterface, "people", "subDivision", {
       type: Sequelize.STRING(80),
       allowNull: true,
     });
   },
 
   async down(queryInterface) {
-    await queryInterface.removeColumn("people", "subDivision");
-    await queryInterface.removeColumn("people", "division");
+    await dropColumnIfExists(queryInterface, "people", "subDivision");
+    await dropColumnIfExists(queryInterface, "people", "division");
   },
 };

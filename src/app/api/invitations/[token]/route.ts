@@ -6,9 +6,13 @@ import { invitationService } from "@/services/invitations/invitation.service";
 
 export const runtime = "nodejs";
 
-export const GET = publicRoute<{ token: string }>(async ({ params }) => {
+export const GET = publicRoute<{ token: string }>(async ({ request, params }) => {
+  const actor = await optionalUser(request);
   return jsonOk(
-    await invitationService.getByToken(normalizeInviteToken(params.token))
+    await invitationService.getByToken(
+      normalizeInviteToken(params.token),
+      actor
+    )
   );
 });
 

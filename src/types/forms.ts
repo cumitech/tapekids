@@ -4,12 +4,12 @@ export type GuardianFormValue = {
 };
 
 export type PersonFormValues = {
-  firstName: string;
-  lastName: string;
+  fullName: string;
   email: string;
   phone: string;
   dateOfBirth: string;
   gender: string;
+  shirtSize: string;
   address: string;
   churchName: string;
   churchPastorName: string;
@@ -21,17 +21,22 @@ export type PersonFormValues = {
   subDivision: string;
   guardians: GuardianFormValue[];
   medicalNotes: string;
+  yfId: string;
+  points: string;
+  ageYears: string;
+  isTrophy: boolean;
+  category: string;
 };
 
 export type EventFormValues = {
   translations: {
-    en: {
+    fr: {
       title: string;
       summary: string;
       description: string;
       venue: string;
     };
-    fr: {
+    en: {
       title: string;
       summary: string;
       description: string;
@@ -41,19 +46,22 @@ export type EventFormValues = {
   city: string;
   startsAt: string;
   endsAt: string;
+  eventType: "camp" | "day_event";
   requiresParticipantFee: boolean;
   participantFeeAmount: string;
   currency: string;
   coordinatorFundAmount: string;
   sponsorFundAmount: string;
   imageUrl: string;
+  minAge: string;
+  maxAge: string;
   isPublished: boolean;
 };
 
 export type MailingListFormValues = {
   translations: {
-    en: { name: string; description: string };
     fr: { name: string; description: string };
+    en: { name: string; description: string };
   };
   audienceKind: "camper" | "coordinator" | "sponsor" | "mixed";
   personIds: string[];

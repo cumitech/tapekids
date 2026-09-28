@@ -107,14 +107,14 @@ export function AppModalProvider({ children }: { children: ReactNode }) {
         <DialogContent
           showCloseButton={false}
           className={cn(
-            "flex max-h-[min(90dvh,40rem)] w-[calc(100%-1.25rem)] flex-col overflow-hidden sm:max-w-2xl",
+            "flex max-h-[min(90dvh,40rem)] w-auto flex-col overflow-hidden sm:max-w-2xl",
             content?.className
           )}
           onPointerDownOutside={(event) => event.preventDefault()}
           onInteractOutside={(event) => event.preventDefault()}
           onEscapeKeyDown={(event) => event.preventDefault()}
         >
-          <DialogHeader className="pr-10">
+          <DialogHeader className="pr-12 sm:pr-10">
             <DialogTitle>{content?.title}</DialogTitle>
             {content?.description ? (
               <DialogDescription>{content.description}</DialogDescription>
@@ -126,14 +126,14 @@ export function AppModalProvider({ children }: { children: ReactNode }) {
           </DialogHeader>
           <button
             type="button"
-            className="absolute top-4 right-4 rounded-sm text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+            className="absolute top-2 right-2 flex size-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50 sm:top-4 sm:right-4 sm:size-8"
             onClick={closeModal}
             aria-label={translate("actions.cancel")}
             disabled={busy}
           >
             <XIcon className="size-4" />
           </button>
-          <div className="overflow-y-auto pr-1">{content?.body}</div>
+          <div className="min-w-0 overflow-x-hidden overflow-y-auto">{content?.body}</div>
         </DialogContent>
       </Dialog>
     </AppModalContext.Provider>

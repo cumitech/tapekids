@@ -1,6 +1,6 @@
 import { STORAGE_KEYS } from "@/constants/storage-keys";
 import { DEFAULT_LOCALE, type AppLocale } from "@/constants/locales";
-import { isAppLocale, negotiateLocale } from "@/lib/locale";
+import { isAppLocale } from "@/lib/locale";
 import { getRequestContext } from "@/lib/api/request-context";
 
 export function localeFromRequest(request: Request): AppLocale {
@@ -23,7 +23,7 @@ export function localeFromRequest(request: Request): AppLocale {
     return cookieLocale;
   }
 
-  return negotiateLocale(request.headers.get("accept-language"));
+  return DEFAULT_LOCALE;
 }
 
 export function getRequestLocale(): AppLocale {

@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   useMenu,
   useLink,
@@ -36,9 +37,32 @@ import { useLocale } from "@/hooks/core/use-locale.hook";
 import { useRoleFlags, useSessionRoles } from "@/hooks/core/use-session-roles.hook";
 import { LAYOUT_CHROME_BG, LAYOUT_HEADER_SHADOW, LAYOUT_SIDEBAR_BODY_SHADOW } from "@/constants/layout";
 import { canPerform } from "@/lib/permissions";
-import { hasRole, isAdminRole, USER_ROLES } from "@/constants/user-roles";
-import { ChevronRight, ListIcon } from "lucide-react";
+import { isAdminRole } from "@/constants/user-roles";
+import {
+  REPORT_KIND_VALUES,
+  REPORT_KINDS,
+  type ReportKind,
+} from "@/constants/reports";
+import {
+  ChevronRight,
+  ClipboardList,
+  Handshake,
+  ListIcon,
+  Trophy,
+  UserCheck,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const REPORT_MENU_ICONS: Record<ReportKind, LucideIcon> = {
+  [REPORT_KINDS.TROPHY_CAMPERS]: Trophy,
+  [REPORT_KINDS.TROPHY_PARTICIPANTS]: Users,
+  [REPORT_KINDS.CHAPERONES]: UserCheck,
+  [REPORT_KINDS.SPONSORS]: Handshake,
+  [REPORT_KINDS.PARTICIPANTS]: Users,
+  [REPORT_KINDS.WAITING_LIST]: ClipboardList,
+};
 
 function filterMenuItems(
   items: TreeMenuItem[],
@@ -99,6 +123,53 @@ function pickItems(items: TreeMenuItem[], names: string[]) {
   return found;
 }
 
+function normalizePath(value: string) {
+  const path = value.split("?")[0]?.split("#")[0]?.replace(/\/$/, "");
+  return path || "/";
+}
+
+function isMenuItemSelected(
+  item: TreeMenuItem,
+  selectedKey: string | undefined,
+  pathname: string
+) {
+  if (selectedKey && item.key === selectedKey) {
+    return true;
+  }
+  if (!item.route) {
+    return false;
+  }
+  return normalizePath(pathname) === normalizePath(item.route);
+}
+
+function withReportMenu(item: TreeMenuItem, translate: (key: string) => string) {
+  if (item.name !== "reports") {
+    return item;
+  }
+
+  const base = String(item.route ?? "").replace(/\/$/, "");
+  if (!base) {
+    return item;
+  }
+
+  const children = REPORT_KIND_VALUES.map((kind) => {
+    const Icon = REPORT_MENU_ICONS[kind];
+    const icon = React.createElement(Icon, { className: "h-4 w-4" });
+    const label = translate(`reports.kinds.${kind}.title`);
+    return {
+      name: `reports/${kind}`,
+      key: `/reports/${kind}`,
+      route: `${base}/${kind}`,
+      label,
+      icon,
+      meta: { label, icon },
+      children: [],
+    } as TreeMenuItem;
+  });
+
+  return { ...item, children };
+}
+
 function organizeMenuItems(
   items: TreeMenuItem[],
   roles: readonly string[],
@@ -115,28 +186,26 @@ function organizeMenuItems(
         meta: { ...dashboard.meta, label: translate("dashboard.adminHome") },
       } as TreeMenuItem);
     }
-    const directory = pickItems(usable, ["people", "mailing-lists", "events"]);
+    const directory = pickItems(usable, [
+      "people",
+      "waiting-list",
+      "mailing-lists",
+      "events",
+      "sponsors",
+      "payments",
+    ]);
     if (directory.length) {
       nav.push(navGroup("directory", translate("dashboard.adminNavDirectory"), directory));
     }
-    const oversight = pickItems(usable, ["audit-logs"]);
+    const reporting = pickItems(usable, ["reports"]).map((item) =>
+      withReportMenu(item, translate)
+    );
+    if (reporting.length) {
+      nav.push(navGroup("reporting", translate("dashboard.adminNavReporting"), reporting));
+    }
+    const oversight = pickItems(usable, ["audit-logs", "app-settings"]);
     if (oversight.length) {
       nav.push(navGroup("oversight", translate("dashboard.adminNavOversight"), oversight));
-    }
-    return nav;
-  }
-
-  if (hasRole(roles, USER_ROLES.STAFF)) {
-    const dashboard = takeItem(usable, "dashboard");
-    if (dashboard) {
-      nav.push({
-        ...dashboard,
-        meta: { ...dashboard.meta, label: translate("dashboard.staffHome") },
-      } as TreeMenuItem);
-    }
-    const daily = pickItems(usable, ["people", "mailing-lists", "events"]);
-    if (daily.length) {
-      nav.push(navGroup("daily-work", translate("dashboard.staffNavGroup"), daily));
     }
     return nav;
   }
@@ -147,6 +216,7 @@ function organizeMenuItems(
 export function Sidebar() {
   const { open } = useShadcnSidebar();
   const { menuItems, selectedKey } = useMenu();
+  const pathname = usePathname() ?? "";
   const translate = useTranslate();
   const { roles } = useSessionRoles();
   const visibleItems = organizeMenuItems(
@@ -175,6 +245,7 @@ export function Sidebar() {
             key={item.key || item.name}
             item={item}
             selectedKey={selectedKey}
+            pathname={pathname}
           />
         ))}
       </ShadcnSidebarContent>
@@ -185,26 +256,51 @@ export function Sidebar() {
 type MenuItemProps = {
   item: TreeMenuItem;
   selectedKey?: string;
+  pathname: string;
 };
 
-function SidebarItem({ item, selectedKey }: MenuItemProps) {
+function SidebarItem({ item, selectedKey, pathname }: MenuItemProps) {
   const { open } = useShadcnSidebar();
 
   if (item.meta?.group) {
-    return <SidebarItemGroup item={item} selectedKey={selectedKey} />;
+    return (
+      <SidebarItemGroup
+        item={item}
+        selectedKey={selectedKey}
+        pathname={pathname}
+      />
+    );
   }
 
   if (item.children && item.children.length > 0) {
     if (open) {
-      return <SidebarItemCollapsible item={item} selectedKey={selectedKey} />;
+      return (
+        <SidebarItemCollapsible
+          item={item}
+          selectedKey={selectedKey}
+          pathname={pathname}
+        />
+      );
     }
-    return <SidebarItemDropdown item={item} selectedKey={selectedKey} />;
+    return (
+      <SidebarItemDropdown
+        item={item}
+        selectedKey={selectedKey}
+        pathname={pathname}
+      />
+    );
   }
 
-  return <SidebarItemLink item={item} selectedKey={selectedKey} />;
+  return (
+    <SidebarItemLink
+      item={item}
+      selectedKey={selectedKey}
+      pathname={pathname}
+    />
+  );
 }
 
-function SidebarItemGroup({ item, selectedKey }: MenuItemProps) {
+function SidebarItemGroup({ item, selectedKey, pathname }: MenuItemProps) {
   const { children } = item;
   const { open } = useShadcnSidebar();
   const translate = useTranslate();
@@ -243,6 +339,7 @@ function SidebarItemGroup({ item, selectedKey }: MenuItemProps) {
               key={child.key || child.name}
               item={child}
               selectedKey={selectedKey}
+              pathname={pathname}
             />
           ))}
         </div>
@@ -251,8 +348,20 @@ function SidebarItemGroup({ item, selectedKey }: MenuItemProps) {
   );
 }
 
-function SidebarItemCollapsible({ item, selectedKey }: MenuItemProps) {
+function SidebarItemCollapsible({ item, selectedKey, pathname }: MenuItemProps) {
   const { name, children } = item;
+  const childActive = children?.some((child) =>
+    isMenuItemSelected(child, selectedKey, pathname)
+  );
+  const isSelected =
+    !childActive && isMenuItemSelected(item, selectedKey, pathname);
+  const [expanded, setExpanded] = useState(Boolean(childActive || isSelected));
+
+  useEffect(() => {
+    if (childActive || isSelected) {
+      setExpanded(true);
+    }
+  }, [childActive, isSelected]);
 
   const chevronIcon = (
     <ChevronRight
@@ -260,18 +369,27 @@ function SidebarItemCollapsible({ item, selectedKey }: MenuItemProps) {
         "h-4",
         "w-4",
         "shrink-0",
-        "text-muted-foreground",
         "transition-transform",
         "duration-200",
-        "group-data-[state=open]:rotate-90"
+        "group-data-[state=open]:rotate-90",
+        isSelected ? "text-current" : "text-muted-foreground"
       )}
     />
   );
 
   return (
-    <Collapsible key={`collapsible-${name}`} className={cn("w-full", "group")}>
+    <Collapsible
+      key={`collapsible-${name}`}
+      className={cn("w-full", "group")}
+      open={expanded}
+      onOpenChange={setExpanded}
+    >
       <CollapsibleTrigger asChild>
-        <SidebarButton item={item} rightIcon={chevronIcon} />
+        <SidebarButton
+          item={item}
+          isSelected={isSelected}
+          rightIcon={chevronIcon}
+        />
       </CollapsibleTrigger>
       <CollapsibleContent className={cn("ml-6", "flex", "flex-col", "gap-2")}>
         {children?.map((child: TreeMenuItem) => (
@@ -279,6 +397,7 @@ function SidebarItemCollapsible({ item, selectedKey }: MenuItemProps) {
             key={child.key || child.name}
             item={child}
             selectedKey={selectedKey}
+            pathname={pathname}
           />
         ))}
       </CollapsibleContent>
@@ -286,16 +405,19 @@ function SidebarItemCollapsible({ item, selectedKey }: MenuItemProps) {
   );
 }
 
-function SidebarItemDropdown({ item, selectedKey }: MenuItemProps) {
+function SidebarItemDropdown({ item, selectedKey, pathname }: MenuItemProps) {
   const { children } = item;
   const { open } = useShadcnSidebar();
   const Link = useLink();
   const translate = useTranslate();
   const label = getDisplayName(item, translate);
+  const isSelected = children?.some((child) =>
+    isMenuItemSelected(child, selectedKey, pathname)
+  );
 
   const trigger = (
     <DropdownMenuTrigger asChild>
-      <SidebarButton item={item} />
+      <SidebarButton item={item} isSelected={isSelected} />
     </DropdownMenuTrigger>
   );
 
@@ -316,7 +438,7 @@ function SidebarItemDropdown({ item, selectedKey }: MenuItemProps) {
       <DropdownMenuContent side="right" align="start">
         {children?.map((child: TreeMenuItem) => {
           const { key: childKey } = child;
-          const isSelected = childKey === selectedKey;
+          const isSelected = isMenuItemSelected(child, selectedKey, pathname);
 
           return (
             <DropdownMenuItem key={childKey || child.name} asChild>
@@ -340,10 +462,10 @@ function SidebarItemDropdown({ item, selectedKey }: MenuItemProps) {
   );
 }
 
-function SidebarItemLink({ item, selectedKey }: MenuItemProps) {
+function SidebarItemLink({ item, selectedKey, pathname }: MenuItemProps) {
   const { open } = useShadcnSidebar();
   const translate = useTranslate();
-  const isSelected = item.key === selectedKey;
+  const isSelected = isMenuItemSelected(item, selectedKey, pathname);
   const button = (
     <SidebarButton item={item} isSelected={isSelected} asLink={true} />
   );
@@ -371,7 +493,7 @@ function SidebarHeader() {
   const Link = useLink();
   const { isAdmin } = useRoleFlags();
   const deskLabel = translate(
-    isAdmin ? "dashboard.adminEyebrow" : "dashboard.staffEyebrow"
+    isAdmin ? "dashboard.adminEyebrow" : "dashboard.guestEyebrow"
   );
 
   return (

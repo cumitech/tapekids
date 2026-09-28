@@ -35,6 +35,7 @@ export const ListViewHeader = ({
   title: titleFromProps,
   wrapperClassName,
   onCreate,
+  children,
 }: ListHeaderProps) => {
   const { resource, identifier } = useResourceParams({
     resource: resourceFromProps,
@@ -54,9 +55,12 @@ export const ListViewHeader = ({
       title={title}
       className={wrapperClassName}
       actions={
-        isCreateButtonVisible ? (
-          <CreateButton resource={resourceName} onClick={onCreate} />
-        ) : null
+        <>
+          {children}
+          {isCreateButtonVisible ? (
+            <CreateButton resource={resourceName} onClick={onCreate} />
+          ) : null}
+        </>
       }
     />
   );

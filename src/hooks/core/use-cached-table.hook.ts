@@ -1,5 +1,6 @@
 "use client";
 
+import { keepPreviousData } from "@tanstack/react-query";
 import { useMemo } from "react";
 import type { CrudFilter, HttpError } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
@@ -50,6 +51,7 @@ export function useCachedTable<TData extends BaseRecord>({
         refetchOnMount: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
+        placeholderData: keepPreviousData,
       },
       filters: permanentFilters
         ? {

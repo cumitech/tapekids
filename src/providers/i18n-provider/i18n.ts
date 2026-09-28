@@ -16,11 +16,11 @@ if (!i18n.isInitialized) {
     ns: [...I18N_NAMESPACES],
     defaultNS: "common",
     resources: {
-      en: {
-        common: enCommon,
-      },
       fr: {
         common: frCommon,
+      },
+      en: {
+        common: enCommon,
       },
     },
     interpolation: {
@@ -29,7 +29,7 @@ if (!i18n.isInitialized) {
   });
 }
 
-i18n.addResourceBundle("en", "common", enCommon, true, true);
 i18n.addResourceBundle("fr", "common", frCommon, true, true);
+i18n.addResourceBundle("en", "common", enCommon, true, true);
 
 export { i18n };

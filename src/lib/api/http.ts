@@ -37,6 +37,17 @@ export function jsonList<T>(data: T[], total: number) {
   });
 }
 
+export function xlsxAttachment(body: Buffer, filename: string) {
+  return new NextResponse(Uint8Array.from(body), {
+    headers: {
+      "Content-Type":
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
 export function jsonFail(message: string, status: number, validationErrors: unknown[] = []) {
   return envelope(null, message, status, validationErrors);
 }

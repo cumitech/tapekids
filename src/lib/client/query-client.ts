@@ -3,12 +3,12 @@
 import {
   dehydrate,
   hydrate,
+  keepPreviousData,
   QueryClient,
   type DehydratedState,
 } from "@tanstack/react-query";
 
 import { STORAGE_KEYS } from "@/constants/storage-keys";
-import { clearListQueryCache } from "@/lib/client/list-query-cache";
 
 const queryDefaults = {
   queries: {
@@ -17,6 +17,7 @@ const queryDefaults = {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    placeholderData: keepPreviousData,
   },
 };
 
@@ -80,10 +81,7 @@ export function createAppQueryClient() {
   restoreQueryClient(client);
 
   let timer: number | undefined;
-  client.getQueryCache().subscribe((event) => {
-    if (event.type === "updated" && event.action.type === "invalidate") {
-      clearListQueryCache();
-    }
+  client.getQueryCache().subscribe(() => {
     window.clearTimeout(timer);
     timer = window.setTimeout(() => persistQueryClient(client), 200);
   });

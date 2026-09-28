@@ -17,6 +17,12 @@ type GeoFieldsProps = {
   };
   showDivisions?: boolean;
   trailing?: ReactNode;
+  required?: {
+    region?: boolean;
+    division?: boolean;
+    subDivision?: boolean;
+    town?: boolean;
+  };
 };
 
 export function GeoFields({
@@ -25,8 +31,13 @@ export function GeoFields({
   labels,
   showDivisions = true,
   trailing,
+  required,
 }: GeoFieldsProps) {
-  const geo = useGeoCascade({ value, onChange });
+  const geo = useGeoCascade({
+    value,
+    onChange,
+    includeDivisions: showDivisions,
+  });
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -35,6 +46,7 @@ export function GeoFields({
         value={geo.selection.region}
         onChange={geo.setRegion}
         options={geo.regionOptions}
+        required={required?.region}
       />
       {showDivisions ? (
         <>
@@ -43,12 +55,14 @@ export function GeoFields({
             value={geo.selection.division}
             onChange={geo.setDivision}
             options={geo.divisionOptions}
+            required={required?.division}
           />
           <LabeledCombobox
             label={labels.subDivision}
             value={geo.selection.subDivision}
             onChange={geo.setSubDivision}
             options={geo.subDivisionOptions}
+            required={required?.subDivision}
           />
         </>
       ) : null}
@@ -57,6 +71,7 @@ export function GeoFields({
         value={geo.selection.town}
         onChange={geo.setTown}
         options={geo.cityOptions}
+        required={required?.town}
       />
       {trailing}
     </div>

@@ -6,6 +6,7 @@ import { ImagePlus, Loader2, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/shared/ui/button";
 import { apiErrorMessage, apiUpload } from "@/lib/client/api";
+import { compressImageIfNeeded } from "@/lib/uploads/compress-image";
 import { eventImageSrc } from "@/lib/uploads/event-image";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +36,8 @@ export function ImageUpload({
     setBusy(true);
     setError("");
     try {
-      const uploaded = await apiUpload<{ url: string }>(endpoint, file);
+      const prepared = await compressImageIfNeeded(file);
+      const uploaded = await apiUpload<{ url: string }>(endpoint, prepared);
       onChange(uploaded.url);
     } catch (cause) {
       setError(apiErrorMessage(cause, translate("uploads.failed")));

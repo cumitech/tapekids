@@ -12,11 +12,8 @@ import { INVITATION_BATCH_STATUSES } from "@/constants/event-participation";
 import { useBusyAction } from "@/hooks/core/use-busy-action.hook";
 import { useLocale } from "@/hooks/core/use-locale.hook";
 import { useIntegrations } from "@/hooks/integrations/use-integrations.hook";
-import { apiPost } from "@/lib/client/api";
-import {
-  invitationDeliveryNotice,
-  type InvitationDeliveryResult,
-} from "@/lib/invitations/delivery-notice";
+import { invitationDeliveryNotice } from "@/lib/invitations/delivery-notice";
+import { sendInvitationBatch } from "@/lib/invitations/send-batch";
 import { cn } from "@/lib/utils";
 import { http } from "@/utils/axios";
 
@@ -24,12 +21,11 @@ type MembershipRow = {
   id: string;
   kind: string;
   status: string;
-  person?: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
+    person?: {
+      id: string;
+      fullName: string;
+      email?: string | null;
+    };
 };
 
 type BatchRow = {
@@ -85,7 +81,7 @@ function EventRoster({ eventId }: { eventId: string }) {
                   href={path(`/dashboard/people/show/${row.person.id}`)}
                   className="font-medium underline-offset-2 hover:underline"
                 >
-                  {row.person.firstName} {row.person.lastName}
+                  {row.person.fullName}
                 </Link>
               ) : (
                 <span>{row.id}</span>
@@ -155,9 +151,7 @@ function InvitationBatchHistory({ eventId }: { eventId: string }) {
                   disabled={busy}
                   onClick={() =>
                     run(async () => {
-                      const payload = await apiPost<InvitationDeliveryResult>(
-                        `/invitation-batches/${row.id}/send`
-                      );
+                      const payload = await sendInvitationBatch(row.id);
                       await load();
                       notify?.(
                         invitationDeliveryNotice(

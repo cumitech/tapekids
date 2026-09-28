@@ -15,15 +15,10 @@ type CanPerformParams = {
 };
 
 /** Sensitive history and system review. Admin only. */
-export const ADMIN_ONLY_RESOURCES = new Set(["audit-logs"]);
-
-/** Operational directory work. Staff and admin CRUD. */
-export const STAFF_DASHBOARD_RESOURCES = new Set([
-  "dashboard",
-  "people",
-  "mailing-lists",
-  "events",
-  "invitation-batches",
+export const ADMIN_ONLY_RESOURCES = new Set([
+  "audit-logs",
+  "reports",
+  "app-settings",
 ]);
 
 /** Participant portal. Guests only, plus a shared dashboard home. */
@@ -52,7 +47,7 @@ export function canPerform({
     return false;
   }
 
-  if (ADMIN_ONLY_RESOURCES.has(resource)) {
+  if (ADMIN_ONLY_RESOURCES.has(resource) || resource.startsWith("reports/")) {
     return isAdminRole(normalizedRoles);
   }
 
@@ -62,10 +57,6 @@ export function canPerform({
 
   if (isAdminRole(normalizedRoles)) {
     return !GUEST_PORTAL_RESOURCES.has(resource);
-  }
-
-  if (hasRole(normalizedRoles, USER_ROLES.STAFF)) {
-    return STAFF_DASHBOARD_RESOURCES.has(resource);
   }
 
   if (hasRole(normalizedRoles, USER_ROLES.GUEST)) {

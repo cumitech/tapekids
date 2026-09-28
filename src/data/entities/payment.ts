@@ -23,6 +23,7 @@ export class Payment extends Model<
   declare amount: string;
   declare currency: CreationOptional<string>;
   declare status: PaymentStatus;
+  declare trackingId: string;
   declare providerRef: CreationOptional<string | null>;
   declare event?: Event;
   declare person?: Person;
@@ -61,6 +62,11 @@ export function initPayment(sequelize: Sequelize) {
         type: DataTypes.STRING(20),
         allowNull: false,
         defaultValue: PAYMENT_STATUSES.PENDING,
+      },
+      trackingId: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        unique: true,
       },
       providerRef: {
         type: DataTypes.STRING(128),

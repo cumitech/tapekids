@@ -1,6 +1,10 @@
 import { CONTENT_ENTITY_TYPES } from "@/constants/content-i18n";
 import { getPaymentAdapter } from "@/adapters/payments";
-import { PAYMENT_STATUSES, type PaymentStatus } from "@/constants/event-participation";
+import {
+  EVENT_MEMBERSHIP_KINDS,
+  PAYMENT_STATUSES,
+  type PaymentStatus,
+} from "@/constants/event-participation";
 import type { Payment } from "@/data/entities/payment";
 import type { User } from "@/data/entities/user";
 import { parseInitiatePayment, parseUpdatePaymentStatus } from "@/data/dtos/payment.dto";
@@ -11,11 +15,12 @@ import { PersonRepository } from "@/data/repositories/person.repository";
 import type { ListQuery } from "@/data/types/pagination";
 import { ForbiddenException } from "@/exceptions/forbidden.exception";
 import { ValidationException } from "@/exceptions/validation.exception";
-import { nanoid } from "@/lib/api/id";
+import { nanoid, paymentTrackingId } from "@/lib/api/id";
 import { resolveContentLocale } from "@/lib/api/request-locale";
 import { isNamedError } from "@/lib/api/app-error";
 import { campayConfig, isCampayConfigured } from "@/lib/integrations/campay.config";
 import { publicAppUrl } from "@/lib/app-url";
+import { SPONSOR_AMOUNT_XAF } from "@/constants/sponsor";
 import { chargeAmountForMembership } from "@/lib/payments/amount";
 import {
   PAYMENT_METHODS,
@@ -24,6 +29,7 @@ import {
 } from "@/lib/payments/charge";
 import { toCameroonMsisdn } from "@/lib/payments/phone";
 import { toPaymentJson } from "@/lib/payments/public";
+import { personNameParts } from "@/lib/people/display-name";
 import { isPersonProfileComplete } from "@/lib/people/profile-completeness";
 import { paymentStatusFromCampay } from "@/lib/payments/status";
 import { auditService } from "@/services/audit/audit.service";
@@ -61,6 +67,12 @@ async function withLocalizedEvents<T extends { event?: { id: string } | null }>(
 }
 
 export class PaymentService {
+  list(query: ListQuery) {
+    return paymentRepository
+      .list(query)
+      .then((result) => withLocalizedEvents(result));
+  }
+
   listByEvent(eventId: string, query: ListQuery) {
     return paymentRepository
       .listByEvent(eventId, query)
@@ -126,8 +138,23 @@ export class PaymentService {
     const person = await personRepository.findById(input.personId);
     const membershipKind = resolveMembershipKind(input);
     const kind = input.paymentKind ?? paymentKindForMembership(membershipKind);
-    const amount = chargeAmountForMembership(event, membershipKind);
+    const requestedAmount =
+      input.amount != null ? Math.round(input.amount) : null;
+    const amount =
+      requestedAmount != null && requestedAmount > 0
+        ? requestedAmount
+        : chargeAmountForMembership(event, membershipKind);
     const currency = (event.currency || campayConfig().currency).toUpperCase();
+
+    if (
+      membershipKind === EVENT_MEMBERSHIP_KINDS.SPONSOR &&
+      requestedAmount != null &&
+      requestedAmount < SPONSOR_AMOUNT_XAF
+    ) {
+      throw new ValidationException(
+        `Amount must be at least ${SPONSOR_AMOUNT_XAF} XAF.`
+      );
+    }
 
     if (amount <= 0) {
       const existing = await paymentRepository.findOpen(
@@ -146,6 +173,7 @@ export class PaymentService {
           })
         : await paymentRepository.create({
             id: nanoid(),
+            trackingId: paymentTrackingId(),
             eventId: event.id,
             personId: person.id,
             kind,
@@ -169,36 +197,43 @@ export class PaymentService {
     }
 
     const existing = await paymentRepository.findOpen(event.id, person.id, kind);
-    if (existing?.status === PAYMENT_STATUSES.PAID) {
+    if (requestedAmount == null && existing?.status === PAYMENT_STATUSES.PAID) {
       return { payment: publicPayment(existing), alreadyPaid: true };
     }
 
     const payment =
-      existing ??
-      (await paymentRepository.create({
-        id: nanoid(),
-        eventId: event.id,
-        personId: person.id,
-        kind,
-        amount: String(amount),
-        currency,
-        status: PAYMENT_STATUSES.PENDING,
-        providerRef: null,
-      }));
+      existing && existing.status !== PAYMENT_STATUSES.PAID
+        ? await paymentRepository.update(existing.id, {
+            amount: String(amount),
+            currency,
+            status: PAYMENT_STATUSES.PENDING,
+          })
+        : await paymentRepository.create({
+            id: nanoid(),
+            trackingId: paymentTrackingId(),
+            eventId: event.id,
+            personId: person.id,
+            kind,
+            amount: String(amount),
+            currency,
+            status: PAYMENT_STATUSES.PENDING,
+            providerRef: null,
+          });
 
     const description = `${event.title} (${kind})`;
     const adapter = getPaymentAdapter();
 
     try {
       if (input.method === PAYMENT_METHODS.LINK) {
+        const name = personNameParts(person.fullName);
         const result = await adapter.createPaymentLink({
           amount,
           currency,
           description,
           externalReference: payment.id,
-          email: person.email,
-          firstName: person.firstName,
-          lastName: person.lastName,
+          email: person.email ?? undefined,
+          firstName: name.firstName,
+          lastName: name.lastName,
           phone: toCameroonMsisdn(input.phone || person.phone || "", {
             required: false,
           }),
@@ -257,6 +292,11 @@ export class PaymentService {
       }
       const message =
         error instanceof Error ? error.message : "CamPay request failed.";
+      if (/timeout/i.test(message)) {
+        throw new ValidationException(
+          "The mobile money request timed out before your phone answered. Approve the prompt, then try again."
+        );
+      }
       throw new ValidationException(message);
     }
   }

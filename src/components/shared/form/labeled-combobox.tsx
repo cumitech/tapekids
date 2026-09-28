@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslate } from "@refinedev/core";
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 
+import { RequiredMark } from "@/components/shared/form/required-mark";
 import { Label } from "@/components/shared/ui/label";
 import { Button } from "@/components/shared/ui/button";
 import {
@@ -29,6 +30,7 @@ type LabeledComboboxProps = {
   options: SelectOption[];
   placeholder?: string;
   disabled?: boolean;
+  required?: boolean;
 };
 
 export function LabeledCombobox({
@@ -38,6 +40,7 @@ export function LabeledCombobox({
   options,
   placeholder,
   disabled,
+  required,
 }: LabeledComboboxProps) {
   const translate = useTranslate();
   const [open, setOpen] = useState(false);
@@ -73,7 +76,10 @@ export function LabeledCombobox({
 
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
-      <Label>{label}</Label>
+      <Label>
+        {label}
+        <RequiredMark required={required} />
+      </Label>
       <Popover
         open={open}
         onOpenChange={(next) => {
@@ -104,7 +110,7 @@ export function LabeledCombobox({
         </PopoverTrigger>
         <PopoverContent
           align="start"
-          className="w-[var(--radix-popover-trigger-width)] p-0"
+          className="w-[var(--radix-popover-trigger-width)] max-w-[var(--radix-popover-content-available-width)] p-0"
         >
           <Command shouldFilter={false}>
             <CommandInput

@@ -1,7 +1,7 @@
 import type { InferCreationAttributes } from "sequelize";
 
 import type { InvitationBatchStatus } from "@/constants/event-participation";
-import { InvitationBatch, MailingList, User } from "@/data/entities";
+import { Event, InvitationBatch, MailingList, User } from "@/data/entities";
 import type { ListQuery, PaginatedResult } from "@/data/types/pagination";
 import { NotFoundException } from "@/exceptions/not-found.exception";
 
@@ -47,6 +47,22 @@ export class InvitationBatchRepository {
       offset: query.offset,
       limit: query.limit,
     };
+  }
+
+  async listForSettings(): Promise<InvitationBatch[]> {
+    return InvitationBatch.findAll({
+      include: [{ model: Event, as: "event", attributes: ["id", "title"] }],
+      order: [["createdAt", "DESC"]],
+    });
+  }
+
+  async setLinksOpen(id: string, linksOpen: boolean): Promise<InvitationBatch> {
+    const batch = await InvitationBatch.findByPk(id);
+    if (!batch) {
+      throw new NotFoundException("InvitationBatch", id);
+    }
+    await batch.update({ linksOpen });
+    return this.findById(id);
   }
 
   async updateStatus(

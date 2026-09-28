@@ -4,22 +4,16 @@ import {
   type ContentEntityType,
   type TranslationsByLocale,
 } from "@/constants/content-i18n";
-import { DEFAULT_LOCALE, LOCALES, type AppLocale } from "@/constants/locales";
-import { isEmptyHtml } from "@/lib/html";
+import { DEFAULT_LOCALE, LOCALES } from "@/constants/locales";
+import {
+  isFilledContentField,
+  isHtmlContentField,
+  pickTranslatedField,
+} from "@/lib/content-i18n/pick";
 
 type TranslationInput = {
   translations?: TranslationsByLocale | null;
 } & Record<string, unknown>;
-
-function filled(field: string, value: unknown): value is string {
-  if (typeof value !== "string") {
-    return false;
-  }
-  if (field === "description" || field === "body") {
-    return !isEmptyHtml(value);
-  }
-  return value.trim().length > 0;
-}
 
 export function translationsFromInput(
   entityType: ContentEntityType,
@@ -31,7 +25,7 @@ export function translationsFromInput(
 
   for (const field of fields) {
     const fallback = parentFallback[field];
-    if (filled(field, fallback)) {
+    if (isFilledContentField(field, fallback)) {
       result[DEFAULT_LOCALE][field] = fallback;
     }
   }
@@ -43,9 +37,8 @@ export function translationsFromInput(
     }
     for (const field of fields) {
       const value = copy[field];
-      if (filled(field, value)) {
-        result[locale][field] =
-          field === "description" || field === "body" ? value : value.trim();
+      if (isFilledContentField(field, value)) {
+        result[locale][field] = isHtmlContentField(field) ? value : value.trim();
       }
     }
   }
@@ -57,11 +50,11 @@ export function defaultLocaleCopy(
   translations: TranslationsByLocale,
   parentFallback: Record<string, string | null | undefined>
 ): Record<string, string> {
-  const locale = DEFAULT_LOCALE as AppLocale;
-  const copy = translations[locale] ?? {};
   const merged: Record<string, string> = {};
   for (const [field, value] of Object.entries(parentFallback)) {
-    merged[field] = copy[field] || (typeof value === "string" ? value : "");
+    merged[field] =
+      pickTranslatedField(translations, field, value) ||
+      (typeof value === "string" ? value : "");
   }
   return merged;
 }

@@ -1,13 +1,36 @@
 import { customAlphabet } from "nanoid";
 
-import { RECORD_ID_LENGTH, TOKEN_ID_LENGTH } from "@/constants/ids";
+import {
+  PAYMENT_TRACKING_ALPHABET,
+  PAYMENT_TRACKING_PREFIX,
+  PAYMENT_TRACKING_SUFFIX_LENGTH,
+  RECORD_ID_ALPHABET,
+  RECORD_ID_LENGTH,
+  TOKEN_ID_LENGTH,
+} from "@/constants/ids";
 
-const alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+const createRecordId = customAlphabet(RECORD_ID_ALPHABET, RECORD_ID_LENGTH);
+const createTokenId = customAlphabet(RECORD_ID_ALPHABET, TOKEN_ID_LENGTH);
+const createPaymentTrackingSuffix = customAlphabet(
+  PAYMENT_TRACKING_ALPHABET,
+  PAYMENT_TRACKING_SUFFIX_LENGTH
+);
 
 export function nanoid(size = RECORD_ID_LENGTH): string {
-  return customAlphabet(alphabet, size)();
+  if (size === RECORD_ID_LENGTH) {
+    return createRecordId();
+  }
+  if (size === TOKEN_ID_LENGTH) {
+    return createTokenId();
+  }
+  return customAlphabet(RECORD_ID_ALPHABET, size)();
 }
 
 export function tokenId(): string {
-  return nanoid(TOKEN_ID_LENGTH);
+  return createTokenId();
+}
+
+/** Unique payment tracking id, separate from the internal record id. */
+export function paymentTrackingId(): string {
+  return `${PAYMENT_TRACKING_PREFIX}${createPaymentTrackingSuffix()}`;
 }

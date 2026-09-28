@@ -44,7 +44,8 @@
     "clear": "Effacer",
     "apply": "Appliquer",
     "undo": "Annuler",
-    "clone": "Dupliquer"
+    "clone": "Dupliquer",
+    "export": "Exporter Excel"
   },
   "documentTitle": {
     "default": "Kids Events Cameroon",
@@ -132,18 +133,12 @@
     "adminEyebrow": "Administration",
     "adminTitle": "Espace administration",
     "adminDescription": "Supervisez les personnes, les événements, les invitations et le journal d'audit au même endroit.",
-    "staffEyebrow": "Équipe",
-    "staffTitle": "Tableau de bord équipe",
-    "staffDescription": "Enregistrez des personnes, constituez des listes d'envoi et envoyez les invitations.",
-    "staffHome": "Accueil",
     "adminHome": "Accueil admin",
-    "staffNavGroup": "Travail du jour",
     "adminNavDirectory": "Annuaire",
+    "adminNavReporting": "Rapports",
     "adminNavOversight": "Supervision",
-    "roleStaff": "Équipe",
     "roleAdmin": "Admin",
-    "roleSuperAdmin": "Super-admin",
-    "staffAddPerson": "Ajouter une personne",
+    "roleGuest": "Invité",
     "guestEyebrow": "Votre espace",
     "guestTitle": "Bienvenue, {{name}}",
     "guestDescription": "Réglez votre place, puis tenez votre profil à jour.",
@@ -154,6 +149,15 @@
     "statPeople": "Personnes",
     "statLists": "Listes",
     "statEvents": "Événements",
+    "statTrophyCampers": "Campeurs Trophy",
+    "statTrophyCampersShort": "Campeurs",
+    "statTrophyParticipants": "Participants Trophy",
+    "statTrophyParticipantsShort": "Participants",
+    "statInvitationsSent": "Invitations envoyées",
+    "statInvitationsSentShort": "Invitations",
+    "statAmountCollected": "Montant collecté",
+    "statAmountCollectedShort": "Collecté",
+    "statTotalEvents": "Total des événements",
     "statCamp": "Camp",
     "statSponsors": "Parrains",
     "statAudit": "Audit",
@@ -163,11 +167,78 @@
     "noMembershipsTitle": "Aucun événement pour le moment",
     "noMembershipsDescription": "Lorsqu'on vous invitera à un camp ou comme parrain, cela apparaîtra ici.",
     "sections": {
-      "people": "Ajoutez campeurs, familles et coordinateurs avec les informations de chaque événement.",
+      "people": "Importez les campeurs Trophy, les participants Trophy et les encadreurs depuis Excel.",
+      "waiting-list": "Examinez les personnes sans trophée et approuvez-les dans l'annuaire.",
       "mailing-lists": "Regroupez les personnes et préparez les invitations au bon moment.",
-      "events": "Organisez les camps avec lieux, dates et fonds participants ou parrains.",
+      "events": "Organisez les camps et les journées avec un lieu, des dates et une page publiée.",
+      "payments": "Consultez les paiements campeurs, coordinateurs et parrains sur tous les événements.",
+      "sponsors": "Voyez les personnes qui ont parrainé un événement, y compris celles qui ont demandé à rester anonymes.",
+      "reports": "Consultez les listes Trophy, encadreurs et parrains, puis exportez-les en Excel.",
       "audit-logs": "Consultez qui a modifié les personnes, événements, paiements et invitations.",
+      "app-settings": "Ouvrez ou fermez les liens d'invitation, les lots et les invitations individuelles.",
       "profile": "Tenez à jour vos coordonnées, votre localisation et les informations familiales."
+    }
+  },
+  "prepareEvent": {
+    "entry": "Commencer ici",
+    "title": "Préparer un événement",
+    "description": "Importez les personnes, créez l'événement, puis envoyez l'invitation.",
+    "start": "Commencer",
+    "progress": "Étape {{step}} sur {{total}}",
+    "continue": "Continuer",
+    "back": "Retour",
+    "eventPending": "Chargement de l'événement…",
+    "importHint": "Importez un fichier Excel. Le même fichier met à jour les personnes existantes et ne crée pas de doublons.",
+    "importReady": "L'annuaire contient déjà des personnes. Importez-en d'autres, ou continuez.",
+    "eventHint": "Enregistrez le camp ou la journée. Il reste choisi pour les étapes suivantes.",
+    "eventSaved": "Cet événement est déjà enregistré. Continuez, ou enregistrez les modifications ci-dessous.",
+    "listHintCamp": "Le public est réglé sur les campeurs. Choisissez qui doit recevoir l'invitation.",
+    "listHintDay": "Choisissez les participants et les encadreurs de cette journée. Le public commence sur les campeurs, et vous pouvez le changer.",
+    "listSaved": "Cette liste d'envoi est déjà enregistrée. Continuez, ou enregistrez les modifications ci-dessous.",
+    "sendHint": "Cet événement est déjà choisi. Relisez le message, puis envoyez.",
+    "doneTitle": "Invitation prête",
+    "doneBody": "Préparée pour cet événement.",
+    "resend": "Réessayer les non envoyées",
+    "another": "Écrire une autre invitation",
+    "openEvent": "Ouvrir l'événement",
+    "openList": "Ouvrir la liste d'envoi",
+    "steps": {
+      "import": "Importer",
+      "event": "Événement",
+      "list": "Liste d'envoi",
+      "send": "Envoyer"
+    }
+  },
+  "appSettings": {
+    "titles": {
+      "list": "Réglages",
+      "create": "Réglages",
+      "edit": "Réglages",
+      "show": "Réglages"
+    },
+    "description": "Tous les réglages de l'application sont ici, y compris les liens d'invitation pour toute l'application, un lot, ou une personne.",
+    "settingsTitle": "Réglages",
+    "failed": "Impossible de mettre à jour ce réglage.",
+    "close": "Fermer",
+    "reopen": "Rouvrir",
+    "linkOpen": "Lien ouvert",
+    "linkClosed": "Lien fermé",
+    "batchClosed": "Lot fermé",
+    "batchesTitle": "Lots d'invitation",
+    "invitationsTitle": "Invitations individuelles",
+    "closeBatch": "Fermer le lot",
+    "reopenBatch": "Rouvrir le lot",
+    "closeInvitation": "Fermer le lien",
+    "reopenInvitation": "Rouvrir le lien",
+    "extendInvitation": "Prolonger de 30 jours",
+    "extendBatch": "Prolonger de 30 jours",
+    "expires": "Expire le {{date}}",
+    "invitationLinks": {
+      "title": "Liens d'invitation",
+      "open": "Tous les liens d'invitation sont ouverts.",
+      "closed": "Tous les liens d'invitation sont fermés.",
+      "close": "Fermer les liens d'invitation",
+      "reopen": "Rouvrir les liens d'invitation"
     }
   },
   "onboarding": {
@@ -181,6 +252,16 @@
     "brand": "Kids Events Cameroon",
     "signIn": "Connexion",
     "register": "Inscription",
+    "waitingList": "Liste d'attente",
+    "waitingListEyebrow": "Pour les personnes sans trophée",
+    "waitingListTitle": "Rejoindre la liste d'attente",
+    "waitingListBody": "C'est pour les personnes intéressées qui n'ont pas de trophée et souhaitent tout de même participer. Complétez les informations de la personne étape par étape, puis attendez qu'un administrateur examine votre demande. L'approbation vous ajoute à l'annuaire des personnes, avec trophées : Non. Cela ne crée pas de compte.",
+    "waitingListCta": "S'inscrire sur la liste d'attente",
+    "sponsors": "Parrains",
+    "sponsorsEyebrow": "Parents et particuliers",
+    "sponsorsTitle": "Parrainer une rencontre",
+    "sponsorsBody": "Contribuez à un camp ou à une journée. Indiquez votre nom et votre e-mail, choisissez de rester anonyme ou non, puis payez depuis votre téléphone. Un reçu est envoyé à l'e-mail fourni dès que le paiement est confirmé.",
+    "sponsorsCta": "Parrainer",
     "dashboard": "Tableau de bord",
     "welcome": "Shalom",
     "headline": "Young Foundations Cameroun",
@@ -200,13 +281,19 @@
     "study": "L'âge de l'Église de Laodicée",
     "footer": "Kids Events Cameroon",
     "footerTagline": "Communion Young Foundations au Cameroun : camps, Creations et Cub Corner.",
+    "partners": {
+      "vgr": "Voice Of God Recordings",
+      "tabernacle": "Branham Tabernacle",
+      "message": "TheMessage.com",
+      "open": "{{name}}, site officiel"
+    },
     "eventsTitle": "Rassemblements à venir",
     "eventsEmpty": "Les camps et rassemblements Creations publiés apparaîtront ici."
   },
   "locale": {
     "label": "Langue",
-    "en": "English",
-    "fr": "Français"
+    "fr": "Français",
+    "en": "English"
   },
   "theme": {
     "label": "Thème",
@@ -264,12 +351,16 @@
       "show": "Personne"
     },
     "fields": {
-      "firstName": "Prénom",
-      "lastName": "Nom",
+      "fullName": "Nom complet",
       "email": "E-mail",
       "phone": "Téléphone",
       "dateOfBirth": "Date de naissance",
       "gender": "Sexe",
+      "shirtSize": "Taille de t-shirt",
+      "category": "Catégorie",
+      "yfId": "ID YF",
+      "points": "Points",
+      "ageYears": "Âge",
       "address": "Adresse",
       "churchName": "Nom de l'église",
       "churchPastorName": "Nom du pasteur",
@@ -281,7 +372,27 @@
       "parentGuardianName": "Nom",
       "parentGuardianPhone": "Téléphone",
       "medicalNotes": "Notes médicales",
-      "country": "Pays"
+      "country": "Pays",
+      "isTrophy": "Trophées"
+    },
+    "categories": {
+      "trophy_camper": "Campeur Trophy",
+      "trophy_participant": "Participant Trophy",
+      "chaperone": "Encadreur / Chaperone"
+    },
+    "import": {
+      "action": "Importer Excel",
+      "title": "Importer des personnes depuis Excel",
+      "hint": "Importez un export Young Foundations (.xlsx). Colonnes : YF ID, Points, Name, Gender, Age, Address, Country, Email, Phone, DOB, Trophy. Choisissez la catégorie pour toutes les lignes du fichier.",
+      "chooseCategory": "Choisir une catégorie",
+      "file": "Fichier Excel",
+      "submit": "Importer",
+      "importing": "Import en cours…",
+      "missing": "Choisissez une catégorie et un fichier Excel.",
+      "failed": "Impossible d'importer ce fichier.",
+      "networkFailed": "Erreur réseau pendant l'import. Vérifiez la connexion et réessayez. Le même fichier ne créera pas de doublons.",
+      "result": "Créés {{created}}, mis à jour {{updated}}, inchangés {{unchanged}}, ignorés {{skipped}}.",
+      "rowError": "Ligne {{row}} : {{message}}"
     },
     "sections": {
       "identity": "Informations personnelles",
@@ -290,21 +401,132 @@
       "guardians": "Parents / tuteurs",
       "notes": "Notes médicales"
     },
-    "createHint": "Le nom, l'e-mail et le téléphone suffisent pour commencer. La personne complète le reste en acceptant l'invitation.",
+    "createHint": "Le nom complet, l'e-mail et le téléphone suffisent pour commencer. La personne complète le reste en acceptant l'invitation.",
     "guardiansHint": "Ajoutez jusqu’à trois parents ou tuteurs. Une ligne reste toujours disponible.",
     "addGuardian": "Ajouter un tuteur",
     "removeGuardian": "Retirer le tuteur",
     "guardianNamePlaceholder": "Nom complet",
     "guardianRow": "Tuteur {{n}}",
     "genderPlaceholder": "Choisir le sexe",
+    "shirtSizePlaceholder": "Choisir la taille",
     "genders": {
       "female": "Féminin",
       "male": "Masculin"
+    },
+    "shirtSizes": {
+      "XS": "XS",
+      "S": "S",
+      "SM": "S",
+      "M": "M",
+      "MD": "M",
+      "L": "L",
+      "LG": "L",
+      "XL": "XL",
+      "2XL": "2XL",
+      "XXL": "2XL",
+      "3XL": "3XL",
+      "XXXL": "3XL"
     },
     "steps": {
       "next": "Continuer",
       "back": "Retour",
       "progress": "Étape {{current}} sur {{total}}"
+    }
+  },
+  "waitingList": {
+    "titles": {
+      "list": "Liste d'attente",
+      "create": "Liste d'attente",
+      "edit": "Liste d'attente",
+      "show": "Liste d'attente"
+    },
+    "joinTitle": "Rejoindre la liste d'attente",
+    "joinDescription": "Complétez chaque étape de la fiche personne. Un administrateur examine la liste et approuve qui rejoint l'annuaire.",
+    "submit": "S'inscrire",
+    "submitting": "Inscription…",
+    "submitted": "Vous êtes sur la liste d'attente. Vous serez ajouté lorsqu'un administrateur vous aura approuvé.",
+    "registerFailed": "Impossible de rejoindre la liste d'attente.",
+    "registeredAt": "Inscrit le",
+    "select": "Sélectionner",
+    "selectAll": "Tout sélectionner sur cette page",
+    "approve": "Approuver",
+    "approving": "Approbation…",
+    "approveSelected": "Approuver la sélection ({{count}})",
+    "approveFailed": "Impossible d'approuver cette inscription.",
+    "approved": "Approuvé. La personne est maintenant dans Personnes, avec trophées : Non.",
+    "approvedPartial": "{{approved}} approuvé(s). {{failed}} n'ont pas pu être approuvés."
+  },
+  "sponsors": {
+    "titles": {
+      "list": "Parrains",
+      "create": "Parrain",
+      "edit": "Parrain",
+      "show": "Parrain"
+    },
+    "fields": {
+      "person": "Personne",
+      "email": "E-mail",
+      "anonymous": "Anonyme",
+      "event": "Événement",
+      "amount": "Montant",
+      "status": "Statut",
+      "paymentPhone": "Téléphone de paiement",
+      "trackingId": "ID de paiement"
+    },
+    "joinTitle": "Parrainer",
+    "joinDescription": "Indiquez qui vous êtes, choisissez un événement, puis payez avec le numéro de téléphone qui recevra la demande de mobile money.",
+    "anonymous": "Rester anonyme",
+    "anonymousYes": "Oui",
+    "anonymousNo": "Non",
+    "event": "Événement",
+    "eventPlaceholder": "Choisir un événement",
+    "paymentPhone": "Numéro de téléphone pour le paiement",
+    "paymentHint": "Saisissez le numéro de téléphone qui doit recevoir la demande de paiement.",
+    "detailsRequired": "Indiquez votre nom, votre e-mail et l'événement.",
+    "phoneRequired": "Indiquez le numéro de téléphone pour le paiement.",
+    "emailRequired": "Une adresse e-mail est requise avant de parrainer.",
+    "eventRequired": "Choisissez un événement à parrainer.",
+    "amountMinimum": "Le montant minimum est de {{amount}} XAF.",
+    "pay": "Payer maintenant",
+    "paying": "Démarrage du paiement…",
+    "waiting": "En attente de confirmation du paiement. Un reçu sera envoyé par e-mail lorsqu'il aboutira.",
+    "paid": "Paiement confirmé. Un reçu a été envoyé à votre e-mail.",
+    "failed": "Impossible de démarrer ce parrainage."
+  },
+  "reports": {
+    "titles": {
+      "list": "Rapports",
+      "create": "Rapports",
+      "edit": "Rapports",
+      "show": "Rapport"
+    },
+    "exporting": "Export…",
+    "exportFailed": "Impossible d'exporter ce rapport.",
+    "kinds": {
+      "trophy-campers": {
+        "title": "Campeurs Trophy",
+        "description": "Personnes enregistrées comme campeurs Trophy pour les camps de plusieurs jours."
+      },
+      "trophy-participants": {
+        "title": "Participants Trophy",
+        "description": "Personnes enregistrées comme participants Trophy pour les événements d'une journée."
+      },
+      "chaperones": {
+        "title": "Encadreurs / Chaperones",
+        "description": "Encadreurs et chaperones sur les camps et les événements."
+      },
+      "sponsors": {
+        "title": "Parrains",
+        "description": "Personnes liées comme parrains sur les événements, avec le nom de l'événement et le statut."
+      },
+      "participants": {
+        "title": "Participants",
+        "description": "Campeurs et participants liés à un événement."
+      },
+      "waiting-list": {
+        "title": "Liste d'attente",
+        "description": "Personnes sans trophée qui souhaitent participer et attendent une approbation."
+      }
     }
   },
   "mailingLists": {
@@ -373,15 +595,25 @@
       "city": "Ville",
       "startsAt": "Début",
       "endsAt": "Fin",
+      "eventType": "Type",
       "scheduleStatus": "Statut",
       "imageUrl": "Image de l'événement",
-      "isPublished": "Afficher sur le site public",
-      "requiresParticipantFee": "Frais participant requis",
-      "participantFeeAmount": "Frais participant (XAF)",
+      "isPublished": "Publié",
+      "requiresParticipantFee": "Frais requis",
+      "participantFeeAmount": "Montant",
       "currency": "Devise",
       "coordinatorFundAmount": "Fonds coordinateur (XAF)",
-      "sponsorFundAmount": "Fonds parrain (XAF)"
+      "sponsorFundAmount": "Fonds parrain (XAF)",
+      "minAge": "Âge minimum",
+      "maxAge": "Âge maximum"
     },
+    "types": {
+      "camp": "Camp",
+      "day_event": "Journée"
+    },
+    "typeHint": "Un camp dure plus d'un jour et concerne les campeurs Trophy. Un événement d'une journée commence et se termine le même jour et concerne les participants Trophy.",
+    "ageRangeHint": "Laissez les deux vides si tout âge peut participer. L'âge d'un campeur correspond aux années révolues le premier jour, calculées à partir de sa date de naissance.",
+    "ageRangeInvalid": "L'âge minimum ne peut pas être supérieur à l'âge maximum.",
     "schedule": {
       "upcoming": "À venir",
       "active": "En cours",
@@ -416,12 +648,23 @@
       "edit": "Payer",
       "show": "Paiement"
     },
+    "fields": {
+      "trackingId": "ID de paiement",
+      "person": "Personne",
+      "event": "Événement",
+      "kind": "Type",
+      "amount": "Montant",
+      "status": "Statut",
+      "createdAt": "Quand"
+    },
     "title": "Encaisser un paiement",
     "kind": "Paiement pour",
     "method": "Méthode",
     "momo": "Mobile money",
     "link": "Lien de paiement",
+    "username": "Nom d'utilisateur",
     "phone": "Numéro MoMo",
+    "amountPlaceholder": "Saisir le montant",
     "charge": "Lancer le paiement",
     "started": "Paiement lancé",
     "waiting": "En attente de la confirmation du paiement…",
@@ -448,10 +691,17 @@
   },
   "invite": {
     "title": "Invitation",
+    "ageRange": "Les campeurs doivent avoir {{range}} ans le premier jour de cet événement.",
     "completeProfile": "Créez un mot de passe pour ouvrir votre compte.",
+    "enterYfId": "Saisissez votre identifiant Young Foundations pour accepter l'invitation et ouvrir votre profil.",
+    "enterYfIdAndPassword": "Saisissez votre identifiant Young Foundations et créez un mot de passe. Utilisez votre e-mail et ce mot de passe pour vous reconnecter.",
     "signInToAccept": "Vous avez déjà un compte. Connectez-vous pour accepter cette invitation.",
     "completeProfileHint": "Votre nom et votre e-mail ont été ajoutés par l'organisateur. Complétez le reste depuis votre tableau de bord après connexion.",
     "createPassword": "Créer un mot de passe",
+    "yfId": "Identifiant Young Foundations",
+    "yfIdPlaceholder": "2790694",
+    "yfIdHint": "Utilisez l'ID YF de votre fiche Young Foundations, par exemple 2790694.",
+    "yfIdRequired": "Saisissez votre identifiant Young Foundations.",
     "accept": "Enregistrer et continuer",
     "accepted": "Invitation acceptée. Ouverture de votre tableau de bord…",
     "acceptedWithAccount": "Invitation acceptée. Ouverture de votre tableau de bord…",
@@ -501,7 +751,8 @@
     "description": "Soutenez un camp en consultant votre parrainage et en versant le fonds lorsqu'il est dû.",
     "homeCard": "Les événements que vous parrainez et les fonds associés.",
     "emptyTitle": "Aucun parrainage pour le moment",
-    "emptyDescription": "Lorsque vous serez invité comme parrain, l'événement et le montant apparaîtront ici."
+    "emptyDescription": "Lorsque vous serez invité comme parrain, l'événement et le montant apparaîtront ici.",
+    "sponsorCta": "Parrainer"
   },
   "profile": {
     "titles": {
@@ -514,7 +765,7 @@
     "description": "Tenez à jour vos coordonnées, votre localisation et les informations familiales.",
     "homeCard": "Mettez à jour vos informations personnelles et familiales.",
     "unavailableTitle": "Profil indisponible",
-    "unavailableDescription": "Impossible de charger votre profil. Reconnectez-vous ou contactez l'équipe."
+    "unavailableDescription": "Impossible de charger votre profil. Reconnectez-vous ou contactez un administrateur."
   },
   "portal": {
     "pay": "Payer",
@@ -542,11 +793,18 @@
         "sending": "Envoi",
         "sent": "Envoyé",
         "failed": "Échec"
+      },
+      "invitation": {
+        "queued": "En file",
+        "sent": "Envoyée",
+        "failed": "Échec",
+        "accepted": "Acceptée",
+        "expired": "Expirée"
       }
     }
   },
   "content": {
-    "translationHint": "Ajoutez le texte en anglais et en français. Le français manquant utilise l'anglais.",
+    "translationHint": "Ajoutez d'abord le français, puis l'anglais si besoin. L'anglais manquant utilise le français.",
     "languages": "Langues"
   },
   "a11y": {

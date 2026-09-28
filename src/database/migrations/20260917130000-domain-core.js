@@ -1,9 +1,17 @@
 "use strict";
 
+const {
+  ensureTable,
+  ensureColumn,
+  ensureIndex,
+  dropTableIfExists,
+  dropColumnIfExists,
+} = require("../migration-guard");
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("people", {
+    await ensureTable(queryInterface, "people", {
       id: { type: Sequelize.STRING(20), allowNull: false, primaryKey: true },
       firstName: { type: Sequelize.STRING(80), allowNull: false },
       lastName: { type: Sequelize.STRING(80), allowNull: false },
@@ -21,7 +29,7 @@ module.exports = {
       updatedAt: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.fn("NOW") },
     });
 
-    await queryInterface.addColumn("users", "personId", {
+    await ensureColumn(queryInterface, "users", "personId", {
       type: Sequelize.STRING(20),
       allowNull: true,
       references: { model: "people", key: "id" },
@@ -29,30 +37,30 @@ module.exports = {
       onDelete: "SET NULL",
     });
 
-    await queryInterface.addColumn("events", "requiresParticipantFee", {
+    await ensureColumn(queryInterface, "events", "requiresParticipantFee", {
       type: Sequelize.BOOLEAN,
       allowNull: false,
       defaultValue: false,
     });
-    await queryInterface.addColumn("events", "participantFeeAmount", {
+    await ensureColumn(queryInterface, "events", "participantFeeAmount", {
       type: Sequelize.DECIMAL(10, 2),
       allowNull: true,
     });
-    await queryInterface.addColumn("events", "currency", {
+    await ensureColumn(queryInterface, "events", "currency", {
       type: Sequelize.STRING(3),
       allowNull: false,
       defaultValue: "XAF",
     });
-    await queryInterface.addColumn("events", "coordinatorFundAmount", {
+    await ensureColumn(queryInterface, "events", "coordinatorFundAmount", {
       type: Sequelize.DECIMAL(10, 2),
       allowNull: true,
     });
-    await queryInterface.addColumn("events", "sponsorFundAmount", {
+    await ensureColumn(queryInterface, "events", "sponsorFundAmount", {
       type: Sequelize.DECIMAL(10, 2),
       allowNull: true,
     });
 
-    await queryInterface.createTable("emergency_contacts", {
+    await ensureTable(queryInterface, "emergency_contacts", {
       id: { type: Sequelize.STRING(20), allowNull: false, primaryKey: true },
       personId: {
         type: Sequelize.STRING(20),
@@ -68,7 +76,7 @@ module.exports = {
       updatedAt: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.fn("NOW") },
     });
 
-    await queryInterface.createTable("event_memberships", {
+    await ensureTable(queryInterface, "event_memberships", {
       id: { type: Sequelize.STRING(20), allowNull: false, primaryKey: true },
       eventId: {
         type: Sequelize.STRING(20),
@@ -89,12 +97,12 @@ module.exports = {
       createdAt: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.fn("NOW") },
       updatedAt: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.fn("NOW") },
     });
-    await queryInterface.addIndex("event_memberships", ["eventId", "personId", "kind"], {
+    await ensureIndex(queryInterface, "event_memberships", ["eventId", "personId", "kind"], {
       unique: true,
       name: "event_memberships_event_person_kind",
     });
 
-    await queryInterface.createTable("mailing_lists", {
+    await ensureTable(queryInterface, "mailing_lists", {
       id: { type: Sequelize.STRING(20), allowNull: false, primaryKey: true },
       name: { type: Sequelize.STRING(128), allowNull: false },
       description: { type: Sequelize.STRING(255), allowNull: true },
@@ -110,7 +118,7 @@ module.exports = {
       updatedAt: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.fn("NOW") },
     });
 
-    await queryInterface.createTable("mailing_list_members", {
+    await ensureTable(queryInterface, "mailing_list_members", {
       id: { type: Sequelize.STRING(20), allowNull: false, primaryKey: true },
       mailingListId: {
         type: Sequelize.STRING(20),
@@ -129,12 +137,12 @@ module.exports = {
       createdAt: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.fn("NOW") },
       updatedAt: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.fn("NOW") },
     });
-    await queryInterface.addIndex("mailing_list_members", ["mailingListId", "personId"], {
+    await ensureIndex(queryInterface, "mailing_list_members", ["mailingListId", "personId"], {
       unique: true,
       name: "mailing_list_members_list_person",
     });
 
-    await queryInterface.createTable("invitation_batches", {
+    await ensureTable(queryInterface, "invitation_batches", {
       id: { type: Sequelize.STRING(20), allowNull: false, primaryKey: true },
       eventId: {
         type: Sequelize.STRING(20),
@@ -166,7 +174,7 @@ module.exports = {
       updatedAt: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.fn("NOW") },
     });
 
-    await queryInterface.createTable("invitations", {
+    await ensureTable(queryInterface, "invitations", {
       id: { type: Sequelize.STRING(20), allowNull: false, primaryKey: true },
       batchId: {
         type: Sequelize.STRING(20),
@@ -199,11 +207,11 @@ module.exports = {
       createdAt: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.fn("NOW") },
       updatedAt: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.fn("NOW") },
     });
-    await queryInterface.addIndex("invitations", ["eventId", "personId", "kind"], {
+    await ensureIndex(queryInterface, "invitations", ["eventId", "personId", "kind"], {
       name: "invitations_event_person_kind",
     });
 
-    await queryInterface.createTable("payments", {
+    await ensureTable(queryInterface, "payments", {
       id: { type: Sequelize.STRING(20), allowNull: false, primaryKey: true },
       eventId: {
         type: Sequelize.STRING(20),
@@ -230,19 +238,19 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable("payments");
-    await queryInterface.dropTable("invitations");
-    await queryInterface.dropTable("invitation_batches");
-    await queryInterface.dropTable("mailing_list_members");
-    await queryInterface.dropTable("mailing_lists");
-    await queryInterface.dropTable("event_memberships");
-    await queryInterface.dropTable("emergency_contacts");
-    await queryInterface.removeColumn("events", "sponsorFundAmount");
-    await queryInterface.removeColumn("events", "coordinatorFundAmount");
-    await queryInterface.removeColumn("events", "currency");
-    await queryInterface.removeColumn("events", "participantFeeAmount");
-    await queryInterface.removeColumn("events", "requiresParticipantFee");
-    await queryInterface.removeColumn("users", "personId");
-    await queryInterface.dropTable("people");
+    await dropTableIfExists(queryInterface, "payments");
+    await dropTableIfExists(queryInterface, "invitations");
+    await dropTableIfExists(queryInterface, "invitation_batches");
+    await dropTableIfExists(queryInterface, "mailing_list_members");
+    await dropTableIfExists(queryInterface, "mailing_lists");
+    await dropTableIfExists(queryInterface, "event_memberships");
+    await dropTableIfExists(queryInterface, "emergency_contacts");
+    await dropColumnIfExists(queryInterface, "events", "sponsorFundAmount");
+    await dropColumnIfExists(queryInterface, "events", "coordinatorFundAmount");
+    await dropColumnIfExists(queryInterface, "events", "currency");
+    await dropColumnIfExists(queryInterface, "events", "participantFeeAmount");
+    await dropColumnIfExists(queryInterface, "events", "requiresParticipantFee");
+    await dropColumnIfExists(queryInterface, "users", "personId");
+    await dropTableIfExists(queryInterface, "people");
   },
 };

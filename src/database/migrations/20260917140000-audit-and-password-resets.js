@@ -1,9 +1,11 @@
 "use strict";
 
+const { ensureTable, ensureIndex, dropTableIfExists } = require("../migration-guard");
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("audit_logs", {
+    await ensureTable(queryInterface, "audit_logs", {
       id: { type: Sequelize.STRING(20), allowNull: false, primaryKey: true },
       actorId: {
         type: Sequelize.STRING(20),
@@ -24,14 +26,14 @@ module.exports = {
       },
     });
 
-    await queryInterface.addIndex("audit_logs", ["entity", "entityId"], {
+    await ensureIndex(queryInterface, "audit_logs", ["entity", "entityId"], {
       name: "audit_logs_entity_entity_id",
     });
-    await queryInterface.addIndex("audit_logs", ["createdAt"], {
+    await ensureIndex(queryInterface, "audit_logs", ["createdAt"], {
       name: "audit_logs_created_at",
     });
 
-    await queryInterface.createTable("password_resets", {
+    await ensureTable(queryInterface, "password_resets", {
       id: { type: Sequelize.STRING(20), allowNull: false, primaryKey: true },
       userId: {
         type: Sequelize.STRING(20),
@@ -52,7 +54,7 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable("password_resets");
-    await queryInterface.dropTable("audit_logs");
+    await dropTableIfExists(queryInterface, "password_resets");
+    await dropTableIfExists(queryInterface, "audit_logs");
   },
 };

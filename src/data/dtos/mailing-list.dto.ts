@@ -1,8 +1,8 @@
-import { DEFAULT_LOCALE } from "@/constants/locales";
 import { z } from "zod";
 
 import { MAILING_LIST_AUDIENCE_KINDS } from "@/constants/event-participation";
 import { nanoid } from "@/lib/api/id";
+import { pickTranslatedField } from "@/lib/content-i18n/pick";
 
 const audienceKind = z.enum([
   MAILING_LIST_AUDIENCE_KINDS.CAMPER,
@@ -43,8 +43,7 @@ export const mailingListBodySchema = z.object({
 
 export const createMailingListSchema = mailingListBodySchema.superRefine(
   (value, ctx) => {
-    const name =
-      value.translations?.[DEFAULT_LOCALE]?.name?.trim() || value.name?.trim();
+    const name = pickTranslatedField(value.translations, "name", value.name);
     if (!name) {
       ctx.addIssue({ code: "custom", path: ["name"], message: "Name is required" });
     }
@@ -57,8 +56,7 @@ export const addMailingListMemberSchema = z
   .object({
     personId: z.string().trim().min(1).optional(),
     email: z.string().trim().email().toLowerCase().optional(),
-    firstName: z.string().trim().min(1).max(80).optional(),
-    lastName: z.string().trim().min(1).max(80).optional(),
+    fullName: z.string().trim().min(1).max(160).optional(),
   })
   .refine((value) => Boolean(value.personId || value.email), {
     message: "Provide a personId or email.",
@@ -86,11 +84,9 @@ export function toCreateMailingListPayload(
 ) {
   return {
     id: nanoid(),
-    name:
-      input.translations?.[DEFAULT_LOCALE]?.name?.trim() || input.name || "",
+    name: pickTranslatedField(input.translations, "name", input.name) || "",
     description:
-      input.translations?.[DEFAULT_LOCALE]?.description?.trim() ||
-      input.description ||
+      pickTranslatedField(input.translations, "description", input.description) ||
       null,
     audienceKind: input.audienceKind ?? MAILING_LIST_AUDIENCE_KINDS.MIXED,
     createdById,
@@ -104,17 +100,23 @@ export function toUpdateMailingListPayload(input: UpdateMailingList) {
     audienceKind?: CreateMailingList["audienceKind"];
   } = {};
 
-  if (input.translations?.[DEFAULT_LOCALE]?.name || input.name !== undefined) {
+  if (
+    pickTranslatedField(input.translations, "name") ||
+    input.name !== undefined
+  ) {
     payload.name =
-      input.translations?.[DEFAULT_LOCALE]?.name?.trim() || input.name;
+      pickTranslatedField(input.translations, "name", input.name) || input.name;
   }
   if (
-    input.translations?.[DEFAULT_LOCALE]?.description !== undefined ||
+    pickTranslatedField(input.translations, "description") ||
     input.description !== undefined
   ) {
     payload.description =
-      input.translations?.[DEFAULT_LOCALE]?.description?.trim() ||
-      input.description;
+      pickTranslatedField(
+        input.translations,
+        "description",
+        input.description
+      ) || input.description;
   }
   if (input.audienceKind !== undefined) payload.audienceKind = input.audienceKind;
 

@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslate } from "@refinedev/core";
 
+import { GUEST_PROFILE_PATH } from "@/constants/guest-portal";
 import { usePasswordPair } from "@/hooks/auth/use-password-pair.hook";
 import { useLocale } from "@/hooks/core/use-locale.hook";
 import { apiErrorMessage, apiGet, apiPost } from "@/lib/client/api";
-import { invitationApiPath } from "@/lib/invitations/paths";
+import { invitationApiPath, localizedInvitePath } from "@/lib/invitations/paths";
 import { normalizeInviteToken } from "@/lib/invitations/token";
+import { normalizeYfId } from "@/lib/people/yf-id";
 import {
   sessionFromInvite,
   type InvitePayload,
@@ -22,12 +24,46 @@ export function useInviteAcceptance() {
   const token = normalizeInviteToken(String(params.token ?? ""));
   const [payload, setPayload] = useState<InvitePayload | null>(null);
   const [message, setMessage] = useState("");
+  const [yfId, setYfId] = useState("");
   const [busy, setBusy] = useState(false);
   const passwords = usePasswordPair();
   const acceptedRef = useRef(false);
 
+  const needsYfId = Boolean(payload?.needsYfId);
   const needsPassword = Boolean(payload?.needsPassword);
-  const invitePath = `/${locale}/invite/${encodeURIComponent(token)}`;
+  const invitePath = localizedInvitePath(locale, token);
+  const profilePath = path(GUEST_PROFILE_PATH);
+  const yfIdValue = normalizeYfId(yfId);
+
+  const applyResult = useCallback(
+    (result: InvitePayload) => {
+      const session = sessionFromInvite(result);
+      if (session) {
+        enterSession(session, profilePath);
+        return;
+      }
+      setPayload(result);
+      setMessage(translate("invite.accepted"));
+    },
+    [profilePath, translate]
+  );
+
+  const postAccept = useCallback(
+    async (body: Record<string, string>) => {
+      setBusy(true);
+      try {
+        applyResult(
+          await apiPost<InvitePayload>(invitationApiPath(token), body)
+        );
+      } catch (error) {
+        acceptedRef.current = false;
+        setMessage(apiErrorMessage(error, translate("invite.failed")));
+      } finally {
+        setBusy(false);
+      }
+    },
+    [applyResult, token, translate]
+  );
 
   useEffect(() => {
     if (!token) {
@@ -43,6 +79,7 @@ export function useInviteAcceptance() {
   useEffect(() => {
     if (
       !payload ||
+      payload.needsYfId ||
       payload.needsPassword ||
       acceptedRef.current ||
       !getSession()?.token
@@ -50,51 +87,35 @@ export function useInviteAcceptance() {
       return;
     }
     acceptedRef.current = true;
-    setBusy(true);
-    apiPost<InvitePayload>(invitationApiPath(token), {})
-      .then((result) => {
-        const session = sessionFromInvite(result);
-        if (session) {
-          enterSession(session, path("/dashboard"));
-          return;
-        }
-        setPayload(result);
-        setMessage(translate("invite.accepted"));
-      })
-      .catch((error) => {
-        acceptedRef.current = false;
-        setMessage(apiErrorMessage(error, translate("invite.failed")));
-      })
-      .finally(() => setBusy(false));
-  }, [path, payload, token, translate]);
+    void postAccept({});
+  }, [payload, postAccept]);
 
   async function accept(event: React.FormEvent) {
     event.preventDefault();
-    if (!token || !payload?.needsPassword) {
+    if (!token) {
       return;
     }
-    if (!passwords.matches) {
-      setMessage(translate("auth.passwordsDontMatch"));
-      return;
-    }
-    setBusy(true);
-    try {
-      const result = await apiPost<InvitePayload>(invitationApiPath(token), {
-        password: passwords.password,
-        confirmPassword: passwords.confirmPassword,
-      });
-      const session = sessionFromInvite(result);
-      if (session) {
-        enterSession(session, path("/dashboard"));
+    if (needsYfId) {
+      if (!yfIdValue) {
+        setMessage(translate("invite.yfIdRequired"));
         return;
       }
-      setPayload(result);
-      setMessage(translate("invite.accepted"));
-    } catch (error) {
-      setMessage(apiErrorMessage(error, translate("invite.failed")));
-    } finally {
-      setBusy(false);
     }
+    if (needsPassword) {
+      if (!passwords.matches) {
+        setMessage(translate("auth.passwordsDontMatch"));
+        return;
+      }
+    }
+    const body: Record<string, string> = {};
+    if (needsYfId) {
+      body.yfId = yfIdValue;
+    }
+    if (needsPassword) {
+      body.password = passwords.password;
+      body.confirmPassword = passwords.confirmPassword;
+    }
+    await postAccept(body);
   }
 
   return {
@@ -102,10 +123,17 @@ export function useInviteAcceptance() {
     message,
     busy,
     passwords,
+    yfId,
+    setYfId,
+    needsYfId,
     needsPassword,
     invitePath,
     signedIn: Boolean(getSession()?.token),
-    canSubmit: !busy && passwords.ready,
+    canSubmit:
+      !busy &&
+      (needsYfId ? Boolean(yfIdValue) : true) &&
+      (needsPassword ? passwords.ready : true) &&
+      (needsYfId || needsPassword),
     submit: accept,
   };
 }

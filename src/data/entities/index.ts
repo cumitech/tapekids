@@ -1,5 +1,6 @@
 import { sequelize } from "@/database/db-sequelize.config";
 
+import { AppSetting, initAppSetting } from "./app-setting";
 import { AuditLog, initAuditLog } from "./audit-log";
 import {
   ContentTranslation,
@@ -16,6 +17,12 @@ import { initPasswordReset, PasswordReset } from "./password-reset";
 import { initPayment, Payment } from "./payment";
 import { initPerson, Person } from "./person";
 import { initUser, User } from "./user";
+import { initSponsor, Sponsor } from "./sponsor";
+import {
+  initWaitingList,
+  WAITING_LIST_STATUS,
+  WaitingListEntry,
+} from "./waiting-list";
 
 let initialized = false;
 
@@ -37,6 +44,9 @@ export function initEntities() {
   initPayment(sequelize);
   initAuditLog(sequelize);
   initPasswordReset(sequelize);
+  initAppSetting(sequelize);
+  initWaitingList(sequelize);
+  initSponsor(sequelize);
 
   Person.hasOne(User, {
     foreignKey: "personId",
@@ -210,10 +220,39 @@ export function initEntities() {
     as: "user",
   });
 
+  Person.hasMany(Sponsor, {
+    foreignKey: "personId",
+    as: "sponsorshipGifts",
+    onDelete: "CASCADE",
+  });
+  Sponsor.belongsTo(Person, {
+    foreignKey: "personId",
+    as: "person",
+  });
+  Event.hasMany(Sponsor, {
+    foreignKey: "eventId",
+    as: "sponsorshipGifts",
+    onDelete: "CASCADE",
+  });
+  Sponsor.belongsTo(Event, {
+    foreignKey: "eventId",
+    as: "event",
+  });
+  Payment.hasOne(Sponsor, {
+    foreignKey: "paymentId",
+    as: "sponsor",
+    onDelete: "SET NULL",
+  });
+  Sponsor.belongsTo(Payment, {
+    foreignKey: "paymentId",
+    as: "payment",
+  });
+
   initialized = true;
 }
 
 export {
+  AppSetting,
   AuditLog,
   ContentTranslation,
   EmergencyContact,
@@ -226,5 +265,8 @@ export {
   PasswordReset,
   Payment,
   Person,
+  Sponsor,
   User,
+  WAITING_LIST_STATUS,
+  WaitingListEntry,
 };

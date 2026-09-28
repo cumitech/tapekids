@@ -2,7 +2,7 @@
 const nextConfig = {
   output: "standalone",
   outputFileTracingRoot: process.cwd(),
-  serverExternalPackages: ["sequelize", "mysql2", "bcryptjs", "mailgun.js", "form-data"],
+  serverExternalPackages: ["sequelize", "mysql2", "bcryptjs", "mailgun.js", "form-data", "xlsx"],
   async headers() {
     return [
       {

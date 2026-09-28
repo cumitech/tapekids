@@ -1,5 +1,7 @@
 import type { EventMembershipKind } from "@/constants/event-participation";
-import type { AppLocale } from "@/constants/locales";
+import { DEFAULT_LOCALE, type AppLocale } from "@/constants/locales";
+import { copyFieldsForLocale } from "@/lib/content-i18n/pick";
+import { invitationLinkValidityCopy } from "@/lib/invitations/expiry";
 import { mailGreeting } from "@/lib/mail/greeting";
 import { htmlToPlainText } from "@/lib/html";
 import { renderTransactionalMailHtml } from "@/lib/mail/layout";
@@ -10,20 +12,26 @@ export type InvitationDraft = {
   body: Record<AppLocale, string>;
 };
 
+const EVENT_DRAFT_FIELDS = ["title", "summary", "venue"] as const;
+
 function copyFor(event: Event, locale: AppLocale) {
-  const translated = event.translations?.[locale];
-  return {
-    title: translated?.title || (locale === "en" ? event.title : "") || event.title,
-    summary:
-      translated?.summary || (locale === "en" ? event.summary : "") || event.summary,
-    venue: translated?.venue || (locale === "en" ? event.venue : "") || event.venue,
-  };
+  return copyFieldsForLocale(
+    event.translations,
+    locale,
+    EVENT_DRAFT_FIELDS,
+    {
+      title: event.title,
+      summary: event.summary,
+      venue: event.venue,
+    },
+    { alwaysUseRoot: true }
+  );
 }
 
 export function formatEventRange(
   startsAt?: string | Date | null,
   endsAt?: string | Date | null,
-  locale: AppLocale = "en"
+  locale: AppLocale = DEFAULT_LOCALE
 ) {
   if (!startsAt) {
     return "";
@@ -86,6 +94,7 @@ export function invitationDrafts(
     summaryEn ? `<p>${summaryEn}</p>` : "",
     "<p>This gathering is for young Christians walking with Christ, anchored in the Word brought by God’s prophet, William Marrion Branham. Place God and His Word first, stay away from the world, and encourage one another.</p>",
     "<p>Open the invitation to confirm a place.</p>",
+    `<p>${invitationLinkValidityCopy("en")}</p>`,
   ]
     .filter(Boolean)
     .join("");
@@ -95,20 +104,44 @@ export function invitationDrafts(
     summaryFr ? `<p>${summaryFr}</p>` : "",
     "<p>Ce rassemblement est pour les jeunes chrétiens qui marchent avec Christ, ancrés dans la Parole apportée par le prophète de Dieu, William Marrion Branham. Placez Dieu et Sa Parole en premier, restez séparés du monde, et encouragez-vous les uns les autres.</p>",
     "<p>Ouvrez l'invitation pour confirmer une place.</p>",
+    `<p>${invitationLinkValidityCopy("fr")}</p>`,
   ]
     .filter(Boolean)
     .join("");
 
   return {
     subject: {
-      en: `You are invited to ${en.title}`,
       fr: `Vous êtes invités à ${fr.title || en.title}`,
+      en: `You are invited to ${en.title}`,
     },
     body: {
-      en: bodyEn,
       fr: bodyFr,
+      en: bodyEn,
     },
   };
+}
+
+export function invitationMailDetails(
+  input: {
+    eventTitle: string;
+    eventVenue?: string | null;
+    eventCity?: string | null;
+    startsAt?: string | Date | null;
+    endsAt?: string | Date | null;
+  },
+  locale: AppLocale
+) {
+  const where = [input.eventVenue, input.eventCity].filter(Boolean).join(", ");
+  const when = formatEventRange(input.startsAt, input.endsAt, locale);
+  return [
+    { label: locale === "fr" ? "Événement" : "Event", value: input.eventTitle },
+    { label: locale === "fr" ? "Quand" : "When", value: when },
+    { label: locale === "fr" ? "Où" : "Where", value: where },
+    {
+      label: locale === "fr" ? "Lien" : "Link",
+      value: invitationLinkValidityCopy(locale),
+    },
+  ];
 }
 
 export function invitationPreviewHtml(input: {
@@ -122,21 +155,15 @@ export function invitationPreviewHtml(input: {
   body: string;
   locale?: AppLocale;
 }): string {
-  const locale = input.locale ?? "en";
+  const locale = input.locale ?? DEFAULT_LOCALE;
   const greeting = mailGreeting(input.firstName);
-  const where = [input.eventVenue, input.eventCity].filter(Boolean).join(", ");
-  const when = formatEventRange(input.startsAt, input.endsAt, locale);
   return renderTransactionalMailHtml({
     locale,
     headerTitle: locale === "fr" ? "Vous êtes invités" : "You are invited",
     preheader: input.subject,
     greeting,
     htmlBody: input.body,
-    details: [
-      { label: locale === "fr" ? "Événement" : "Event", value: input.eventTitle },
-      { label: locale === "fr" ? "Quand" : "When", value: when },
-      { label: locale === "fr" ? "Où" : "Where", value: where },
-    ],
+    details: invitationMailDetails(input, locale),
     cta: {
       label: locale === "fr" ? "Accepter l'invitation" : "Accept invitation",
       url: "#",

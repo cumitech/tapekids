@@ -1,5 +1,4 @@
 import {
-  ClipboardList,
   HeartHandshake,
   Shield,
   Sparkles,
@@ -8,7 +7,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-export type PortalTone = "camp" | "sponsor" | "staff" | "admin" | "guest" | "profile";
+export type PortalTone = "camp" | "sponsor" | "admin" | "guest" | "profile";
 
 export const PORTAL_TONES: Record<
   PortalTone,
@@ -30,12 +29,6 @@ export const PORTAL_TONES: Record<
     glow: "bg-chart-4/45",
     iconWrap: "bg-white/15 text-white",
     Icon: HeartHandshake,
-  },
-  staff: {
-    hero: "bg-gradient-to-br from-[#466d6b] via-[#3d6a5c] to-[#2f4f62]",
-    glow: "bg-chart-4/40",
-    iconWrap: "bg-white/15 text-white",
-    Icon: ClipboardList,
   },
   admin: {
     hero: "bg-gradient-to-br from-[#182356] via-[#3d4a8f] to-[#466d6b]",
@@ -76,27 +69,27 @@ export const PORTAL_CARD_TINTS: Record<
   { wrap: string; rail: string; meta: string }
 > = {
   navy: {
-    wrap: "bg-primary text-primary-foreground",
-    rail: "bg-primary",
-    meta: "text-primary",
+    wrap: "bg-[#182356]/10 text-[#182356] dark:bg-white/10 dark:text-white",
+    rail: "bg-[#182356] dark:bg-white/70",
+    meta: "text-[#182356]",
   },
   sage: {
-    wrap: "bg-secondary text-secondary-foreground",
-    rail: "bg-secondary",
-    meta: "text-secondary",
+    wrap: "bg-[#466d6b]/12 text-[#3d5c5a] dark:bg-[#94bfc8]/15 dark:text-[#d5eeea]",
+    rail: "bg-[#466d6b]",
+    meta: "text-[#3d5c5a]",
   },
   amber: {
-    wrap: "bg-warning text-warning-foreground",
-    rail: "bg-warning",
-    meta: "text-warning-foreground",
+    wrap: "bg-[#f59f21]/16 text-[#8a5608] dark:bg-[#f59f21]/20 dark:text-[#ffd27a]",
+    rail: "bg-[#f59f21]",
+    meta: "text-[#8a5608]",
   },
   mint: {
-    wrap: "bg-accent text-primary",
-    rail: "bg-chart-4",
-    meta: "text-primary",
+    wrap: "bg-[#466d6b]/10 text-[#2f5f55] dark:bg-[#94bfc8]/15 dark:text-[#d5eeea]",
+    rail: "bg-[#466d6b]",
+    meta: "text-[#2f5f55]",
   },
   rose: {
-    wrap: "bg-destructive/15 text-destructive",
+    wrap: "bg-destructive/10 text-destructive",
     rail: "bg-destructive",
     meta: "text-destructive",
   },
@@ -104,9 +97,14 @@ export const PORTAL_CARD_TINTS: Record<
 
 export const RESOURCE_CARD_TINT: Record<string, PortalCardTint> = {
   people: "sage",
+  "waiting-list": "amber",
   "mailing-lists": "amber",
   events: "navy",
+  payments: "mint",
+  sponsors: "mint",
+  reports: "amber",
   "audit-logs": "rose",
+  "app-settings": "navy",
   profile: "sage",
 };
 
@@ -114,6 +112,10 @@ export const RESOURCE_HEROES: Record<string, { hero: string; glow: string }> = {
   people: {
     hero: "bg-gradient-to-r from-[#466d6b] via-[#2f4f62] to-[#182356]",
     glow: "bg-chart-4/40",
+  },
+  "waiting-list": {
+    hero: "bg-gradient-to-r from-[#182356] via-[#3d4a8f] to-[#f59f21]",
+    glow: "bg-warning/40",
   },
   events: {
     hero: "bg-gradient-to-r from-[#182356] via-[#24356e] to-[#466d6b]",
@@ -123,8 +125,24 @@ export const RESOURCE_HEROES: Record<string, { hero: string; glow: string }> = {
     hero: "bg-gradient-to-r from-[#182356] via-[#3d4a8f] to-[#f59f21]",
     glow: "bg-warning/40",
   },
+  payments: {
+    hero: "bg-gradient-to-r from-[#182356] via-[#2f5f55] to-[#466d6b]",
+    glow: "bg-chart-4/35",
+  },
+  sponsors: {
+    hero: "bg-gradient-to-r from-[#466d6b] via-[#24356e] to-[#182356]",
+    glow: "bg-chart-4/40",
+  },
+  reports: {
+    hero: "bg-gradient-to-r from-[#182356] via-[#3d4a8f] to-[#f59f21]",
+    glow: "bg-warning/40",
+  },
   "audit-logs": {
     hero: "bg-gradient-to-r from-[#182356] via-[#4a2248] to-[#9f1239]",
     glow: "bg-destructive/40",
+  },
+  "app-settings": {
+    hero: "bg-gradient-to-r from-[#182356] via-[#24356e] to-[#466d6b]",
+    glow: "bg-chart-4/35",
   },
 };

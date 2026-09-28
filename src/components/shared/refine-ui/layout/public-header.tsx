@@ -19,9 +19,14 @@ function PublicNavLinks({
 }) {
   const { path } = useLocale();
   const translate = useTranslate();
+  const sponsors = {
+    href: path("/sponsors"),
+    label: translate("landing.sponsors"),
+  };
   const links = isAuthenticated
-    ? [{ href: path("/dashboard"), label: translate("landing.dashboard") }]
+    ? [sponsors, { href: path("/dashboard"), label: translate("landing.dashboard") }]
     : [
+        sponsors,
         { href: path("/login"), label: translate("landing.signIn") },
         { href: path("/register"), label: translate("landing.register") },
       ];
@@ -72,7 +77,7 @@ export function PublicHeader() {
           className="min-w-0 shrink text-white"
           aria-label={translate("brand.name")}
         >
-          <AppLogo className="h-8 max-w-full text-white md:h-12" />
+          <AppLogo className="h-12 max-w-full text-white" />
         </Link>
         <div className="hidden items-center gap-4 md:flex">
           <PublicNavLinks isAuthenticated={isAuthenticated} onPrimary />

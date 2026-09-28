@@ -1,4 +1,10 @@
-import { LOCALES, type AppLocale } from "@/constants/locales";
+import { CONTENT_FIELDS } from "@/constants/content-i18n";
+import { LOCALES } from "@/constants/locales";
+import {
+  copiesByLocale,
+  emptyTranslationsForm,
+  translationsPayload,
+} from "@/lib/content-i18n/pick";
 import type { EventFormValues } from "@/types/forms";
 
 export interface Event {
@@ -18,9 +24,12 @@ export interface Event {
   coordinatorFundAmount?: string | number | null;
   sponsorFundAmount?: string | number | null;
   imageUrl?: string | null;
+  eventType?: "camp" | "day_event";
+  minAge?: number | null;
+  maxAge?: number | null;
   translations?: Partial<
     Record<
-      AppLocale,
+      (typeof LOCALES)[number],
       Partial<{
         title: string;
         summary: string;
@@ -39,42 +48,38 @@ const emptyCopy = {
 };
 
 export const emptyEventForm: EventFormValues = {
-  translations: {
-    en: { ...emptyCopy },
-    fr: { ...emptyCopy },
-  },
+  translations: emptyTranslationsForm(emptyCopy),
   city: "",
   startsAt: "",
   endsAt: "",
+  eventType: "camp",
   requiresParticipantFee: false,
   participantFeeAmount: "",
   currency: "XAF",
   coordinatorFundAmount: "",
   sponsorFundAmount: "",
   imageUrl: "",
+  minAge: "",
+  maxAge: "",
   isPublished: true,
 };
 
-function copyFor(record: Event | null | undefined, locale: AppLocale) {
-  const translated = record?.translations?.[locale];
-  return {
-    title: translated?.title || (locale === "en" ? record?.title ?? "" : ""),
-    summary: translated?.summary || (locale === "en" ? record?.summary ?? "" : ""),
-    description:
-      translated?.description || (locale === "en" ? record?.description ?? "" : ""),
-    venue: translated?.venue || (locale === "en" ? record?.venue ?? "" : ""),
-  };
-}
-
 export function eventToFormValues(record?: Event | null): EventFormValues {
   return {
-    translations: {
-      en: copyFor(record, "en"),
-      fr: copyFor(record, "fr"),
-    },
+    translations: copiesByLocale(
+      record?.translations,
+      CONTENT_FIELDS.event,
+      {
+        title: record?.title,
+        summary: record?.summary,
+        description: record?.description,
+        venue: record?.venue,
+      }
+    ),
     city: record?.city ?? "",
     startsAt: record?.startsAt ? record.startsAt.slice(0, 16) : "",
     endsAt: record?.endsAt ? record.endsAt.slice(0, 16) : "",
+    eventType: record?.eventType === "day_event" ? "day_event" : "camp",
     requiresParticipantFee: Boolean(record?.requiresParticipantFee),
     participantFeeAmount:
       record?.participantFeeAmount != null
@@ -90,6 +95,8 @@ export function eventToFormValues(record?: Event | null): EventFormValues {
         ? String(record.sponsorFundAmount)
         : "",
     imageUrl: record?.imageUrl ?? "",
+    minAge: record?.minAge != null ? String(record.minAge) : "",
+    maxAge: record?.maxAge != null ? String(record.maxAge) : "",
     isPublished: record?.isPublished ?? true,
   };
 }
@@ -99,15 +106,12 @@ export function eventFormToPayload(values: EventFormValues) {
     city: values.city,
     startsAt: values.startsAt,
     endsAt: values.endsAt || null,
+    eventType: values.eventType,
     requiresParticipantFee: values.requiresParticipantFee,
     participantFeeAmount: values.participantFeeAmount || null,
     currency: values.currency || "XAF",
-    coordinatorFundAmount: values.coordinatorFundAmount || null,
-    sponsorFundAmount: values.sponsorFundAmount || null,
     imageUrl: values.imageUrl.trim() || null,
     isPublished: values.isPublished,
-    translations: Object.fromEntries(
-      LOCALES.map((locale) => [locale, values.translations[locale]])
-    ),
+    translations: translationsPayload(values.translations),
   };
 }

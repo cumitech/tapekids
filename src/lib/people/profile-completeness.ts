@@ -1,3 +1,5 @@
+import { GUEST_PROFILE_PATH } from "@/constants/guest-portal";
+
 export function filledText(value?: string | Date | null) {
   if (value instanceof Date) {
     return !Number.isNaN(value.getTime());
@@ -5,50 +7,71 @@ export function filledText(value?: string | Date | null) {
   return Boolean(value && String(value).trim());
 }
 
-export function isPersonProfileComplete(person?: {
-  firstName?: string | null;
-  lastName?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  dateOfBirth?: string | Date | null;
-  address?: string | null;
-  churchName?: string | null;
-  churchPastorName?: string | null;
-  churchAddress?: string | null;
-  town?: string | null;
-  region?: string | null;
-  division?: string | null;
-  subDivision?: string | null;
+export const PROFILE_REQUIRED_TEXT_FIELDS = [
+  "fullName",
+  "email",
+  "phone",
+  "dateOfBirth",
+  "gender",
+  "shirtSize",
+  "address",
+  "churchName",
+  "churchPastorName",
+  "churchAddress",
+  "town",
+  "region",
+  "division",
+  "subDivision",
+] as const;
+
+export type ProfileRequiredTextField =
+  (typeof PROFILE_REQUIRED_TEXT_FIELDS)[number];
+
+export const PROFILE_GEO_FIELDS = [
+  "region",
+  "division",
+  "subDivision",
+  "town",
+] as const;
+
+export type PersonProfileFields = Partial<
+  Record<ProfileRequiredTextField, string | Date | null>
+> & {
   parentGuardianName?: string | null;
   parentGuardianPhone?: string | null;
   emergencyContacts?: Array<{ name?: string | null; phone?: string | null }>;
-} | null) {
+};
+
+export function hasGuardianDetails(person?: PersonProfileFields | null) {
   if (!person) {
     return false;
   }
-
-  const hasGuardian = Boolean(
+  return Boolean(
     (person.emergencyContacts ?? []).some(
       (contact) => filledText(contact.name) && filledText(contact.phone)
     ) ||
       (filledText(person.parentGuardianName) &&
         filledText(person.parentGuardianPhone))
   );
+}
 
+export function isPersonProfileComplete(
+  person?: PersonProfileFields | null
+): boolean {
+  if (!person) {
+    return false;
+  }
   return (
-    filledText(person.firstName) &&
-    filledText(person.lastName) &&
-    filledText(person.email) &&
-    filledText(person.phone) &&
-    filledText(person.dateOfBirth) &&
-    filledText(person.address) &&
-    filledText(person.churchName) &&
-    filledText(person.churchPastorName) &&
-    filledText(person.churchAddress) &&
-    filledText(person.town) &&
-    filledText(person.region) &&
-    filledText(person.division) &&
-    filledText(person.subDivision) &&
-    hasGuardian
+    PROFILE_REQUIRED_TEXT_FIELDS.every((field) =>
+      filledText(person[field])
+    ) && hasGuardianDetails(person)
   );
+}
+
+export function requiredIfComplete(requireComplete: boolean) {
+  return requireComplete ? ({ required: true } as const) : {};
+}
+
+export function isGuestProfilePath(pathname?: string | null) {
+  return Boolean(pathname?.includes(GUEST_PROFILE_PATH));
 }

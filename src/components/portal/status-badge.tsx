@@ -43,7 +43,7 @@ export function StatusBadge({
   namespace,
 }: {
   value: string;
-  namespace: "membership" | "payment" | "batch";
+  namespace: "membership" | "payment" | "batch" | "invitation";
 }) {
   const translate = useTranslate();
   return (

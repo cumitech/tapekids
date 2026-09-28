@@ -21,10 +21,10 @@ The Refine CLI does not treat `-p` as a port. Use `PORT=5000 npm run dev` (or `s
 
 Seeded logins (password from `SEED_PASSWORD`, default `SeedPass123!`):
 
-- `superadmin@seed.kidsevent.cm` — same dashboard access as admin
-- `admin@seed.kidsevent.cm` — admin
-- `staff@seed.kidsevent.cm` — staff
-- `guest@seed.kidsevent.cm` — guest portal only
+- `superadmin@seed.kidsevent.cm`: same dashboard access as admin
+- `admin@seed.kidsevent.cm`: admin
+- `staff@seed.kidsevent.cm`: staff
+- `guest@seed.kidsevent.cm`: guest portal only
 
 Public self-registration creates a **guest** account. When Mailgun is configured, the user must confirm email before signing in. Staff accounts are created by admins (or seed), not the public form.
 

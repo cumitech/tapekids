@@ -13,7 +13,11 @@ import { EventScheduleBadge } from "@/components/events/event-schedule-badge";
 import { EventImage } from "@/components/events/event-image";
 import { StatusBadge } from "@/components/portal/status-badge";
 import { Button } from "@/components/shared/ui/button";
-import { PAYMENT_STATUSES } from "@/constants/event-participation";
+import {
+  EVENT_MEMBERSHIP_KINDS,
+  PAYMENT_STATUSES,
+} from "@/constants/event-participation";
+import { SPONSOR_AMOUNT_XAF } from "@/constants/sponsor";
 import { PORTAL_SURFACE, PORTAL_SURFACE_HOVER } from "@/constants/layout";
 import { useDashboardFormModal } from "@/hooks/core/use-dashboard-form-modal.hook";
 import { useLocale } from "@/hooks/core/use-locale.hook";
@@ -24,6 +28,7 @@ import type { MeMembership } from "@/models/me/me.model";
 type MembershipCardProps = {
   membership: MeMembership;
   personId: string;
+  accountName?: string | null;
   defaultPhone?: string | null;
   redirectPath: string;
   onPaid?: () => void;
@@ -33,6 +38,7 @@ type MembershipCardProps = {
 export function MembershipCard({
   membership,
   personId,
+  accountName,
   defaultPhone,
   redirectPath,
   onPaid,
@@ -58,10 +64,18 @@ export function MembershipCard({
       ({ close }) => (
         <PaymentCheckout
           personId={personId}
+          accountName={accountName}
           defaultPhone={defaultPhone}
+          currency={membership.currency}
           eventId={event.id}
           kind={membership.kind}
           lockSelection
+          allowAmount
+          minAmount={
+            membership.kind === EVENT_MEMBERSHIP_KINDS.SPONSOR
+              ? SPONSOR_AMOUNT_XAF
+              : undefined
+          }
           hideTitle
           endpoint="/me/payments"
           redirectPath={redirectPath}
@@ -168,7 +182,11 @@ export function MembershipCard({
                   : translate("portal.noFee")}
             </p>
           </div>
-          {due ? (
+          {paid ? (
+            <Button type="button" size="lg" disabled>
+              {translate("portal.settled")}
+            </Button>
+          ) : event ? (
             profileComplete ? (
               <Button type="button" size="lg" onClick={openPayModal}>
                 {translate("portal.pay")}

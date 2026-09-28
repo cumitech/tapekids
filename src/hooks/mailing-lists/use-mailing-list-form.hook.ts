@@ -14,13 +14,15 @@ import type { MailingListFormValues } from "@/types/forms";
 type UseMailingListFormParams = {
   mode: "create" | "edit";
   id?: BaseKey;
+  defaults?: Partial<MailingListFormValues>;
   onCancel?: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (record: MailingList) => void;
 };
 
 export function useMailingListForm({
   mode,
   id,
+  defaults,
   onCancel,
   onSuccess,
 }: UseMailingListFormParams) {
@@ -32,7 +34,7 @@ export function useMailingListForm({
     resource: "mailing-lists",
     mode,
     id,
-    emptyValues: emptyMailingListForm,
+    emptyValues: { ...emptyMailingListForm, ...defaults },
     toFormValues: mailingListToFormValues,
     toPayload: mailingListFormToPayload,
     onCancel,

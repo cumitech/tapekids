@@ -20,7 +20,7 @@ export function FormSection({
   return (
     <section
       className={cn(
-        "flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-[0_1px_4px_rgba(15,23,42,0.08)]",
+        "flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-[0_1px_4px_rgba(15,23,42,0.08)] min-w-0",
         className
       )}
     >

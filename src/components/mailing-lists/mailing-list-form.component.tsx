@@ -11,21 +11,27 @@ import { Button } from "@/components/shared/ui/button";
 import { Input } from "@/components/shared/ui/input";
 import { Textarea } from "@/components/shared/ui/textarea";
 import { MAILING_LIST_AUDIENCE_KINDS } from "@/constants/event-participation";
+import { DEFAULT_LOCALE, type AppLocale } from "@/constants/locales";
 import { useMailingListForm } from "@/hooks/mailing-lists/use-mailing-list-form.hook";
+import type { MailingList } from "@/models/mailing-lists/mailing-list.model";
+import type { MailingListFormValues } from "@/types/forms";
 import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
+import { requireAnyLocaleField } from "@/lib/content-i18n/pick";
 
 const FIELD_KEYS = ["name", "description", "audienceKind"] as const;
 
 type MailingListFormProps = {
   mode: "create" | "edit";
   id?: string;
+  defaults?: Partial<MailingListFormValues>;
   onCancel?: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (record: MailingList) => void;
 };
 
 export function MailingListForm({
   mode,
   id,
+  defaults,
   onCancel,
   onSuccess,
 }: MailingListFormProps) {
@@ -34,6 +40,7 @@ export function MailingListForm({
   const { form, onSubmit, isLoading, onCancel: cancel } = useMailingListForm({
     mode,
     id,
+    defaults,
     onCancel,
     onSuccess,
   });
@@ -47,16 +54,18 @@ export function MailingListForm({
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
       <LocalizedTabs>
-        {(locale) => (
+        {(locale: AppLocale) => (
           <>
             <FormField
               label={labels.fields.name}
               error={errors.translations?.[locale]?.name?.message}
+              required={locale === DEFAULT_LOCALE}
             >
               <Input
-                {...register(`translations.${locale}.name`, {
-                  required: locale === "en",
-                })}
+                {...register(
+                  `translations.${locale}.name`,
+                  requireAnyLocaleField(locale, "name", labels.fields.name)
+                )}
               />
             </FormField>
             <FormField label={labels.fields.description}>

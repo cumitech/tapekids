@@ -12,6 +12,7 @@ export class UserRepository {
     password: string;
     role: UserRole;
     verified?: boolean;
+    passwordChosen?: boolean;
     personId?: string | null;
   }): Promise<User> {
     return User.create(payload);
@@ -38,6 +39,12 @@ export class UserRepository {
   async markVerified(id: string): Promise<User> {
     const user = await this.findById(id);
     await user.update({ verified: true });
+    return this.findById(id);
+  }
+
+  async choosePassword(id: string, password: string): Promise<User> {
+    const user = await this.findById(id);
+    await user.update({ password, passwordChosen: true });
     return this.findById(id);
   }
 

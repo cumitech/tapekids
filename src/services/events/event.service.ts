@@ -14,11 +14,35 @@ import type { ListQuery } from "@/data/types/pagination";
 import { resolveContentLocale } from "@/lib/api/request-locale";
 import { translationsFromInput } from "@/lib/content-i18n/input";
 import { slugify } from "@/lib/api/slug";
+import { eventSpanError } from "@/lib/events/event-span";
+import { ageRangeError } from "@/lib/people/age";
+import { ValidationException } from "@/exceptions/validation.exception";
 import { sanitizeRichText } from "@/lib/sanitize-html";
 import { auditService } from "@/services/audit/audit.service";
 
 const eventRepository = new EventRepository();
 const eventMembershipRepository = new EventMembershipRepository();
+
+function assertEventSpan(
+  eventType: string | null | undefined,
+  startsAt: Date | string | null | undefined,
+  endsAt: Date | string | null | undefined
+) {
+  const message = eventSpanError(eventType, startsAt, endsAt);
+  if (message) {
+    throw new ValidationException(message);
+  }
+}
+
+function assertAgeRange(
+  minAge: number | null | undefined,
+  maxAge: number | null | undefined
+) {
+  const message = ageRangeError(minAge, maxAge);
+  if (message) {
+    throw new ValidationException(message);
+  }
+}
 
 function eventTranslations(input: {
   translations?: {
@@ -96,6 +120,8 @@ export class EventService {
   async create(body: unknown, createdById: string) {
     const input = parseCreateEvent(body);
     const payload = toCreatePayload(input, createdById);
+    assertAgeRange(payload.minAge, payload.maxAge);
+    assertEventSpan(payload.eventType, payload.startsAt, payload.endsAt);
     payload.slug = await this.uniqueSlug(payload.slug);
     const event = await eventRepository.create(payload);
     await contentTranslationRepository.replace(
@@ -117,6 +143,15 @@ export class EventService {
     const before = await eventRepository.findById(id);
     const input = parseUpdateEvent(body);
     const payload = toUpdatePayload(input);
+    assertAgeRange(
+      payload.minAge !== undefined ? payload.minAge : before.minAge,
+      payload.maxAge !== undefined ? payload.maxAge : before.maxAge
+    );
+    assertEventSpan(
+      payload.eventType ?? before.eventType,
+      payload.startsAt ?? before.startsAt,
+      payload.endsAt !== undefined ? payload.endsAt : before.endsAt
+    );
     if (payload.slug) {
       payload.slug = await this.uniqueSlug(payload.slug, id);
     }

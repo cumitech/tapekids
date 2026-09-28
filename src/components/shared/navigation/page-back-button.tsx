@@ -11,11 +11,13 @@ import { cn } from "@/lib/utils";
 type PageBackButtonProps = {
   className?: string;
   fallbackHref?: string;
+  href?: string;
 };
 
 export function PageBackButton({
   className,
   fallbackHref = "/dashboard",
+  href,
 }: PageBackButtonProps) {
   const back = useBack();
   const router = useRouter();
@@ -27,6 +29,10 @@ export function PageBackButton({
       variant="ghost"
       size="icon"
       onClick={() => {
+        if (href) {
+          router.push(path(href));
+          return;
+        }
         if (typeof window !== "undefined" && window.history.length > 1) {
           back();
           return;

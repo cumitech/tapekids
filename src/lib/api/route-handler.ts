@@ -8,7 +8,7 @@ import {
   requestPath,
   runWithRequestContext,
 } from "@/lib/api/request-context";
-import { requireAdmin, requireStaffOrAdmin, requireUser } from "@/lib/api/session";
+import { requireAdmin, requireUser } from "@/lib/api/session";
 import { isClientError } from "@/lib/api/app-error";
 import { logger } from "@/lib/logger";
 
@@ -106,15 +106,6 @@ export function authedRoute<P extends Params = Params>(
   return wrapRoute<P>(
     (args) => handler(args as AuthedRouteArgs<P>),
     { auth: requireUser }
-  );
-}
-
-export function staffRoute<P extends Params = Params>(
-  handler: (args: AuthedRouteArgs<P>) => Promise<Response>
-) {
-  return wrapRoute<P>(
-    (args) => handler(args as AuthedRouteArgs<P>),
-    { auth: requireStaffOrAdmin }
   );
 }
 

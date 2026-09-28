@@ -23,22 +23,23 @@ export type PaymentRow = {
   amount: string;
   currency: string;
   status: string;
+  trackingId?: string;
   providerRef?: string | null;
-  person?: { firstName: string; lastName: string; email: string };
+  person?: { fullName?: string; email?: string };
   event?: { id: string; title: string };
 };
 
 type PaymentListProps = {
   eventId?: string;
   personId?: string;
-  source?: "staff" | "self";
+  source?: "admin" | "self";
   compact?: boolean;
 };
 
 export function PaymentList({
   eventId,
   personId,
-  source = "staff",
+  source = "admin",
   compact = false,
 }: PaymentListProps) {
   const translate = useTranslate();
@@ -125,17 +126,24 @@ export function PaymentList({
                   : isSelf
                     ? translate("portal.unknownEvent")
                     : row.person
-                      ? `${row.person.firstName} ${row.person.lastName}`
+                      ? row.person.fullName || row.person.email || row.personId
                       : row.personId}
               </p>
               <p className="mt-0.5 text-sm text-muted-foreground">
                 {!isSelf && row.person
-                  ? `${row.person.firstName} ${row.person.lastName} · `
+                  ? `${row.person.fullName || row.person.email || row.personId} · `
                   : ""}
                 {translate(
                   `payments.kinds.${membershipKindFromPaymentKind(row.kind as PaymentKind)}`
                 )}{" "}
                 · {formatMoney(row.amount, row.currency)}
+                {row.trackingId ? (
+                  <>
+                    {" "}
+                    ·{" "}
+                    <span className="font-mono">{row.trackingId}</span>
+                  </>
+                ) : null}
               </p>
             </div>
             <div

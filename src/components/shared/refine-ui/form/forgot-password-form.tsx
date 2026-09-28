@@ -7,6 +7,7 @@ import { useForgotPassword, useLink, useTranslate } from "@refinedev/core";
 import { AuthFormFrame } from "@/components/shared/refine-ui/form/auth-form-frame";
 import { Button } from "@/components/shared/ui/button";
 import { Input } from "@/components/shared/ui/input";
+import { RequiredMark } from "@/components/shared/form/required-mark";
 import { Label } from "@/components/shared/ui/label";
 import {
   CardContent,
@@ -47,7 +48,10 @@ export const ForgotPasswordForm = () => {
       <CardContent className="px-0">
         <form onSubmit={handleForgotPassword}>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="email">{translate("auth.email")}</Label>
+            <Label htmlFor="email">
+              {translate("auth.email")}
+              <RequiredMark required />
+            </Label>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
                 id="email"

@@ -1,20 +1,18 @@
-const CACHE = "kec-static-v2";
+const CACHE = "kec-static-v3";
 const PRECACHE = [
-  "/favicon.svg",
   "/favicon.ico",
   "/favicon-16x16.png",
   "/favicon-32x32.png",
   "/apple-touch-icon.png",
-  "/icons/icon.svg",
+  "/logo.png",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
   "/icons/icon-512-maskable.png",
   "/icons/apple-touch-icon.png",
-  "/logo-v3.svg",
   "/manifest.webmanifest",
 ];
 
-const STATIC_PREFIXES = ["/favicon", "/icons/", "/logo-v3.svg", "/manifest.webmanifest", "/apple-touch-icon", "/browserconfig.xml"];
+const STATIC_PREFIXES = ["/favicon", "/icons/", "/logo.png", "/manifest.webmanifest", "/apple-touch-icon", "/browserconfig.xml"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

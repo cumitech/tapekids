@@ -126,8 +126,7 @@ export class MailingListService {
       ? await personRepository.findById(input.personId)
       : await personService.findOrCreateByEmail({
           email: input.email!,
-          firstName: input.firstName,
-          lastName: input.lastName,
+          fullName: input.fullName,
         });
 
     const member = await mailingListMemberRepository.add({
@@ -178,7 +177,7 @@ export class MailingListService {
         const matches = await personRepository.list({
           offset: 0,
           limit: 1,
-          sort: "lastName",
+          sort: "fullName",
           order: "ASC",
           q: filters.q,
           eq: Object.keys(eq).length ? eq : undefined,

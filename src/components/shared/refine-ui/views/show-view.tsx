@@ -1,6 +1,6 @@
 "use client";
 
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 
 import { useResourceParams } from "@refinedev/core";
 
@@ -26,6 +26,12 @@ type ShowViewHeaderProps = PropsWithChildren<{
   title?: string;
   wrapperClassName?: string;
   headerClassName?: string;
+  stats?: {
+    label: string;
+    value: string | number;
+    accent?: "glass" | "ivory" | "gold";
+  }[];
+  ornament?: ReactNode;
   onEdit?: () => void;
 }>;
 
@@ -33,6 +39,8 @@ export const ShowViewHeader = ({
   resource: resourceFromProps,
   title: titleFromProps,
   wrapperClassName,
+  stats,
+  ornament,
   onEdit,
 }: ShowViewHeaderProps) => {
   const { resource, identifier } = useResourceParams({
@@ -47,6 +55,8 @@ export const ShowViewHeader = ({
     <ResourceHero
       resource={resourceName}
       title={title}
+      stats={stats}
+      ornament={ornament}
       showBack
       className={wrapperClassName}
       actions={

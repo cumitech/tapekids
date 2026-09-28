@@ -1,12 +1,13 @@
-import { DEFAULT_LOCALE } from "@/constants/locales";
 import { z } from "zod";
 
 import type { EventScheduleStatus } from "@/constants/event-schedule";
 import { nanoid } from "@/lib/api/id";
 import { slugify } from "@/lib/api/slug";
+import { pickTranslatedField } from "@/lib/content-i18n/pick";
 import { eventScheduleStatus } from "@/lib/events/event-schedule";
 import { isEmptyHtml } from "@/lib/html";
 import { sanitizeRichText } from "@/lib/sanitize-html";
+import { ageBoundError, parseAgeBound } from "@/lib/people/age";
 import { eventImageSrc } from "@/lib/uploads/event-image";
 
 const optionalImagePath = z
@@ -20,6 +21,16 @@ const optionalImagePath = z
   ])
   .nullable()
   .optional();
+
+const ageBoundField = z
+  .union([z.number(), z.string(), z.null()])
+  .optional()
+  .superRefine((value, ctx) => {
+    const message = ageBoundError(value);
+    if (message) {
+      ctx.addIssue({ code: "custom", message });
+    }
+  });
 
 const eventLocaleCopySchema = z.object({
   title: z.string().max(128).optional(),
@@ -44,6 +55,7 @@ export const eventBodySchema = z.object({
   city: z.string().trim().min(1).max(80),
   startsAt: z.coerce.date(),
   endsAt: z.coerce.date().nullable().optional(),
+  eventType: z.enum(["camp", "day_event"]).optional(),
   isPublished: z.boolean().optional(),
   requiresParticipantFee: z.boolean().optional(),
   participantFeeAmount: z.union([z.string(), z.number()]).nullable().optional(),
@@ -51,18 +63,25 @@ export const eventBodySchema = z.object({
   coordinatorFundAmount: z.union([z.string(), z.number()]).nullable().optional(),
   sponsorFundAmount: z.union([z.string(), z.number()]).nullable().optional(),
   imageUrl: optionalImagePath,
+  minAge: ageBoundField,
+  maxAge: ageBoundField,
   translations: eventTranslationsSchema,
 });
 
 export const createEventSchema = eventBodySchema.superRefine((value, ctx) => {
-  const title =
-    value.translations?.[DEFAULT_LOCALE]?.title?.trim() || value.title?.trim();
-  const summary =
-    value.translations?.[DEFAULT_LOCALE]?.summary?.trim() || value.summary?.trim();
-  const description =
-    value.translations?.[DEFAULT_LOCALE]?.description || value.description;
-  const venue =
-    value.translations?.[DEFAULT_LOCALE]?.venue?.trim() || value.venue?.trim();
+  const title = pickTranslatedField(value.translations, "title", value.title);
+  const summary = pickTranslatedField(
+    value.translations,
+    "summary",
+    value.summary
+  );
+  const description = pickTranslatedField(
+    value.translations,
+    "description",
+    value.description,
+    { html: true }
+  );
+  const venue = pickTranslatedField(value.translations, "venue", value.venue);
 
   if (!title) {
     ctx.addIssue({ code: "custom", path: ["title"], message: "Title is required" });
@@ -101,6 +120,7 @@ export type EventCreatePayload = {
   city: string;
   startsAt: Date;
   endsAt: Date | null;
+  eventType: "camp" | "day_event";
   isPublished: boolean;
   requiresParticipantFee: boolean;
   participantFeeAmount: string | null;
@@ -108,6 +128,8 @@ export type EventCreatePayload = {
   coordinatorFundAmount: string | null;
   sponsorFundAmount: string | null;
   imageUrl: string | null;
+  minAge: number | null;
+  maxAge: number | null;
   createdById: string;
 };
 
@@ -129,15 +151,12 @@ function defaultLocaleField(
   } & Record<string, unknown>,
   field: "title" | "summary" | "description" | "venue"
 ) {
-  const fromLocale = input.translations?.[DEFAULT_LOCALE]?.[field];
-  const fromRoot = input[field];
-  if (typeof fromLocale === "string" && fromLocale.trim()) {
-    return field === "description" ? fromLocale : fromLocale.trim();
-  }
-  if (typeof fromRoot === "string") {
-    return field === "description" ? fromRoot : fromRoot.trim();
-  }
-  return "";
+  return pickTranslatedField(
+    input.translations,
+    field,
+    input[field],
+    { html: field === "description" }
+  );
 }
 
 export function toCreatePayload(
@@ -158,6 +177,7 @@ export function toCreatePayload(
     city: input.city,
     startsAt: input.startsAt,
     endsAt: input.endsAt ?? null,
+    eventType: input.eventType ?? "camp",
     isPublished: input.isPublished ?? true,
     requiresParticipantFee: input.requiresParticipantFee ?? false,
     participantFeeAmount:
@@ -172,6 +192,8 @@ export function toCreatePayload(
     sponsorFundAmount:
       input.sponsorFundAmount == null ? null : String(input.sponsorFundAmount),
     imageUrl: input.imageUrl ? input.imageUrl : null,
+    minAge: parseAgeBound(input.minAge),
+    maxAge: parseAgeBound(input.maxAge),
     createdById,
   };
 }
@@ -179,27 +201,39 @@ export function toCreatePayload(
 export function toUpdatePayload(input: UpdateEvent): EventUpdatePayload {
   const payload: EventUpdatePayload = {};
 
-  if (input.translations?.[DEFAULT_LOCALE]?.title || input.title !== undefined) {
+  if (
+    pickTranslatedField(input.translations, "title") ||
+    input.title !== undefined
+  ) {
     payload.title = defaultLocaleField(input, "title") || input.title;
   }
   if (input.slug !== undefined) payload.slug = slugify(input.slug);
-  if (input.translations?.[DEFAULT_LOCALE]?.summary || input.summary !== undefined) {
+  if (
+    pickTranslatedField(input.translations, "summary") ||
+    input.summary !== undefined
+  ) {
     payload.summary = defaultLocaleField(input, "summary") || input.summary;
   }
   if (
-    input.translations?.[DEFAULT_LOCALE]?.description ||
+    pickTranslatedField(input.translations, "description", undefined, {
+      html: true,
+    }) ||
     input.description !== undefined
   ) {
     payload.description = sanitizeRichText(
       defaultLocaleField(input, "description") || input.description || ""
     );
   }
-  if (input.translations?.[DEFAULT_LOCALE]?.venue || input.venue !== undefined) {
+  if (
+    pickTranslatedField(input.translations, "venue") ||
+    input.venue !== undefined
+  ) {
     payload.venue = defaultLocaleField(input, "venue") || input.venue;
   }
   if (input.city !== undefined) payload.city = input.city;
   if (input.startsAt !== undefined) payload.startsAt = input.startsAt;
   if (input.endsAt !== undefined) payload.endsAt = input.endsAt;
+  if (input.eventType !== undefined) payload.eventType = input.eventType;
   if (input.isPublished !== undefined) payload.isPublished = input.isPublished;
   if (input.requiresParticipantFee !== undefined) {
     payload.requiresParticipantFee = input.requiresParticipantFee;
@@ -224,6 +258,8 @@ export function toUpdatePayload(input: UpdateEvent): EventUpdatePayload {
   if (input.imageUrl !== undefined) {
     payload.imageUrl = input.imageUrl ? input.imageUrl : null;
   }
+  if (input.minAge !== undefined) payload.minAge = parseAgeBound(input.minAge);
+  if (input.maxAge !== undefined) payload.maxAge = parseAgeBound(input.maxAge);
 
   return payload;
 }
@@ -239,6 +275,8 @@ export type PublicEvent = {
   startsAt: string;
   endsAt: string | null;
   imageUrl: string | null;
+  minAge: number | null;
+  maxAge: number | null;
   scheduleStatus: EventScheduleStatus;
 };
 
@@ -253,6 +291,8 @@ export function toPublicEvent(event: {
   startsAt: string | Date;
   endsAt?: string | Date | null;
   imageUrl?: string | null;
+  minAge?: number | null;
+  maxAge?: number | null;
 }): PublicEvent {
   const startsAt = new Date(event.startsAt).toISOString();
   const endsAt = event.endsAt ? new Date(event.endsAt).toISOString() : null;
@@ -267,6 +307,8 @@ export function toPublicEvent(event: {
     startsAt,
     endsAt,
     imageUrl: eventImageSrc(event.imageUrl),
+    minAge: event.minAge ?? null,
+    maxAge: event.maxAge ?? null,
     scheduleStatus: eventScheduleStatus(startsAt, endsAt),
   };
 }

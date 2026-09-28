@@ -1,5 +1,6 @@
 "use client";
 
+import { RequiredMark } from "@/components/shared/form/required-mark";
 import { Label } from "@/components/shared/ui/label";
 import {
   Select,
@@ -21,6 +22,7 @@ type LabeledSelectProps = {
   options: SelectOption[];
   placeholder?: string;
   disabled?: boolean;
+  required?: boolean;
 };
 
 export function LabeledSelect({
@@ -30,10 +32,14 @@ export function LabeledSelect({
   options,
   placeholder,
   disabled,
+  required,
 }: LabeledSelectProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label>{label}</Label>
+      <Label>
+        {label}
+        <RequiredMark required={required} />
+      </Label>
       <Select
         value={value || undefined}
         onValueChange={onChange}

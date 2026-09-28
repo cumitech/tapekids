@@ -1,5 +1,5 @@
 import { CAMPAY_PATHS, CAMPAY_PAYMENT_OPTIONS } from "@/constants/campay";
-import { campayRequest } from "./http";
+import { CAMPAY_COLLECT_TIMEOUT_MS, campayRequest } from "./http";
 import type {
   CollectInput,
   PaymentAdapter,
@@ -29,6 +29,7 @@ type StatusResponse = {
 export class CampayAdapter implements PaymentAdapter {
   async collect(input: CollectInput): Promise<ProviderChargeResult> {
     const data = await campayRequest<CollectResponse>("post", CAMPAY_PATHS.collect, {
+      timeout: CAMPAY_COLLECT_TIMEOUT_MS,
       body: {
         amount: String(input.amount),
         currency: input.currency,

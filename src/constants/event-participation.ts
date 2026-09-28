@@ -12,6 +12,11 @@ export const CAMP_PORTAL_KINDS: EventMembershipKind[] = [
   EVENT_MEMBERSHIP_KINDS.COORDINATOR,
 ];
 
+/** Campers and day-event participants confirm identity with their YF ID. */
+export function usesYfIdInvite(kind: EventMembershipKind | null | undefined) {
+  return kind === EVENT_MEMBERSHIP_KINDS.CAMPER;
+}
+
 export const SPONSOR_PORTAL_KINDS: EventMembershipKind[] = [
   EVENT_MEMBERSHIP_KINDS.SPONSOR,
 ];

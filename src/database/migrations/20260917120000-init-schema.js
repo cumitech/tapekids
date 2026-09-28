@@ -1,9 +1,11 @@
 "use strict";
 
+const { ensureTable, dropTableIfExists } = require("../migration-guard");
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("users", {
+    await ensureTable(queryInterface, "users", {
       id: { type: Sequelize.STRING(20), allowNull: false, primaryKey: true },
       email: { type: Sequelize.STRING(128), allowNull: false, unique: true },
       username: { type: Sequelize.STRING(50), allowNull: false },
@@ -14,7 +16,7 @@ module.exports = {
       updatedAt: { allowNull: false, type: Sequelize.DATE, defaultValue: Sequelize.fn("NOW") },
     });
 
-    await queryInterface.createTable("events", {
+    await ensureTable(queryInterface, "events", {
       id: { type: Sequelize.STRING(20), allowNull: false, primaryKey: true },
       title: { type: Sequelize.STRING(128), allowNull: false },
       slug: { type: Sequelize.STRING(128), allowNull: false, unique: true },
@@ -37,7 +39,7 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable("events");
-    await queryInterface.dropTable("users");
+    await dropTableIfExists(queryInterface, "events");
+    await dropTableIfExists(queryInterface, "users");
   },
 };

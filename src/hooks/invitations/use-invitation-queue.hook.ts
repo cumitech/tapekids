@@ -1,18 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslate } from "@refinedev/core";
 
 import {
   EVENT_MEMBERSHIP_KINDS,
   type EventMembershipKind,
 } from "@/constants/event-participation";
-import type { AppLocale } from "@/constants/locales";
+import { DEFAULT_LOCALE, type AppLocale } from "@/constants/locales";
 import { useBusyAction } from "@/hooks/core/use-busy-action.hook";
-import { useLocale } from "@/hooks/core/use-locale.hook";
 import { useIntegrations } from "@/hooks/integrations/use-integrations.hook";
 import { apiGet, apiPost } from "@/lib/client/api";
-import { isEmptyHtml } from "@/lib/html";
+import { hasTranslatedField } from "@/lib/content-i18n/pick";
 import {
   invitationDeliveryNotice,
   type InvitationDeliveryResult,
@@ -20,19 +19,26 @@ import {
 import { invitationDrafts } from "@/lib/invitations/invitation-copy";
 import type { Event } from "@/models/events/event.model";
 
-export function useInvitationQueue(mailingListId: string) {
+export function useInvitationQueue(
+  mailingListId: string,
+  options?: {
+    eventId?: string;
+    onSent?: (result: InvitationDeliveryResult) => void;
+  }
+) {
   const translate = useTranslate();
-  const { locale } = useLocale();
   const integrations = useIntegrations();
   const { busy, run, notify } = useBusyAction();
-  const [eventId, setEventId] = useState("");
+  const onSentRef = useRef(options?.onSent);
+  onSentRef.current = options?.onSent;
+  const [eventId, setEventId] = useState(options?.eventId ?? "");
   const [event, setEvent] = useState<Event | null>(null);
   const [kind, setKind] = useState<EventMembershipKind>(
     EVENT_MEMBERSHIP_KINDS.CAMPER
   );
-  const [previewLocale, setPreviewLocale] = useState<AppLocale>(locale);
-  const [subject, setSubject] = useState({ en: "", fr: "" });
-  const [body, setBody] = useState({ en: "", fr: "" });
+  const [previewLocale, setPreviewLocale] = useState<AppLocale>(DEFAULT_LOCALE);
+  const [subject, setSubject] = useState({ fr: "", en: "" });
+  const [body, setBody] = useState({ fr: "", en: "" });
   const actionLabel = integrations.mailEnabled
     ? translate("mailingLists.sendInvitations")
     : translate("mailingLists.queueInvitations");
@@ -63,8 +69,8 @@ export function useInvitationQueue(mailingListId: string) {
 
   useEffect(() => {
     if (!event) {
-      setSubject({ en: "", fr: "" });
-      setBody({ en: "", fr: "" });
+      setSubject({ fr: "", en: "" });
+      setBody({ fr: "", en: "" });
       return;
     }
     const draft = invitationDrafts(event, kind);
@@ -72,8 +78,15 @@ export function useInvitationQueue(mailingListId: string) {
     setBody(draft.body);
   }, [event, kind]);
 
+  const translations = {
+    fr: { subject: subject.fr, body: body.fr },
+    en: { subject: subject.en, body: body.en },
+  };
   const canSend =
-    !busy && Boolean(eventId) && Boolean(subject.en) && !isEmptyHtml(body.en);
+    !busy &&
+    Boolean(eventId) &&
+    hasTranslatedField(translations, "subject") &&
+    hasTranslatedField(translations, "body");
 
   function send() {
     return run(async () => {
@@ -82,10 +95,7 @@ export function useInvitationQueue(mailingListId: string) {
         {
           mailingListId,
           kind,
-          translations: {
-            en: { subject: subject.en, body: body.en },
-            fr: { subject: subject.fr, body: body.fr },
-          },
+          translations,
         }
       );
       notify?.(
@@ -95,6 +105,7 @@ export function useInvitationQueue(mailingListId: string) {
           translate
         )
       );
+      onSentRef.current?.(payload);
     }, translate("mailingLists.invitationsSendFailed"));
   }
 

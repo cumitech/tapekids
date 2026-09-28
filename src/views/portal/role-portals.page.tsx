@@ -32,6 +32,7 @@ export function SponsorshipsPage() {
       eyebrowKey="sponsorships.eyebrow"
       kinds={SPONSOR_PORTAL_KINDS}
       redirectPath="/dashboard/sponsorships"
+      showSponsorCta
     />
   );
 }

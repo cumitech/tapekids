@@ -7,6 +7,7 @@ type Translate = (
 export type InvitationDeliveryResult = {
   queuedCount?: number;
   failedCount?: number;
+  batch?: { id?: string };
 };
 
 export function invitationDeliveryNotice(

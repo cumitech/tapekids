@@ -40,7 +40,7 @@ export function usePersonForm({
     initialRecord: record,
     toFormValues: personToFormValues,
     toPayload: personFormToPayload,
-    refetchOnMount: true,
+    refetchOnMount: record == null,
     onCancel,
     onSuccess,
   });

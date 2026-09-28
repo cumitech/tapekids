@@ -1,8 +1,14 @@
 "use strict";
 
+const { constraintExists, dropConstraintIfExists } = require("../migration-guard");
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface) {
+    if (await constraintExists(queryInterface, "events", "events_createdById_users_fk")) {
+      return;
+    }
+
     const [rows] = await queryInterface.sequelize.query(
       `SELECT CONSTRAINT_NAME AS name
        FROM information_schema.KEY_COLUMN_USAGE
@@ -28,7 +34,10 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.removeConstraint("events", "events_createdById_users_fk");
+    await dropConstraintIfExists(queryInterface, "events", "events_createdById_users_fk");
+    if (await constraintExists(queryInterface, "events", "events_ibfk_1")) {
+      return;
+    }
     await queryInterface.addConstraint("events", {
       fields: ["createdById"],
       type: "foreign key",

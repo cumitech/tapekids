@@ -29,8 +29,9 @@ type MailingListPeoplePickerProps = {
   onChange: (personIds: string[]) => void;
 };
 
-function personLabel(person: Pick<Person, "firstName" | "lastName" | "email">) {
-  return `${person.firstName} ${person.lastName} (${person.email})`;
+function personLabel(person: Pick<Person, "fullName" | "email">) {
+  const name = person.fullName || person.email || "";
+  return person.email ? `${name} (${person.email})` : name;
 }
 
 export function MailingListPeoplePicker({
@@ -60,8 +61,15 @@ export function MailingListPeoplePicker({
   const { query } = useList<Person>({
     resource: "people",
     pagination: { currentPage: 1, pageSize: 100 },
-    sorters: [{ field: "lastName", order: "asc" }],
+    sorters: [{ field: "fullName", order: "asc" }],
     filters,
+    queryOptions: {
+      staleTime: Infinity,
+      gcTime: Infinity,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
   });
 
   const people =
@@ -212,7 +220,7 @@ export function MailingListPeoplePicker({
               >
                 <span className="truncate">
                   {person
-                    ? `${person.firstName} ${person.lastName}`
+                    ? person.fullName
                     : translate("mailingLists.selectedPerson", "Selected")}
                 </span>
                 <XIcon className="size-3 shrink-0 opacity-60" />

@@ -14,7 +14,7 @@ export function useGuestHome() {
   const memberships = profile?.memberships ?? [];
 
   return {
-    name: profile?.person?.firstName || identity?.name || "",
+    name: profile?.person?.fullName || identity?.name || "",
     campCount: memberships.filter((item) =>
       CAMP_PORTAL_KINDS.includes(item.kind)
     ).length,
@@ -23,6 +23,7 @@ export function useGuestHome() {
     ).length,
     upcoming: memberships.slice(0, 2),
     personId: profile?.user.personId || profile?.person?.id || "",
+    accountName: profile?.user.name || "",
     defaultPhone: profile?.person?.phone,
     profileComplete,
     loading,

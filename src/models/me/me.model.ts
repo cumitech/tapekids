@@ -12,6 +12,7 @@ export type MeUser = {
   name: string;
   roles: UserRole[];
   personId?: string | null;
+  passwordChosen?: boolean;
 };
 
 export type MePaymentSummary = {

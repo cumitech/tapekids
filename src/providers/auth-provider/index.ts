@@ -58,7 +58,10 @@ export const authProvider: AuthProvider = {
     }
 
     try {
-      const { data } = await http.post<AuthEnvelope>("/auth/login", { email, password });
+      const { data } = await http.post<AuthEnvelope>("/auth/login", {
+        email,
+        password,
+      });
       setSession(sessionFromResponse(data), { remember: params.remember !== false });
       return {
         success: true,

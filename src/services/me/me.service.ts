@@ -38,33 +38,41 @@ function toIso(value: Date | string | null | undefined) {
 
 export class MeService {
   async getProfile(user: User): Promise<MeProfile> {
-    const person = user.personId
-      ? await personService.getById(user.personId)
-      : null;
-    const memberships = user.personId
-      ? await eventMembershipRepository.listByPerson(user.personId)
-      : [];
+    const [person, memberships] = await Promise.all([
+      user.personId ? personService.getById(user.personId) : null,
+      user.personId
+        ? eventMembershipRepository.listByPerson(user.personId)
+        : [],
+    ]);
     const nestedEvents = memberships
       .map((membership) => membership.event)
       .filter((event): event is NonNullable<typeof event> => Boolean(event));
-    if (nestedEvents.length > 0) {
-      const localized = await contentTranslationRepository.localize(
-        CONTENT_ENTITY_TYPES.event,
-        nestedEvents,
-        resolveContentLocale()
-      );
-      contentTranslationRepository.overlay(
-        nestedEvents,
-        localized,
-        CONTENT_ENTITY_TYPES.event
-      );
-    }
-    const payments = user.personId
-      ? await paymentRepository.listByPerson(user.personId, OWN_PAYMENTS_QUERY)
-      : { data: [] };
+    const [payments] = await Promise.all([
+      memberships.length > 0 && user.personId
+        ? paymentRepository.listRecentByPerson(user.personId)
+        : Promise.resolve([]),
+      nestedEvents.length > 0
+        ? contentTranslationRepository
+            .localize(
+              CONTENT_ENTITY_TYPES.event,
+              nestedEvents,
+              resolveContentLocale()
+            )
+            .then((localized) => {
+              contentTranslationRepository.overlay(
+                nestedEvents,
+                localized,
+                CONTENT_ENTITY_TYPES.event
+              );
+            })
+        : Promise.resolve(),
+    ]);
 
     return {
-      user: toPublicUser(user),
+      user: {
+        ...toPublicUser(user),
+        passwordChosen: user.passwordChosen !== false,
+      },
       person: person ? (person.toJSON() as MeProfile["person"]) : null,
       memberships: memberships.map((membership) => {
         const event = membership.event;
@@ -77,7 +85,7 @@ export class MeService {
               title: String(eventJson.title ?? ""),
               slug: String(eventJson.slug ?? ""),
               summary: String(eventJson.summary ?? ""),
-              description: String(eventJson.description ?? ""),
+              description: "",
               venue: String(eventJson.venue ?? ""),
               city: String(eventJson.city ?? ""),
               startsAt: toIso(eventJson.startsAt as Date | string) ?? "",
@@ -100,7 +108,7 @@ export class MeService {
             }
           : null;
         const paymentKind = paymentKindForMembership(membership.kind);
-        const payment = payments.data.find(
+        const payment = payments.find(
           (row) =>
             row.eventId === membership.eventId && row.kind === paymentKind,
         );

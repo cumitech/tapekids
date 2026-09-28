@@ -1,6 +1,7 @@
+import { DEFAULT_LOCALE } from "@/constants/locales";
 import { getClientLocale } from "@/utils/locale-cookie";
 
-const STORAGE_KEY = "kec.list-query.v2";
+const STORAGE_KEY = "kec.list-query.v3";
 
 type ListCacheEntry = {
   data: unknown[];
@@ -29,6 +30,36 @@ function writeStore(store: Record<string, ListCacheEntry>) {
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(store));
 }
 
+function stableValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(stableValue);
+  }
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    return Object.fromEntries(
+      Object.keys(record)
+        .sort()
+        .map((key) => [key, stableValue(record[key])])
+    );
+  }
+  return value;
+}
+
+function paginationKey(pagination: unknown) {
+  if (!pagination || typeof pagination !== "object") {
+    return { page: 1, size: 10 };
+  }
+  const value = pagination as {
+    current?: number;
+    currentPage?: number;
+    pageSize?: number;
+  };
+  return {
+    page: value.currentPage ?? value.current ?? 1,
+    size: value.pageSize ?? 10,
+  };
+}
+
 export function listQueryCacheKey(params: {
   resource: string;
   pagination?: unknown;
@@ -37,10 +68,10 @@ export function listQueryCacheKey(params: {
 }) {
   return JSON.stringify({
     r: params.resource,
-    l: typeof window === "undefined" ? "en" : getClientLocale(),
-    p: params.pagination,
-    f: params.filters,
-    s: params.sorters,
+    l: typeof window === "undefined" ? DEFAULT_LOCALE : getClientLocale(),
+    p: paginationKey(params.pagination),
+    f: stableValue(params.filters),
+    s: stableValue(params.sorters),
   });
 }
 

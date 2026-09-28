@@ -1,7 +1,5 @@
 export const USER_ROLES = {
-  SUPER_ADMIN: "super-admin",
   ADMIN: "admin",
-  STAFF: "staff",
   GUEST: "guest",
 } as const;
 
@@ -37,18 +35,5 @@ export function isAdminRole(
   roles: readonly string[] | string | undefined
 ): boolean {
   const list = asRoleList(roles);
-  return hasRole(list, USER_ROLES.ADMIN) || hasRole(list, USER_ROLES.SUPER_ADMIN);
-}
-
-export function isStaffOperatorRole(
-  roles: readonly string[] | string | undefined
-): boolean {
-  const list = asRoleList(roles);
-  return hasRole(list, USER_ROLES.STAFF) && !isAdminRole(list);
-}
-
-export function isStaffDashboardRole(
-  roles: readonly string[] | string | undefined
-): boolean {
-  return isAdminRole(roles) || isStaffOperatorRole(roles);
+  return hasRole(list, USER_ROLES.ADMIN);
 }
