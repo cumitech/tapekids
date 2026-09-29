@@ -25,14 +25,14 @@ const STAT_ACCENTS: Record<
     value: "text-white",
   },
   ivory: {
-    card: "bg-white shadow-[0_8px_20px_rgba(24,35,86,0.18)]",
-    label: "text-[#466d6b]",
-    value: "text-[#182356]",
+    card: "bg-white shadow-[0_8px_20px_rgba(15,78,98,0.18)]",
+    label: "text-[#3e6e78]",
+    value: "text-[#146d8f]",
   },
   gold: {
-    card: "bg-[#f59f21] shadow-[0_8px_20px_rgba(24,35,86,0.18)]",
-    label: "text-[#182356]/70",
-    value: "text-[#182356]",
+    card: "bg-[#f59f21] shadow-[0_8px_20px_rgba(15,78,98,0.18)]",
+    label: "text-[#0f4e62]/70",
+    value: "text-[#0f4e62]",
   },
 };
 
@@ -89,7 +89,7 @@ export function PortalHero({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl p-4 text-white shadow-[0_12px_32px_rgba(24,35,86,0.28)] sm:p-6 md:p-8",
+        "relative overflow-hidden rounded-2xl p-4 text-white shadow-[0_12px_32px_rgba(15,78,98,0.28)] sm:p-6 md:p-8",
         palette.hero
       )}
     >

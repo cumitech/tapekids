@@ -16,6 +16,7 @@ import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
 import { apiDelete } from "@/lib/client/api";
 import { cn } from "@/lib/utils";
 import { PORTAL_SURFACE } from "@/constants/layout";
+import { categoryForAudience } from "@/constants/person";
 import type { MailingList } from "@/models/mailing-lists/mailing-list.model";
 
 export function MailingListsShowPage() {
@@ -59,10 +60,12 @@ export function MailingListsShowPage() {
         <div className="flex flex-col gap-8">
           <p className="text-muted-foreground">
             {labels.fields.audienceKind}:{" "}
-            {translate(
-              `mailingLists.audienceKinds.${record.audienceKind}`,
-              record.audienceKind
-            )}
+            {(() => {
+              const category = categoryForAudience(record.audienceKind);
+              return category
+                ? translate(`people.categories.${category}`)
+                : record.audienceKind;
+            })()}
           </p>
 
           <section className={cn(PORTAL_SURFACE, "bg-white p-5 dark:bg-card")}>

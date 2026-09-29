@@ -13,6 +13,7 @@ import { INVITATION_BATCH_STATUSES } from "@/constants/event-participation";
 import { useBusyAction } from "@/hooks/core/use-busy-action.hook";
 import { useLocale } from "@/hooks/core/use-locale.hook";
 import { useIntegrations } from "@/hooks/integrations/use-integrations.hook";
+import { formatDateTime } from "@/lib/format";
 import { invitationDeliveryNotice } from "@/lib/invitations/delivery-notice";
 import { sendInvitationBatch } from "@/lib/invitations/send-batch";
 import { cn } from "@/lib/utils";
@@ -110,6 +111,7 @@ function EventRoster({ eventId }: { eventId: string }) {
 
 function InvitationBatchHistory({ eventId }: { eventId: string }) {
   const translate = useTranslate();
+  const { locale } = useLocale();
   const integrations = useIntegrations();
   const { busy, run, notify } = useBusyAction();
   const [rows, setRows] = useState<BatchRow[]>([]);
@@ -141,7 +143,7 @@ function InvitationBatchHistory({ eventId }: { eventId: string }) {
               <p className="font-medium">{row.subject}</p>
               <p className="text-sm text-muted-foreground">
                 {translate(`payments.kinds.${row.kind}`, row.kind)}
-                {row.sentAt ? ` · ${row.sentAt}` : ""}
+                {row.sentAt ? ` · ${formatDateTime(row.sentAt, locale)}` : ""}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">

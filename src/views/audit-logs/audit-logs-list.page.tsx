@@ -15,11 +15,14 @@ import {
   DialogTitle,
 } from "@/components/shared/ui/dialog";
 import { useCachedTable } from "@/hooks/core/use-cached-table.hook";
+import { useLocale } from "@/hooks/core/use-locale.hook";
 import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
+import { formatDateTime, formatPresentedValue } from "@/lib/format";
 import type { AuditLog } from "@/models/audit-logs/audit-log.model";
 
 function AuditChangesCell({ record }: { record: AuditLog }) {
   const translate = useTranslate();
+  const { locale } = useLocale();
   const [open, setOpen] = useState(false);
   const changes = record.changes;
   const hasChanges = Boolean(
@@ -45,7 +48,7 @@ function AuditChangesCell({ record }: { record: AuditLog }) {
             <DialogTitle>{translate("auditLogs.viewChanges")}</DialogTitle>
           </DialogHeader>
           <pre className="overflow-x-auto rounded-md bg-muted p-3 text-xs">
-            {JSON.stringify(changes, null, 2)}
+            {JSON.stringify(formatPresentedValue(changes, locale), null, 2)}
           </pre>
         </DialogContent>
       </Dialog>
@@ -54,6 +57,7 @@ function AuditChangesCell({ record }: { record: AuditLog }) {
 }
 
 export function AuditLogsListPage() {
+  const { locale } = useLocale();
   const labels = useResourceLabels("auditLogs", [
     "action",
     "entity",
@@ -64,7 +68,12 @@ export function AuditLogsListPage() {
 
   const columns = useMemo<ColumnDef<AuditLog>[]>(
     () => [
-      { id: "createdAt", accessorKey: "createdAt", header: labels.fields.createdAt },
+      {
+        id: "createdAt",
+        accessorKey: "createdAt",
+        header: labels.fields.createdAt,
+        cell: ({ row }) => formatDateTime(row.original.createdAt, locale) || "-",
+      },
       {
         id: "action",
         accessorKey: "action",
@@ -89,7 +98,7 @@ export function AuditLogsListPage() {
         cell: ({ row }) => <AuditChangesCell record={row.original} />,
       },
     ],
-    [labels]
+    [labels, locale]
   );
 
   const { table } = useCachedTable<AuditLog>({

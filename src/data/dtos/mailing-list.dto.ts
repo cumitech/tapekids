@@ -1,15 +1,18 @@
 import { z } from "zod";
 
 import { MAILING_LIST_AUDIENCE_KINDS } from "@/constants/event-participation";
+import { categoryForAudience } from "@/constants/person";
 import { nanoid } from "@/lib/api/id";
 import { pickTranslatedField } from "@/lib/content-i18n/pick";
 
-const audienceKind = z.enum([
-  MAILING_LIST_AUDIENCE_KINDS.CAMPER,
-  MAILING_LIST_AUDIENCE_KINDS.COORDINATOR,
-  MAILING_LIST_AUDIENCE_KINDS.SPONSOR,
-  MAILING_LIST_AUDIENCE_KINDS.MIXED,
-]);
+const audienceKind = z.preprocess(
+  (value) => categoryForAudience(value) ?? value,
+  z.enum([
+    MAILING_LIST_AUDIENCE_KINDS.TROPHY_CAMPER,
+    MAILING_LIST_AUDIENCE_KINDS.TROPHY_PARTICIPANT,
+    MAILING_LIST_AUDIENCE_KINDS.CHAPERONE,
+  ])
+);
 
 const memberFiltersSchema = z
   .object({
@@ -88,7 +91,7 @@ export function toCreateMailingListPayload(
     description:
       pickTranslatedField(input.translations, "description", input.description) ||
       null,
-    audienceKind: input.audienceKind ?? MAILING_LIST_AUDIENCE_KINDS.MIXED,
+    audienceKind: input.audienceKind ?? MAILING_LIST_AUDIENCE_KINDS.TROPHY_CAMPER,
     createdById,
   };
 }

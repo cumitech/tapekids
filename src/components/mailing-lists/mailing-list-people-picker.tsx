@@ -20,11 +20,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/shared/ui/popover";
-import { apiGet } from "@/lib/client/api";
+import type { PersonCategory } from "@/constants/person";
 import { cn } from "@/lib/utils";
 import type { Person } from "@/models/people/person.model";
+import { apiGet } from "@/lib/client/api";
 
 type MailingListPeoplePickerProps = {
+  category: PersonCategory | null;
   value: string[];
   onChange: (personIds: string[]) => void;
 };
@@ -35,6 +37,7 @@ function personLabel(person: Pick<Person, "fullName" | "email">) {
 }
 
 export function MailingListPeoplePicker({
+  category,
   value,
   onChange,
 }: MailingListPeoplePickerProps) {
@@ -44,19 +47,30 @@ export function MailingListPeoplePicker({
   const [busy, setBusy] = useState(false);
   const selected = useMemo(() => new Set(value), [value]);
 
-  const filters = useMemo(
-    () =>
-      search.trim()
-        ? [
-            {
-              field: "q",
-              operator: "contains" as const,
-              value: search.trim(),
-            },
-          ]
-        : [],
-    [search]
-  );
+  const filters = useMemo(() => {
+    if (!category) {
+      return [];
+    }
+    const next: Array<{
+      field: string;
+      operator: "eq" | "contains";
+      value: string;
+    }> = [
+      {
+        field: "category",
+        operator: "eq",
+        value: category,
+      },
+    ];
+    if (search.trim()) {
+      next.push({
+        field: "q",
+        operator: "contains",
+        value: search.trim(),
+      });
+    }
+    return next;
+  }, [category, search]);
 
   const { query } = useList<Person>({
     resource: "people",
@@ -64,6 +78,7 @@ export function MailingListPeoplePicker({
     sorters: [{ field: "fullName", order: "asc" }],
     filters,
     queryOptions: {
+      enabled: Boolean(category),
       staleTime: Infinity,
       gcTime: Infinity,
       refetchOnMount: false,
@@ -72,11 +87,12 @@ export function MailingListPeoplePicker({
     },
   });
 
-  const people =
-    (query as { result?: { data?: Person[] }; data?: { data?: Person[] } })
-      .result?.data ??
-    query.data?.data ??
-    [];
+  const people = category
+    ? ((query as { result?: { data?: Person[] }; data?: { data?: Person[] } })
+        .result?.data ??
+      query.data?.data ??
+      [])
+    : [];
   const peopleById = useMemo(
     () => new Map(people.map((person) => [person.id, person])),
     [people]
@@ -95,8 +111,12 @@ export function MailingListPeoplePicker({
   };
 
   const selectAll = async () => {
+    if (!category) {
+      return;
+    }
     const params = new URLSearchParams();
     params.set("idsOnly", "true");
+    params.set("category", category);
     if (search.trim()) {
       params.set("q", search.trim());
     }
@@ -165,7 +185,7 @@ export function MailingListPeoplePicker({
               <CommandGroup>
                 <CommandItem
                   value="select-all"
-                  disabled={busy}
+                  disabled={busy || !category}
                   onSelect={() => {
                     void selectAll();
                   }}

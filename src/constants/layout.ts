@@ -10,4 +10,4 @@ export const PORTAL_SURFACE =
   "rounded-xl border border-border bg-card shadow-[0_1px_4px_rgba(15,23,42,0.08)] transition-all duration-200";
 
 export const PORTAL_SURFACE_HOVER =
-  "hover:border-primary/50 hover:shadow-[0_10px_28px_rgba(24,35,86,0.16)]";
+  "hover:border-primary/50 hover:shadow-[0_10px_28px_rgba(15,78,98,0.16)]";

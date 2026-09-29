@@ -171,7 +171,7 @@
       "waiting-list": "Examinez les personnes sans trophée et approuvez-les dans l'annuaire.",
       "mailing-lists": "Regroupez les personnes et préparez les invitations au bon moment.",
       "events": "Organisez les camps et les journées avec un lieu, des dates et une page publiée.",
-      "payments": "Consultez les paiements campeurs, coordinateurs et parrains sur tous les événements.",
+      "payments": "Consultez les paiements campeurs, encadreurs et parrains sur tous les événements.",
       "sponsors": "Voyez les personnes qui ont parrainé un événement, y compris celles qui ont demandé à rester anonymes.",
       "reports": "Consultez les listes Trophy, encadreurs et parrains, puis exportez-les en Excel.",
       "audit-logs": "Consultez qui a modifié les personnes, événements, paiements et invitations.",
@@ -376,9 +376,9 @@
       "isTrophy": "Trophées"
     },
     "categories": {
-      "trophy_camper": "Campeur Trophy",
-      "trophy_participant": "Participant Trophy",
-      "chaperone": "Encadreur / Chaperone"
+      "trophy_camper": "Trophy Camper",
+      "trophy_participant": "Trophy Participant",
+      "chaperone": "Chaperone / Encadreur"
     },
     "import": {
       "action": "Importer Excel",
@@ -386,6 +386,8 @@
       "hint": "Importez un export Young Foundations (.xlsx). Colonnes : YF ID, Points, Name, Gender, Age, Address, Country, Email, Phone, DOB, Trophy. Choisissez la catégorie pour toutes les lignes du fichier.",
       "chooseCategory": "Choisir une catégorie",
       "file": "Fichier Excel",
+      "browse": "Parcourir",
+      "emptyFile": "Aucun fichier sélectionné",
       "submit": "Importer",
       "importing": "Import en cours…",
       "missing": "Choisissez une catégorie et un fichier Excel.",
@@ -393,6 +395,31 @@
       "networkFailed": "Erreur réseau pendant l'import. Vérifiez la connexion et réessayez. Le même fichier ne créera pas de doublons.",
       "result": "Créés {{created}}, mis à jour {{updated}}, inchangés {{unchanged}}, ignorés {{skipped}}.",
       "rowError": "Ligne {{row}} : {{message}}"
+    },
+    "summary": {
+      "hint": "Cliquez sur une catégorie pour ouvrir sa liste. Utilisez la flèche pour prévisualiser les personnes sans quitter cette page.",
+      "people": "Personnes",
+      "count": "{{count}} personnes",
+      "open": "Ouvrir la catégorie",
+      "expand": "Aperçu de {{category}}",
+      "collapse": "Masquer {{category}}",
+      "previewEmpty": "Aucune personne dans cette catégorie.",
+      "previewMore": "{{shown}} sur {{count}} affichées.",
+      "back": "Toutes les catégories",
+      "failed": "Impossible de charger les catégories."
+    },
+    "bulkDelete": {
+      "action": "Supprimer la sélection",
+      "selectPage": "Tout sélectionner sur cette page",
+      "selectRow": "Sélectionner la personne",
+      "selectAll": "Tout sélectionner ({{count}})",
+      "selected": "{{count}} sélectionné(s)",
+      "pageSelected": "Toutes les personnes de cette page sont sélectionnées. Sélectionnez tout pour inclure les autres pages.",
+      "clear": "Effacer la sélection",
+      "confirmTitle": "Supprimer les personnes sélectionnées ?",
+      "confirmDescription": "Cela supprime {{count}} personnes de {{category}}. Cette action est définitive.",
+      "failed": "Impossible de supprimer les personnes sélectionnées.",
+      "success": "{{count}} personnes supprimées."
     },
     "sections": {
       "identity": "Informations personnelles",
@@ -515,8 +542,8 @@
         "description": "Personnes enregistrées comme participants Trophy pour les événements d'une journée."
       },
       "chaperones": {
-        "title": "Encadreurs / Chaperones",
-        "description": "Encadreurs et chaperones sur les camps et les événements."
+        "title": "Chaperones / Encadreurs",
+        "description": "Chaperones et encadreurs sur les camps et les événements."
       },
       "sponsors": {
         "title": "Parrains",
@@ -548,6 +575,11 @@
       "subject": "Objet",
       "body": "Message"
     },
+    "audiences": {
+      "camper": "Campeurs",
+      "participant": "Participants",
+      "chaperone": "Chaperone / Encadreur"
+    },
     "members": "Membres",
     "pickCampers": "Sélectionner des campeurs",
     "pickCampersPlaceholder": "Rechercher et sélectionner des campeurs",
@@ -568,6 +600,7 @@
     "queueInvitations": "Préparer les invitations",
     "sendInvitations": "Envoyer les invitations",
     "selectEvent": "Choisir un événement",
+    "derivedDescription": "Liste d'envoi pour {{name}}",
     "invitationPreview": "Aperçu de l'invitation",
     "invitationPreviewHint": "Voici l'apparence de l'e-mail dans la langue sélectionnée.",
     "invitationPreviewEmpty": "Choisissez un événement pour prévisualiser l'invitation.",
@@ -576,8 +609,10 @@
     "invitationsFailed": "Impossible de préparer les invitations",
     "invitationsSendFailed": "Impossible d'envoyer les invitations. Vérifiez la configuration e-mail et réessayez.",
     "audienceKinds": {
-      "camper": "Campeur",
-      "coordinator": "Coordinateur",
+      "trophy_camper": "Trophy Camper",
+      "trophy_participant": "Trophy Participant",
+      "chaperone": "Chaperone / Encadreur",
+      "camper": "Trophy Camper",
       "sponsor": "Parrain",
       "mixed": "Mixte"
     }
@@ -605,7 +640,7 @@
       "requiresParticipantFee": "Frais requis",
       "participantFeeAmount": "Montant",
       "currency": "Devise",
-      "coordinatorFundAmount": "Fonds coordinateur (XAF)",
+      "coordinatorFundAmount": "Fonds Chaperone / Encadreur (XAF)",
       "sponsorFundAmount": "Fonds parrain (XAF)",
       "minAge": "Âge minimum",
       "maxAge": "Âge maximum"
@@ -708,7 +743,8 @@
     "markWaived": "Dispenser",
     "kinds": {
       "camper": "Frais campeur",
-      "coordinator": "Fonds coordinateur",
+      "coordinator": "Fonds Chaperone / Encadreur",
+      "coordinator_fund": "Fonds Chaperone / Encadreur",
       "sponsor": "Fonds parrain"
     }
   },

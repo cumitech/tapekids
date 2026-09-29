@@ -1,10 +1,11 @@
-import { Op } from "sequelize";
+import { Op, fn, col, type WhereOptions } from "sequelize";
 import type { InferCreationAttributes } from "sequelize";
 
 import { EmergencyContact, Person } from "@/data/entities";
 import { listSearchWhere } from "@/data/list-where";
 import type { ListQuery, PaginatedResult } from "@/data/types/pagination";
 import { NotFoundException } from "@/exceptions/not-found.exception";
+import type { PersonCategory } from "@/constants/person";
 import { normalizeYfId } from "@/lib/people/yf-id";
 
 export type PersonCreatePayload = InferCreationAttributes<Person>;
@@ -123,5 +124,32 @@ export class PersonRepository {
       throw new NotFoundException("Person", id);
     }
     await person.destroy();
+  }
+
+  async countByCategory(): Promise<Array<{ category: string | null; count: number }>> {
+    const rows = await Person.findAll({
+      attributes: ["category", [fn("COUNT", col("id")), "count"]],
+      group: ["category"],
+      raw: true,
+    });
+
+    return rows.map((row) => {
+      const record = row as unknown as { category: string | null; count: string | number };
+      return {
+        category: record.category,
+        count: Number(record.count) || 0,
+      };
+    });
+  }
+
+  async deleteInCategory(category: PersonCategory, ids?: string[]): Promise<number> {
+    const where: WhereOptions = { category };
+    if (ids) {
+      if (ids.length === 0) {
+        return 0;
+      }
+      Object.assign(where, { id: { [Op.in]: ids } });
+    }
+    return Person.destroy({ where });
   }
 }

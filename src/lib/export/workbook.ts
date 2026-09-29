@@ -27,8 +27,12 @@ function applyDateFormats(sheet: XLSX.WorkSheet) {
   for (let row = range.s.r + 1; row <= range.e.r; row += 1) {
     for (let col = range.s.c; col <= range.e.c; col += 1) {
       const cell = sheet[XLSX.utils.encode_cell({ r: row, c: col })];
-      if (cell && cell.t === "d") {
-        cell.z = "yyyy-mm-dd";
+      if (cell && cell.t === "d" && cell.v instanceof Date) {
+        const hasTime =
+          cell.v.getHours() !== 0 ||
+          cell.v.getMinutes() !== 0 ||
+          cell.v.getSeconds() !== 0;
+        cell.z = hasTime ? "dd/mm/yyyy hh:mm:ss" : "dd/mm/yyyy";
       }
     }
   }

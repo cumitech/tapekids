@@ -31,6 +31,7 @@ type LabeledComboboxProps = {
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
+  error?: string;
 };
 
 export function LabeledCombobox({
@@ -41,6 +42,7 @@ export function LabeledCombobox({
   placeholder,
   disabled,
   required,
+  error,
 }: LabeledComboboxProps) {
   const translate = useTranslate();
   const [open, setOpen] = useState(false);
@@ -156,6 +158,7 @@ export function LabeledCombobox({
           </Command>
         </PopoverContent>
       </Popover>
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
     </div>
   );
 }

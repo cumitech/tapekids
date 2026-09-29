@@ -1,5 +1,7 @@
 import { CONTENT_FIELDS } from "@/constants/content-i18n";
+import { MAILING_LIST_AUDIENCE_KINDS } from "@/constants/event-participation";
 import type { AppLocale } from "@/constants/locales";
+import { categoryForAudience } from "@/constants/person";
 import {
   copiesByLocale,
   emptyTranslationsForm,
@@ -11,7 +13,7 @@ export interface MailingList {
   id: string;
   name: string;
   description?: string | null;
-  audienceKind: "camper" | "coordinator" | "sponsor" | "mixed";
+  audienceKind: "trophy_camper" | "trophy_participant" | "chaperone";
   translations?: Partial<
     Record<AppLocale, Partial<{ name: string; description: string }>>
   >;
@@ -29,7 +31,7 @@ export interface MailingList {
 
 export const emptyMailingListForm: MailingListFormValues = {
   translations: emptyTranslationsForm({ name: "", description: "" }),
-  audienceKind: "mixed",
+  audienceKind: MAILING_LIST_AUDIENCE_KINDS.TROPHY_CAMPER,
   personIds: [],
 };
 
@@ -45,7 +47,9 @@ export function mailingListToFormValues(
         description: record?.description,
       }
     ),
-    audienceKind: record?.audienceKind ?? "mixed",
+    audienceKind:
+      categoryForAudience(record?.audienceKind) ??
+      MAILING_LIST_AUDIENCE_KINDS.TROPHY_CAMPER,
     personIds: record?.members?.map((member) => member.personId) ?? [],
   };
 }

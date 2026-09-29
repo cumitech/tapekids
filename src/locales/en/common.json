@@ -171,7 +171,7 @@
       "waiting-list": "Review people without trophies and approve them into the directory.",
       "mailing-lists": "Group people and queue invitations when it is time to write.",
       "events": "Plan camps and day gatherings with a venue, dates, and a published page.",
-      "payments": "Review camper, coordinator, and sponsor payments across events.",
+      "payments": "Review camper, chaperone, and sponsor payments across events.",
       "sponsors": "See people who sponsored an event, including those who asked to stay anonymous.",
       "reports": "Open trophy, chaperone, and sponsor lists, then export formatted Excel reports.",
       "audit-logs": "Review who changed people, events, payments, and invitations.",
@@ -376,8 +376,8 @@
       "isTrophy": "Trophies"
     },
     "categories": {
-      "trophy_camper": "Trophy camper",
-      "trophy_participant": "Trophy participant",
+      "trophy_camper": "Trophy Camper",
+      "trophy_participant": "Trophy Participant",
       "chaperone": "Chaperone / Encadreur"
     },
     "import": {
@@ -386,6 +386,8 @@
       "hint": "Upload a Young Foundations export (.xlsx). Columns used: YF ID, Points, Name, Gender, Age, Address, Country, Email, Phone, DOB, Trophy. Choose the category for every row in this file.",
       "chooseCategory": "Select category",
       "file": "Excel file",
+      "browse": "Browse",
+      "emptyFile": "No file selected",
       "submit": "Import",
       "importing": "Importing…",
       "missing": "Choose a category and an Excel file.",
@@ -393,6 +395,31 @@
       "networkFailed": "Network error while importing. Check your connection and try again. The same file will not create duplicates.",
       "result": "Created {{created}}, updated {{updated}}, unchanged {{unchanged}}, skipped {{skipped}}.",
       "rowError": "Row {{row}}: {{message}}"
+    },
+    "summary": {
+      "hint": "Click a category to open its list. Use the arrow to preview the people in that category without leaving this page.",
+      "people": "People",
+      "count": "{{count}} people",
+      "open": "Open category",
+      "expand": "Preview {{category}}",
+      "collapse": "Hide {{category}}",
+      "previewEmpty": "No people in this category yet.",
+      "previewMore": "Showing {{shown}} of {{count}}.",
+      "back": "All categories",
+      "failed": "Could not load categories."
+    },
+    "bulkDelete": {
+      "action": "Delete selected",
+      "selectPage": "Select all on this page",
+      "selectRow": "Select person",
+      "selectAll": "Select all ({{count}})",
+      "selected": "{{count}} selected",
+      "pageSelected": "Every person on this page is selected. Select all to include the other pages.",
+      "clear": "Clear selection",
+      "confirmTitle": "Delete selected people?",
+      "confirmDescription": "This deletes {{count}} people from {{category}}. This cannot be undone.",
+      "failed": "Could not delete the selected people.",
+      "success": "Deleted {{count}} people."
     },
     "sections": {
       "identity": "Personal details",
@@ -548,6 +575,11 @@
       "subject": "Subject",
       "body": "Message"
     },
+    "audiences": {
+      "camper": "Campers",
+      "participant": "Participants",
+      "chaperone": "Chaperone / Encadreur"
+    },
     "members": "Members",
     "pickCampers": "Select campers",
     "pickCampersPlaceholder": "Search and select campers",
@@ -568,6 +600,7 @@
     "queueInvitations": "Queue invitations",
     "sendInvitations": "Send invitations",
     "selectEvent": "Select an event",
+    "derivedDescription": "Mailing list for {{name}}",
     "invitationPreview": "Invitation preview",
     "invitationPreviewHint": "This is how the email will look for the selected language.",
     "invitationPreviewEmpty": "Select an event to preview the invitation.",
@@ -576,8 +609,10 @@
     "invitationsFailed": "Could not queue invitations",
     "invitationsSendFailed": "Could not send the invitations. Check email settings and try again.",
     "audienceKinds": {
-      "camper": "Camper",
-      "coordinator": "Coordinator",
+      "trophy_camper": "Trophy Camper",
+      "trophy_participant": "Trophy Participant",
+      "chaperone": "Chaperone / Encadreur",
+      "camper": "Trophy Camper",
       "sponsor": "Sponsor",
       "mixed": "Mixed"
     }
@@ -605,7 +640,7 @@
       "requiresParticipantFee": "Fee required",
       "participantFeeAmount": "Fee",
       "currency": "Currency",
-      "coordinatorFundAmount": "Coordinator fund (XAF)",
+      "coordinatorFundAmount": "Chaperone / Encadreur fund (XAF)",
       "sponsorFundAmount": "Sponsor fund (XAF)",
       "minAge": "Minimum age",
       "maxAge": "Maximum age"
@@ -708,7 +743,8 @@
     "markWaived": "Waive",
     "kinds": {
       "camper": "Camper fee",
-      "coordinator": "Coordinator fund",
+      "coordinator": "Chaperone / Encadreur fund",
+      "coordinator_fund": "Chaperone / Encadreur fund",
       "sponsor": "Sponsor fund"
     }
   },

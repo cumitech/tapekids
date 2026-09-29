@@ -25,7 +25,7 @@ export function FormSection({
       )}
     >
       <div className="flex flex-col gap-0.5">
-        <h3 className="text-sm font-semibold tracking-wide text-[#182356] dark:text-foreground">
+        <h3 className="text-sm font-semibold tracking-wide text-primary dark:text-foreground">
           {title}
         </h3>
         {description ? (

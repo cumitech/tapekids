@@ -26,11 +26,11 @@ export type TransactionalMailLayout = {
   footer?: string;
 };
 
-const NAVY = "#182356";
-const SAGE = "#466d6b";
-const MINT = "#e1edef";
-const PAGE = "#e8eeed";
-const INK = "#1c2434";
+const NAVY = "#146d8f";
+const SAGE = "#3e6e78";
+const MINT = "#e7f6fb";
+const PAGE = "#e8f4f7";
+const INK = "#16343c";
 const MUTED = "#5b6770";
 
 function paragraphHtml(paragraph: string) {
@@ -110,7 +110,7 @@ export function renderTransactionalMailHtml(input: TransactionalMailLayout): str
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${PAGE};padding:28px 12px;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 28px rgba(24,35,86,0.12);">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 28px rgba(15,78,98,0.12);">
           <tr>
             <td style="background:${NAVY};padding:28px 32px;color:#ffffff;">
               <p style="margin:0 0 8px;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:${MINT};">${brand}</p>

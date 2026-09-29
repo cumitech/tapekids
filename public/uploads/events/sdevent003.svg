@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" role="img" aria-label="Bamenda Easter Retreat">
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#24356e"/>
-      <stop offset="1" stop-color="#466d6b"/>
+      <stop offset="0" stop-color="#0f4e62"/>
+      <stop offset="1" stop-color="#90becb"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="750" fill="url(#g)"/>

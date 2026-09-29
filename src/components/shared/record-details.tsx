@@ -2,6 +2,8 @@
 
 import { useTranslate } from "@refinedev/core";
 
+import { useLocale } from "@/hooks/core/use-locale.hook";
+import { formatPresentedValue } from "@/lib/format";
 import { formatPhoneDisplay } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +19,7 @@ export function RecordDetails({
   className,
 }: RecordDetailsProps) {
   const translate = useTranslate();
+  const { locale } = useLocale();
 
   return (
     <dl
@@ -28,7 +31,7 @@ export function RecordDetails({
       {Object.entries(fields).map(([key, value]) => (
         <div key={key} className="flex flex-col gap-1">
           <dt className="text-sm text-muted-foreground">{labels[key]}</dt>
-          <dd>{formatRecordValue(key, value, translate)}</dd>
+          <dd>{formatRecordValue(key, value, translate, locale)}</dd>
         </div>
       ))}
     </dl>
@@ -38,7 +41,8 @@ export function RecordDetails({
 function formatRecordValue(
   key: string,
   value: unknown,
-  translate: (key: string, defaultMessage?: string) => string
+  translate: (key: string, defaultMessage?: string) => string,
+  locale: string
 ) {
   if (value == null || value === "") {
     return "-";
@@ -52,5 +56,6 @@ function formatRecordValue(
     return formatPhoneDisplay(value) || value;
   }
 
-  return String(value);
+  const presented = formatPresentedValue(value, locale);
+  return presented == null || presented === "" ? "-" : String(presented);
 }

@@ -1,6 +1,8 @@
-import type { EventMembershipKind } from "@/constants/event-participation";
+import type { InvitationAudience } from "@/constants/event-participation";
+import { EVENT_TYPES, type EventType } from "@/constants/event-type";
 import { DEFAULT_LOCALE, type AppLocale } from "@/constants/locales";
 import { copyFieldsForLocale } from "@/lib/content-i18n/pick";
+import { formatDateTime } from "@/lib/format";
 import { invitationLinkValidityCopy } from "@/lib/invitations/expiry";
 import { mailGreeting } from "@/lib/mail/greeting";
 import { htmlToPlainText } from "@/lib/html";
@@ -40,45 +42,55 @@ export function formatEventRange(
   if (Number.isNaN(start.getTime())) {
     return "";
   }
-  const loc = locale === "fr" ? "fr-CM" : "en-GB";
-  const format = (value: Date) =>
-    new Intl.DateTimeFormat(loc, {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }).format(value);
+  const startLabel = formatDateTime(start, locale);
   if (!endsAt) {
-    return format(start);
+    return startLabel;
   }
   const end = new Date(endsAt);
   if (Number.isNaN(end.getTime())) {
-    return format(start);
+    return startLabel;
   }
-  return `${format(start)} to ${format(end)}`;
+  return `${startLabel} – ${formatDateTime(end, locale)}`;
 }
 
-function kindPhrase(kind: EventMembershipKind, locale: AppLocale) {
+function kindPhrase(audience: InvitationAudience, locale: AppLocale) {
   if (locale === "fr") {
-    if (kind === "coordinator") {
-      return "comme coordinateurs";
+    if (audience === "chaperone") {
+      return "comme chaperons / encadreurs";
     }
-    if (kind === "sponsor") {
-      return "comme parrains";
+    if (audience === "participant") {
+      return "comme participants";
     }
     return "comme campeurs";
   }
-  if (kind === "coordinator") {
-    return "as coordinators";
+  if (audience === "chaperone") {
+    return "as chaperones / encadreurs";
   }
-  if (kind === "sponsor") {
-    return "as sponsors";
+  if (audience === "participant") {
+    return "as participants";
   }
   return "as campers";
 }
 
+export function eventTypeLabel(eventType: EventType | null | undefined, locale: AppLocale) {
+  const type = eventType === EVENT_TYPES.DAY_EVENT ? EVENT_TYPES.DAY_EVENT : EVENT_TYPES.CAMP;
+  if (locale === "fr") {
+    return type === EVENT_TYPES.DAY_EVENT ? "Journée" : "Camp";
+  }
+  return type === EVENT_TYPES.DAY_EVENT ? "Day event" : "Camp";
+}
+
+function eventTypePhrase(eventType: EventType | null | undefined, locale: AppLocale) {
+  const day = eventType === EVENT_TYPES.DAY_EVENT;
+  if (locale === "fr") {
+    return day ? "pour cette journée" : "pour ce camp";
+  }
+  return day ? "for this day event" : "for this camp";
+}
+
 export function invitationDrafts(
   event: Event,
-  kind: EventMembershipKind
+  audience: InvitationAudience
 ): InvitationDraft {
   const en = copyFor(event, "en");
   const fr = copyFor(event, "fr");
@@ -90,7 +102,7 @@ export function invitationDrafts(
   const summaryFr = htmlToPlainText(fr.summary || en.summary || "");
 
   const bodyEn = [
-    `<p>We would love you to join ${en.title} ${kindPhrase(kind, "en")} at ${placeEn}${datesEn ? ` from ${datesEn}` : ""}.</p>`,
+    `<p>We would love you to join ${en.title} ${kindPhrase(audience, "en")} ${eventTypePhrase(event.eventType, "en")} at ${placeEn}${datesEn ? ` from ${datesEn}` : ""}.</p>`,
     summaryEn ? `<p>${summaryEn}</p>` : "",
     "<p>This gathering is for young Christians walking with Christ, anchored in the Word brought by God’s prophet, William Marrion Branham. Place God and His Word first, stay away from the world, and encourage one another.</p>",
     "<p>Open the invitation to confirm a place.</p>",
@@ -100,7 +112,7 @@ export function invitationDrafts(
     .join("");
 
   const bodyFr = [
-    `<p>Nous serions heureux que vous rejoigniez ${fr.title || en.title} ${kindPhrase(kind, "fr")} à ${placeFr}${datesFr ? ` du ${datesFr}` : ""}.</p>`,
+    `<p>Nous serions heureux que vous rejoigniez ${fr.title || en.title} ${kindPhrase(audience, "fr")} ${eventTypePhrase(event.eventType, "fr")} à ${placeFr}${datesFr ? ` du ${datesFr}` : ""}.</p>`,
     summaryFr ? `<p>${summaryFr}</p>` : "",
     "<p>Ce rassemblement est pour les jeunes chrétiens qui marchent avec Christ, ancrés dans la Parole apportée par le prophète de Dieu, William Marrion Branham. Placez Dieu et Sa Parole en premier, restez séparés du monde, et encouragez-vous les uns les autres.</p>",
     "<p>Ouvrez l'invitation pour confirmer une place.</p>",
@@ -128,6 +140,7 @@ export function invitationMailDetails(
     eventCity?: string | null;
     startsAt?: string | Date | null;
     endsAt?: string | Date | null;
+    eventType?: EventType | null;
   },
   locale: AppLocale
 ) {
@@ -135,6 +148,10 @@ export function invitationMailDetails(
   const when = formatEventRange(input.startsAt, input.endsAt, locale);
   return [
     { label: locale === "fr" ? "Événement" : "Event", value: input.eventTitle },
+    {
+      label: locale === "fr" ? "Type" : "Type",
+      value: eventTypeLabel(input.eventType, locale),
+    },
     { label: locale === "fr" ? "Quand" : "When", value: when },
     { label: locale === "fr" ? "Où" : "Where", value: where },
     {
@@ -151,6 +168,7 @@ export function invitationPreviewHtml(input: {
   eventCity?: string | null;
   startsAt?: string | Date | null;
   endsAt?: string | Date | null;
+  eventType?: EventType | null;
   subject: string;
   body: string;
   locale?: AppLocale;

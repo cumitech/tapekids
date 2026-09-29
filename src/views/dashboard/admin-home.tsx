@@ -57,7 +57,7 @@ export function AdminHome() {
         description={translate("dashboard.adminDescription")}
       />
       <div className="flex flex-col gap-2">
-        <h2 className="text-xs font-semibold tracking-tight text-[#182356] dark:text-foreground">
+        <h2 className="text-xs font-semibold tracking-tight text-primary dark:text-foreground">
           {translate("prepareEvent.entry")}
         </h2>
         <div className="grid items-stretch gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
@@ -73,7 +73,7 @@ export function AdminHome() {
       </div>
       {groups.map((group) => (
         <div key={group.title} className="flex flex-col gap-2">
-          <h2 className="text-xs font-semibold tracking-tight text-[#182356] dark:text-foreground">
+          <h2 className="text-xs font-semibold tracking-tight text-primary dark:text-foreground">
             {group.title}
           </h2>
           <div className="grid items-stretch gap-2.5 sm:grid-cols-2 xl:grid-cols-3">

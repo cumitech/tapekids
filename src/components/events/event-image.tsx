@@ -22,7 +22,7 @@ export function EventImage({ src, alt, className }: EventImageProps) {
           className="absolute inset-0 size-full object-cover"
         />
       ) : (
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#182356] to-[#466d6b] text-white/80">
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#0f4e62] to-[#1c96c5] text-white/80">
           <Tent className="size-10" />
         </div>
       )}

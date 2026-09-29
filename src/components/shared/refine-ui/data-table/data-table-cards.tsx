@@ -111,8 +111,13 @@ export function DataTableCards<TData extends BaseRecord>({
           .filter((cell) => !isInternalIdColumn(cell.column));
         const media = cells.find((cell) => isMediaColumn(cell.column));
         const actions = cells.find((cell) => cell.column.id === "actions");
+        const select = cells.find((cell) => cell.column.id === "select");
         const fields = cells.filter((cell) => {
-          if (cell.column.id === "actions" || isMediaColumn(cell.column)) {
+          if (
+            cell.column.id === "actions" ||
+            cell.column.id === "select" ||
+            isMediaColumn(cell.column)
+          ) {
             return false;
           }
           if (HIDDEN_MOBILE_COLUMNS.has(cell.column.id)) {
@@ -143,6 +148,14 @@ export function DataTableCards<TData extends BaseRecord>({
             className="overflow-hidden rounded-2xl border border-border/60 bg-white shadow-[0_1px_4px_rgba(15,23,42,0.08)] dark:bg-card"
           >
             <div className="flex items-start gap-3 p-4">
+              {select ? (
+                <div className="pt-1">
+                  {flexRender(
+                    select.column.columnDef.cell,
+                    select.getContext()
+                  )}
+                </div>
+              ) : null}
               {media ? (
                 <div className="shrink-0 overflow-hidden rounded-xl">
                   {flexRender(

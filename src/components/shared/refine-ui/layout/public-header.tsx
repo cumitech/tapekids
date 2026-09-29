@@ -38,7 +38,7 @@ function PublicNavLinks({
           <Link
             key={link.href}
             href={link.href}
-            className="transition-colors hover:text-[#e1edef]"
+            className="transition-colors hover:text-[#e7f6fb]"
           >
             {link.label}
           </Link>
@@ -70,14 +70,14 @@ export function PublicHeader() {
   const isAuthenticated = mounted && Boolean(data?.authenticated);
 
   return (
-    <header className="sticky top-0 z-50 bg-primary text-primary-foreground shadow-[0_4px_14px_rgba(15,23,42,0.18)] dark:bg-card">
+    <header className="sticky top-0 z-50 bg-[#146d8f] text-white shadow-[0_4px_14px_rgba(15,78,98,0.22)]">
       <div className="mx-auto flex h-16 w-full min-w-0 max-w-6xl items-center justify-between gap-3 overflow-x-clip px-3 md:h-[4.5rem] md:px-6">
         <Link
           href={path("/")}
-          className="min-w-0 shrink text-white"
+          className="min-w-0 shrink"
           aria-label={translate("brand.name")}
         >
-          <AppLogo className="h-12 max-w-full text-white" />
+          <AppLogo onDark className="h-12 max-w-full drop-shadow-[0_1px_1px_rgba(8,40,52,0.35)]" />
         </Link>
         <div className="hidden items-center gap-4 md:flex">
           <PublicNavLinks isAuthenticated={isAuthenticated} onPrimary />

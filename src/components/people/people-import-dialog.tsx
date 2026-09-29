@@ -10,16 +10,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/shared/ui/dialog";
+import type { PersonCategory } from "@/constants/person";
 import type { PeopleImportResult } from "@/models/people/people-import.model";
 
 type PeopleImportDialogProps = {
   open: boolean;
+  lockedCategory?: PersonCategory;
   onOpenChange: (open: boolean) => void;
   onImported?: (result: PeopleImportResult) => void;
 };
 
 export function PeopleImportDialog({
   open,
+  lockedCategory,
   onOpenChange,
   onImported,
 }: PeopleImportDialogProps) {
@@ -41,6 +44,7 @@ export function PeopleImportDialog({
         </DialogHeader>
         {open ? (
           <PeopleImportForm
+            lockedCategory={lockedCategory}
             onBusyChange={setBusy}
             onCancel={() => onOpenChange(false)}
             onImported={onImported}

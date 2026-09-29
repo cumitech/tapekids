@@ -21,9 +21,31 @@ export const SPONSOR_PORTAL_KINDS: EventMembershipKind[] = [
   EVENT_MEMBERSHIP_KINDS.SPONSOR,
 ];
 
+/** Who an invitation addresses. Participants share the camper membership record. */
+export const INVITATION_AUDIENCES = {
+  CAMPER: "camper",
+  PARTICIPANT: "participant",
+  CHAPERONE: "chaperone",
+} as const;
+
+export type InvitationAudience =
+  (typeof INVITATION_AUDIENCES)[keyof typeof INVITATION_AUDIENCES];
+
+export const INVITATION_AUDIENCE_VALUES = Object.values(INVITATION_AUDIENCES);
+
+export function membershipKindForInvitation(
+  audience: InvitationAudience
+): EventMembershipKind {
+  if (audience === INVITATION_AUDIENCES.CHAPERONE) {
+    return EVENT_MEMBERSHIP_KINDS.COORDINATOR;
+  }
+  return EVENT_MEMBERSHIP_KINDS.CAMPER;
+}
+
 export const MAILING_LIST_AUDIENCE_KINDS = {
-  ...EVENT_MEMBERSHIP_KINDS,
-  MIXED: "mixed",
+  TROPHY_CAMPER: "trophy_camper",
+  TROPHY_PARTICIPANT: "trophy_participant",
+  CHAPERONE: "chaperone",
 } as const;
 
 export type MailingListAudienceKind =

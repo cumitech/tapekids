@@ -9,7 +9,7 @@ import { ResourceRowActions } from "@/components/shared/refine-ui/buttons/resour
 import { columnFilter } from "@/components/shared/refine-ui/data-table/data-table-column-filter";
 import { DataTable } from "@/components/shared/refine-ui/data-table/data-table";
 import { ListView, ListViewHeader } from "@/components/shared/refine-ui/views/list-view";
-import { MAILING_LIST_AUDIENCE_KINDS } from "@/constants/event-participation";
+import { PERSON_CATEGORY_VALUES, categoryForAudience } from "@/constants/person";
 import { useCachedTable } from "@/hooks/core/use-cached-table.hook";
 import { useDashboardFormModal } from "@/hooks/core/use-dashboard-form-modal.hook";
 import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
@@ -24,9 +24,9 @@ export function MailingListsListPage() {
 
   const audienceOptions = useMemo(
     () =>
-      Object.values(MAILING_LIST_AUDIENCE_KINDS).map((value) => ({
+      PERSON_CATEGORY_VALUES.map((value) => ({
         value,
-        label: translate(`mailingLists.audienceKinds.${value}`),
+        label: translate(`people.categories.${value}`),
       })),
     [translate]
   );
@@ -38,6 +38,12 @@ export function MailingListsListPage() {
         id: "audienceKind",
         accessorKey: "audienceKind",
         header: labels.fields.audienceKind,
+        cell: ({ row }) => {
+          const category = categoryForAudience(row.original.audienceKind);
+          return category
+            ? translate(`people.categories.${category}`)
+            : String(row.original.audienceKind);
+        },
         ...columnFilter("select", audienceOptions),
       },
       {
@@ -65,7 +71,7 @@ export function MailingListsListPage() {
         ),
       },
     ],
-    [audienceOptions, labels, openEdit]
+    [audienceOptions, labels, openEdit, translate]
   );
 
   const { table } = useCachedTable<MailingList>({

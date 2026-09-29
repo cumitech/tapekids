@@ -6,7 +6,9 @@ import { InvitationEmailPreview } from "@/components/invitations/invitation-emai
 import { EventSelect } from "@/components/events/event-select";
 import { LabeledField } from "@/components/shared/form/labeled-field";
 import { LocalizedTabs } from "@/components/shared/form/localized-tabs";
-import { MembershipKindSelect } from "@/components/shared/form/membership-kind-select";
+import { LabeledSelect } from "@/components/shared/form/labeled-select";
+import { INVITATION_AUDIENCE_VALUES } from "@/constants/event-participation";
+import type { InvitationAudience } from "@/constants/event-participation";
 import { Button } from "@/components/shared/ui/button";
 import { Input } from "@/components/shared/ui/input";
 import { RichTextEditor } from "@/components/shared/form/rich-text-editor";
@@ -43,10 +45,15 @@ export function InvitationQueueForm({
           ) : (
             <EventSelect value={queue.eventId} onChange={queue.setEventId} required />
           )}
-          <MembershipKindSelect
+          <LabeledSelect
             label={translate("mailingLists.fields.kind")}
-            value={queue.kind}
-            onChange={queue.setKind}
+            value={queue.audience}
+            onChange={(next) => queue.setAudience(next as InvitationAudience)}
+            options={INVITATION_AUDIENCE_VALUES.map((audience) => ({
+              value: audience,
+              label: translate(`mailingLists.audiences.${audience}`),
+            }))}
+            required
           />
           <LocalizedTabs
             value={queue.previewLocale}

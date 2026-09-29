@@ -143,7 +143,7 @@ export function DataTable<TData extends BaseRecord>({
                     >
                       {isPlaceholder ? null : (
                         <div className={cn("flex", "items-center", "gap-1")}>
-                          <span className="truncate">
+                          <span className={header.column.id === "select" ? "flex" : "truncate"}>
                             {flexRender(
                               header.column.columnDef.header,
                               header.getContext()
@@ -237,6 +237,8 @@ export function DataTable<TData extends BaseRecord>({
                           className={
                             cell.column.id === "actions"
                               ? "flex justify-end overflow-visible"
+                              : cell.column.id === "select"
+                              ? "flex items-center"
                               : "min-w-0 truncate"
                           }
                         >
@@ -332,6 +334,14 @@ export function getCommonStyles<TData>({
     vertical: boolean;
   };
 }): React.CSSProperties {
+  if (column.id === "select") {
+    return {
+      width: 44,
+      minWidth: 44,
+      maxWidth: 44,
+    };
+  }
+
   if (column.id === "actions") {
     return {
       position: "sticky",

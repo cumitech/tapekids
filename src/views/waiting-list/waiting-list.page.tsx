@@ -16,7 +16,7 @@ import { useCachedTable } from "@/hooks/core/use-cached-table.hook";
 import { useLocale } from "@/hooks/core/use-locale.hook";
 import { unwrapEnvelope } from "@/lib/client/api";
 import { clearListQueryCache } from "@/lib/client/list-query-cache";
-import { formatDate } from "@/lib/format";
+import { formatDateTime } from "@/lib/format";
 import { formatPhoneDisplay } from "@/lib/phone";
 import type { WaitingListEntry } from "@/models/waiting-list/waiting-list.model";
 import { http } from "@/utils/axios";
@@ -211,7 +211,7 @@ function useWaitingListColumns({
         id: "createdAt",
         accessorKey: "createdAt",
         header: translate("waitingList.registeredAt"),
-        cell: ({ row }) => formatDate(row.original.createdAt, locale) || "-",
+        cell: ({ row }) => formatDateTime(row.original.createdAt, locale) || "-",
       },
       {
         id: "actions",

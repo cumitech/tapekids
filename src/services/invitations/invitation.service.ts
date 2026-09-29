@@ -219,6 +219,7 @@ export class InvitationService {
           eventCity: event.city,
           startsAt: event.startsAt,
           endsAt: event.endsAt,
+          eventType: event.eventType === "day_event" ? "day_event" : "camp",
           subject: primary.subject,
           body: this.bilingualInvitationBody(copies),
           token: invitation.token,

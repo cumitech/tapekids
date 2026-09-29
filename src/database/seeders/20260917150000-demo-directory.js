@@ -382,20 +382,20 @@ module.exports = {
         id: "sdlist0001",
         name: "Christmas campers 2026",
         description: "Children invited to the Yaoundé Christmas camp.",
-        audienceKind: "camper",
+        audienceKind: "trophy_camper",
         createdById: adminId,
       }),
       stamp(now, {
         id: "sdlist0002",
-        name: "Camp coordinators",
+        name: "Camp chaperones",
         description: "Adults who run stations and dorms.",
-        audienceKind: "coordinator",
+        audienceKind: "chaperone",
         createdById: adminId,
       }),
       stamp(now, {
         id: "sdlist0003",
         name: "Yaoundé church families",
-        description: "Mixed list of campers, parents who sponsor, and coordinators in Centre.",
+        description: "Mixed list of campers, parents who sponsor, and chaperones in Centre.",
         audienceKind: "mixed",
         createdById: adminId,
       }),
@@ -533,7 +533,7 @@ module.exports = {
         eventId: eventIds.sdevent001,
         mailingListId: "sdlist0002",
         kind: "coordinator",
-        subject: "Coordinator briefing: Christmas Camp",
+        subject: "Chaperone briefing: Christmas Camp",
         body: "Please confirm if you can lead a station at the Yaoundé Christmas camp. Arrival is 19 December for setup.",
         sentById: adminId,
         status: "sent",
@@ -577,11 +577,11 @@ module.exports = {
       }),
       ...translationRows(now, "mailing_list", "sdlist0002", {
         en: {
-          name: "Camp coordinators",
+          name: "Camp chaperones",
           description: "Adults who run stations and dorms.",
         },
         fr: {
-          name: "Coordinateurs de camp",
+          name: "Encadreurs de camp",
           description: "Adultes qui animent les ateliers et les dortoirs.",
         },
       }),
@@ -589,12 +589,12 @@ module.exports = {
         en: {
           name: "Yaoundé church families",
           description:
-            "Mixed list of campers, parents who sponsor, and coordinators in Centre.",
+            "Mixed list of campers, parents who sponsor, and chaperones in Centre.",
         },
         fr: {
           name: "Familles d'églises de Yaoundé",
           description:
-            "Liste mixte de campeurs, de parents parrains et de coordinateurs du Centre.",
+            "Liste mixte de campeurs, de parents parrains et d'encadreurs du Centre.",
         },
       }),
       ...translationRows(now, "invitation_batch", "sdbatch001", {
@@ -609,11 +609,11 @@ module.exports = {
       }),
       ...translationRows(now, "invitation_batch", "sdbatch002", {
         en: {
-          subject: "Coordinator briefing: Christmas Camp",
+          subject: "Chaperone briefing: Christmas Camp",
           body: "Please confirm if you can lead a station at the Yaoundé Christmas camp. Arrival is 19 December for setup.",
         },
         fr: {
-          subject: "Briefing des coordinateurs: Camp de Noël",
+          subject: "Briefing des encadreurs: Camp de Noël",
           body: "Merci de confirmer si vous pouvez animer un atelier au camp de Noël de Yaoundé. Arrivée le 19 décembre pour l'installation.",
         },
       }),

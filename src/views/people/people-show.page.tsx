@@ -132,7 +132,7 @@ export function PeopleShowPage() {
           </div>
           <aside className="flex min-w-0 flex-col gap-8">
             <section className="flex flex-col gap-3">
-              <h3 className="text-sm font-semibold text-[#182356] dark:text-foreground">
+              <h3 className="text-sm font-semibold text-primary dark:text-foreground">
                 {translate("people.sections.guardians")}
               </h3>
               {guardians.length === 0 ? (

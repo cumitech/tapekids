@@ -32,6 +32,7 @@ export function invitationMail(input: {
   eventCity?: string | null;
   startsAt?: string | Date | null;
   endsAt?: string | Date | null;
+  eventType?: "camp" | "day_event" | null;
   subject: string;
   body: string;
   token: string;
@@ -135,7 +136,7 @@ export function registrationConfirmedMail(input: {
     subject: `You are registered for ${input.eventTitle}`,
     paragraphs: [
       `Your ${input.kind} place at ${input.eventTitle} is confirmed.`,
-      "We will write again if a payment is recorded, or if coordinators send another update. Place God and His Word first in all things.",
+      "We will write again if a payment is recorded, or if chaperones send another update. Place God and His Word first in all things.",
     ],
   });
 }
@@ -194,7 +195,7 @@ export function paymentWaivedMail(input: {
     firstName: input.firstName,
     subject: `Payment waived for ${input.eventTitle}`,
     paragraphs: [
-      `No payment is due for ${input.eventTitle}. Coordinators marked this fee as waived.`,
+      `No payment is due for ${input.eventTitle}. Chaperones marked this fee as waived.`,
       input.trackingId ? `Payment ID: ${input.trackingId}.` : "",
     ].filter(Boolean),
   });

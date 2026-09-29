@@ -1,4 +1,7 @@
-import type { PersonCategory } from "@/constants/person";
+import {
+  PERSON_CATEGORY_VALUES,
+  type PersonCategory,
+} from "@/constants/person";
 import {
   parseCreatePerson,
   parseUpdatePerson,
@@ -110,6 +113,44 @@ export class PersonService {
       entityId: id,
       before,
     });
+  }
+
+  async summary() {
+    const rows = await personRepository.countByCategory();
+    const counts = new Map(rows.map((row) => [row.category ?? "", row.count]));
+    return PERSON_CATEGORY_VALUES.map((category) => ({
+      category,
+      count: counts.get(category) ?? 0,
+    }));
+  }
+
+  async deleteMany(input: {
+    category: PersonCategory;
+    ids?: string[];
+    all?: boolean;
+  }) {
+    if (!input.all && (!input.ids || input.ids.length === 0)) {
+      throw new ValidationException("Choose people to delete.");
+    }
+    if (input.ids && input.ids.length > 5000) {
+      throw new ValidationException("Too many people were selected at once.");
+    }
+
+    const deleted = await personRepository.deleteInCategory(
+      input.category,
+      input.all ? undefined : input.ids
+    );
+    await auditService.record({
+      action: "delete",
+      entity: "Person",
+      entityId: null,
+      after: {
+        category: input.category,
+        deleted,
+        all: Boolean(input.all),
+      },
+    });
+    return { deleted };
   }
 
   async findOrCreateByEmail(input: {

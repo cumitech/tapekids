@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslate } from "@refinedev/core";
 
 import {
-  EVENT_MEMBERSHIP_KINDS,
-  type EventMembershipKind,
+  INVITATION_AUDIENCES,
+  membershipKindForInvitation,
+  type InvitationAudience,
 } from "@/constants/event-participation";
 import { DEFAULT_LOCALE, type AppLocale } from "@/constants/locales";
 import { useBusyAction } from "@/hooks/core/use-busy-action.hook";
@@ -33,8 +34,8 @@ export function useInvitationQueue(
   onSentRef.current = options?.onSent;
   const [eventId, setEventId] = useState(options?.eventId ?? "");
   const [event, setEvent] = useState<Event | null>(null);
-  const [kind, setKind] = useState<EventMembershipKind>(
-    EVENT_MEMBERSHIP_KINDS.CAMPER
+  const [audience, setAudience] = useState<InvitationAudience>(
+    INVITATION_AUDIENCES.CAMPER
   );
   const [previewLocale, setPreviewLocale] = useState<AppLocale>(DEFAULT_LOCALE);
   const [subject, setSubject] = useState({ fr: "", en: "" });
@@ -73,10 +74,10 @@ export function useInvitationQueue(
       setBody({ fr: "", en: "" });
       return;
     }
-    const draft = invitationDrafts(event, kind);
+    const draft = invitationDrafts(event, audience);
     setSubject(draft.subject);
     setBody(draft.body);
-  }, [event, kind]);
+  }, [event, audience]);
 
   const translations = {
     fr: { subject: subject.fr, body: body.fr },
@@ -94,7 +95,7 @@ export function useInvitationQueue(
         `/events/${eventId}/invitation-batches`,
         {
           mailingListId,
-          kind,
+          kind: membershipKindForInvitation(audience),
           translations,
         }
       );
@@ -114,8 +115,8 @@ export function useInvitationQueue(
     eventId,
     setEventId,
     event,
-    kind,
-    setKind,
+    audience,
+    setAudience,
     previewLocale,
     setPreviewLocale,
     subject,

@@ -21,7 +21,7 @@ export function PublicEventPage({ event }: { event: PublicEvent }) {
     <div className="flex min-h-svh flex-col bg-background text-foreground">
       <PublicHeader />
       <main className="flex min-w-0 flex-1 flex-col">
-        <div className="relative overflow-hidden bg-gradient-to-r from-[#2a4078] via-[#3d5a86] to-[#466d6b] text-white">
+        <div className="relative overflow-hidden bg-gradient-to-r from-[#0f4e62] via-[#146d8f] to-[#1c96c5] text-white">
           <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:px-6 md:py-14">
             <div className="min-w-0">
               <Link

@@ -74,6 +74,20 @@ export function isPersonCategory(value: unknown): value is PersonCategory {
   return PERSON_CATEGORY_VALUES.includes(value as PersonCategory);
 }
 
+/** Older mailing lists stored camper/coordinator. Both map onto a person category. */
+const AUDIENCE_CATEGORY_ALIASES: Record<string, PersonCategory> = {
+  trophy_camper: PERSON_CATEGORIES.TROPHY_CAMPER,
+  camper: PERSON_CATEGORIES.TROPHY_CAMPER,
+  trophy_participant: PERSON_CATEGORIES.TROPHY_PARTICIPANT,
+  chaperone: PERSON_CATEGORIES.CHAPERONE,
+  coordinator: PERSON_CATEGORIES.CHAPERONE,
+};
+
+export function categoryForAudience(value: unknown): PersonCategory | null {
+  const key = String(value ?? "").trim();
+  return AUDIENCE_CATEGORY_ALIASES[key] ?? null;
+}
+
 export function parsePersonGender(raw: unknown): PersonGender | null {
   const value = String(raw ?? "")
     .trim()

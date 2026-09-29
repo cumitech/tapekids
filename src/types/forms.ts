@@ -63,6 +63,6 @@ export type MailingListFormValues = {
     fr: { name: string; description: string };
     en: { name: string; description: string };
   };
-  audienceKind: "camper" | "coordinator" | "sponsor" | "mixed";
+  audienceKind: "trophy_camper" | "trophy_participant" | "chaperone";
   personIds: string[];
 };

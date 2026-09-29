@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTranslate } from "@refinedev/core";
+import { FileSpreadsheet } from "lucide-react";
 
 import { PersonCategorySelect } from "@/components/people/person-category-select";
 import { RequiredMark } from "@/components/shared/form/required-mark";
 import { Button } from "@/components/shared/ui/button";
 import { Label } from "@/components/shared/ui/label";
+import { cn } from "@/lib/utils";
 import type { PersonCategory } from "@/constants/person";
 import {
   apiErrorMessage,
@@ -18,18 +20,22 @@ import { clearListQueryCache } from "@/lib/client/list-query-cache";
 import type { PeopleImportResult } from "@/models/people/people-import.model";
 
 type PeopleImportFormProps = {
+  lockedCategory?: PersonCategory;
   onImported?: (result: PeopleImportResult) => void;
   onCancel?: () => void;
   onBusyChange?: (busy: boolean) => void;
 };
 
 export function PeopleImportForm({
+  lockedCategory,
   onImported,
   onCancel,
   onBusyChange,
 }: PeopleImportFormProps) {
   const translate = useTranslate();
-  const [category, setCategory] = useState<PersonCategory | "">("");
+  const fileInputId = useId();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [category, setCategory] = useState<PersonCategory | "">(lockedCategory ?? "");
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<PeopleImportResult | null>(null);
@@ -42,7 +48,8 @@ export function PeopleImportForm({
   }, [busy]);
 
   async function onSubmit() {
-    if (!category || !file) {
+    const chosen = lockedCategory || category;
+    if (!chosen || !file) {
       setError(translate("people.import.missing"));
       return;
     }
@@ -51,7 +58,7 @@ export function PeopleImportForm({
     setResult(null);
     try {
       const body = new FormData();
-      body.append("category", category);
+      body.append("category", chosen);
       body.append("file", file);
       const response = await withHttpRetry(() =>
         apiUploadForm<PeopleImportResult>("/people/import", body, {
@@ -79,19 +86,52 @@ export function PeopleImportForm({
           {translate("people.fields.category")}
           <RequiredMark required />
         </Label>
-        <PersonCategorySelect value={category} onChange={setCategory} />
+        <PersonCategorySelect
+          value={lockedCategory || category}
+          onChange={setCategory}
+          disabled={Boolean(lockedCategory)}
+        />
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label>
+        <Label htmlFor={fileInputId}>
           {translate("people.import.file")}
           <RequiredMark required />
         </Label>
-        <input
-          type="file"
-          accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
-          onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-          className="block h-12 w-full min-w-0 rounded-md border border-input bg-transparent px-3 text-base file:mr-3 file:inline-flex file:h-10 file:rounded-md file:border-0 file:bg-primary file:px-3 file:text-sm file:font-medium file:text-primary-foreground md:h-9 md:text-sm md:file:h-7"
-        />
+        <div
+          className={cn(
+            "border-input bg-transparent flex h-12 w-full min-w-0 items-center gap-2 rounded-md border px-1.5 shadow-xs md:h-9",
+            "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]"
+          )}
+        >
+          <FileSpreadsheet className="ml-1.5 size-4 shrink-0 text-muted-foreground" />
+          <span
+            className={cn(
+              "min-w-0 flex-1 truncate text-sm",
+              file ? "text-foreground" : "text-muted-foreground"
+            )}
+          >
+            {file ? file.name : translate("people.import.emptyFile")}
+          </span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={busy}
+            className="h-9 shrink-0 px-3 md:h-7"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {translate("people.import.browse")}
+          </Button>
+          <input
+            ref={fileInputRef}
+            id={fileInputId}
+            type="file"
+            accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+            disabled={busy}
+            className="sr-only"
+            onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+          />
+        </div>
       </div>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {result ? (

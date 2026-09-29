@@ -1,42 +1,73 @@
+function pad(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
+const DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
+
+function calendarDate(value: string | Date) {
+  if (typeof value === "string") {
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    }
+  }
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function instant(value: string | Date) {
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 export function formatDate(
   value: string | Date | null | undefined,
-  locale: string
+  _locale?: string
 ) {
   if (!value) {
     return "";
   }
-  const iso =
-    typeof value === "string"
-      ? value.match(/^(\d{4}-\d{2}-\d{2})/)?.[1]
-      : null;
-  const date = iso
-    ? new Date(`${iso}T00:00:00`)
-    : value instanceof Date
-      ? value
-      : new Date(value);
-  if (Number.isNaN(date.getTime())) {
+  const date = calendarDate(value);
+  if (!date || Number.isNaN(date.getTime())) {
     return String(value);
   }
-  return new Intl.DateTimeFormat(locale === "fr" ? "fr-CM" : "en-GB", {
-    dateStyle: "medium",
-  }).format(date);
+  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
 }
 
 export function formatDateTime(
   value: string | Date | null | undefined,
-  locale: string
+  locale?: string
 ) {
   if (!value) {
     return "";
   }
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) {
+  const date = instant(value);
+  if (!date) {
     return String(value);
   }
-  return new Intl.DateTimeFormat(locale === "fr" ? "fr-CM" : "en-GB", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
+  return `${formatDate(date, locale)} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
+export function formatPresentedValue(value: unknown, locale?: string): unknown {
+  if (typeof value === "string" && DATE_TIME.test(value)) {
+    return formatDateTime(value, locale);
+  }
+  if (typeof value === "string" && DATE_ONLY.test(value)) {
+    return formatDate(value, locale);
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => formatPresentedValue(item, locale));
+  }
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nested]) => [
+        key,
+        formatPresentedValue(nested, locale),
+      ])
+    );
+  }
+  return value;
 }
 
 export function formatMoney(

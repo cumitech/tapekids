@@ -8,7 +8,7 @@ import { Button } from "@/components/shared/ui/button";
 import { useLocale } from "@/hooks/core/use-locale.hook";
 
 const HERO_BUTTON =
-  "h-12 w-full justify-center bg-white text-primary hover:bg-[#e1edef] md:h-9 md:w-auto";
+  "h-12 w-full justify-center bg-white text-primary hover:bg-[#e7f6fb] md:h-9 md:w-auto";
 
 export function DashboardOpenProfileAction() {
   const translate = useTranslate();

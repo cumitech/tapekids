@@ -39,7 +39,7 @@ export function initMailingList(sequelize: Sequelize) {
       audienceKind: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        defaultValue: MAILING_LIST_AUDIENCE_KINDS.MIXED,
+        defaultValue: MAILING_LIST_AUDIENCE_KINDS.TROPHY_CAMPER,
       },
       createdById: {
         type: DataTypes.STRING(20),

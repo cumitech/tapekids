@@ -32,7 +32,7 @@ export function MinistryLinks() {
   const translate = useTranslate();
 
   return (
-    <section className="bg-[#5e8d8b] px-4 py-8 md:px-6 md:py-10">
+    <section className="bg-[#146d8f] px-4 py-8 md:px-6 md:py-10">
       <ul className="mx-auto grid w-full max-w-5xl list-none gap-8 sm:grid-cols-3 sm:gap-6">
         {PARTNERS.map((partner) => {
           const label = translate(partner.labelKey);
@@ -43,9 +43,9 @@ export function MinistryLinks() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={translate("landing.partners.open", { name: label })}
-                className="group flex flex-col items-center gap-3 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#5e8d8b]"
+                className="group flex flex-col items-center gap-3 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#146d8f]"
               >
-                <span className="block aspect-[16/10] w-full overflow-hidden rounded-2xl shadow-[0_8px_20px_rgba(24,35,86,0.18)] transition duration-200 group-hover:-translate-y-0.5">
+                <span className="block aspect-[16/10] w-full overflow-hidden rounded-2xl shadow-[0_8px_20px_rgba(15,78,98,0.18)] transition duration-200 group-hover:-translate-y-0.5">
                   <PartnerArt kind={partner.art} />
                 </span>
                 <span className="text-center text-sm font-medium tracking-wide text-white">

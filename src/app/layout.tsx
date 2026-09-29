@@ -20,7 +20,7 @@ const bitter = Bitter({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#2a4078",
+  themeColor: "#146d8f",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     shortcut: ["/favicon.ico"],
   },
   other: {
-    "msapplication-TileColor": "#2a4078",
+    "msapplication-TileColor": "#146d8f",
     "msapplication-config": "/browserconfig.xml",
     "mobile-web-app-capable": "yes",
   },

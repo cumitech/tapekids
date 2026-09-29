@@ -12,12 +12,15 @@ import { columnFilter } from "@/components/shared/refine-ui/data-table/data-tabl
 import { DataTable } from "@/components/shared/refine-ui/data-table/data-table";
 import { ListView, ListViewHeader } from "@/components/shared/refine-ui/views/list-view";
 import { useCachedTable } from "@/hooks/core/use-cached-table.hook";
+import { useLocale } from "@/hooks/core/use-locale.hook";
+import { formatDateTime } from "@/lib/format";
 import { useDashboardFormModal } from "@/hooks/core/use-dashboard-form-modal.hook";
 import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
 import type { Event } from "@/models/events/event.model";
 
 export function EventsListPage() {
   const translate = useTranslate();
+  const { locale } = useLocale();
   const { openCreate, openEdit } = useDashboardFormModal();
   const labels = useResourceLabels("events", [
     "title",
@@ -65,7 +68,12 @@ export function EventsListPage() {
         header: labels.fields.venue,
         ...columnFilter(),
       },
-      { id: "startsAt", accessorKey: "startsAt", header: labels.fields.startsAt },
+      {
+        id: "startsAt",
+        accessorKey: "startsAt",
+        header: labels.fields.startsAt,
+        cell: ({ row }) => formatDateTime(row.original.startsAt, locale) || "-",
+      },
       {
         id: "scheduleStatus",
         header: labels.fields.scheduleStatus,
@@ -96,7 +104,7 @@ export function EventsListPage() {
         ),
       },
     ],
-    [labels, openEdit, translate]
+    [labels, locale, openEdit, translate]
   );
 
   const { table } = useCachedTable<Event>({

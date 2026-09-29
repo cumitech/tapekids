@@ -8,7 +8,9 @@ import { columnFilter } from "@/components/shared/refine-ui/data-table/data-tabl
 import { DataTable } from "@/components/shared/refine-ui/data-table/data-table";
 import { ListView, ListViewHeader } from "@/components/shared/refine-ui/views/list-view";
 import { useCachedTable } from "@/hooks/core/use-cached-table.hook";
+import { useLocale } from "@/hooks/core/use-locale.hook";
 import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
+import { formatDateTime } from "@/lib/format";
 import type { Payment } from "@/models/payments/payment.model";
 
 function personLabel(payment: Payment) {
@@ -21,6 +23,7 @@ function personLabel(payment: Payment) {
 
 export function PaymentsListPage() {
   const translate = useTranslate();
+  const { locale } = useLocale();
   const labels = useResourceLabels("payments", [
     "trackingId",
     "person",
@@ -78,16 +81,10 @@ export function PaymentsListPage() {
         id: "createdAt",
         accessorKey: "createdAt",
         header: labels.fields.createdAt,
-        cell: ({ row }) => {
-          const value = row.original.createdAt;
-          if (!value) {
-            return "-";
-          }
-          return new Date(value).toLocaleString();
-        },
+        cell: ({ row }) => formatDateTime(row.original.createdAt, locale) || "-",
       },
     ],
-    [labels, translate]
+    [labels, locale, translate]
   );
 
   const { table } = useCachedTable<Payment>({

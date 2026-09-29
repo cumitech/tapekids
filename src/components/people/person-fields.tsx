@@ -420,7 +420,7 @@ export function PersonFields({
           <div className="flex flex-col gap-4">
             {fields.map((field, index) => (
               <div key={field.id} className="flex flex-col gap-2">
-                <p className="text-xs font-medium text-[#466d6b]">
+                <p className="text-xs font-medium text-secondary">
                   {translate(
                     "people.guardianRow",
                     { n: index + 1 },

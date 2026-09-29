@@ -9,7 +9,7 @@ const EVENT_COPY = {
         "A full week of worship, games, Bible class, and family celebration for children from churches across Yaoundé.",
       venue: "Presbyterian Youth Centre, Nlongkak",
       description: `<h2>Welcome to Christmas Camp</h2>
-<p>From <strong>20 to 27 December 2026</strong>, children from churches across Yaoundé will gather at the Presbyterian Youth Centre in Nlongkak for a week of worship, friendship, and play. Camp is for children roughly <em>7 to 14 years old</em>, with stations led by coordinators from partner congregations.</p>
+<p>From <strong>20 to 27 December 2026</strong>, children from churches across Yaoundé will gather at the Presbyterian Youth Centre in Nlongkak for a week of worship, friendship, and play. Camp is for children roughly <em>7 to 14 years old</em>, with stations led by chaperones from partner congregations.</p>
 <h3>What the week looks like</h3>
 <ul>
 <li>Morning worship and a short Bible class each day</li>
@@ -24,7 +24,7 @@ const EVENT_COPY = {
 <li>Share any medical notes with staff when you confirm the place.</li>
 </ol>
 <blockquote>Let the little children come unto me, and forbid them not. (Mark 10:14)</blockquote>
-<p>Questions before you accept the invitation? Reply to the camp email and a coordinator will help you.</p>`,
+<p>Questions before you accept the invitation? Reply to the camp email and a chaperone will help you.</p>`,
     },
     fr: {
       title: "Camp de Noël de Yaoundé 2026",
@@ -32,7 +32,7 @@ const EVENT_COPY = {
         "Une semaine complète de culte, de jeux, de classe biblique et de fête familiale pour les enfants des églises de Yaoundé.",
       venue: "Centre de jeunesse presbytérien, Nlongkak",
       description: `<h2>Bienvenue au camp de Noël</h2>
-<p>Du <strong>20 au 27 décembre 2026</strong>, les enfants des églises de Yaoundé se retrouvent au Centre de jeunesse presbytérien de Nlongkak pour une semaine de culte, d'amitié et de jeux. Le camp s'adresse aux enfants d'environ <em>7 à 14 ans</em>, avec des ateliers animés par des coordinateurs des congrégations partenaires.</p>
+<p>Du <strong>20 au 27 décembre 2026</strong>, les enfants des églises de Yaoundé se retrouvent au Centre de jeunesse presbytérien de Nlongkak pour une semaine de culte, d'amitié et de jeux. Le camp s'adresse aux enfants d'environ <em>7 à 14 ans</em>, avec des ateliers animés par des encadreurs des congrégations partenaires.</p>
 <h3>Le programme de la semaine</h3>
 <ul>
 <li>Culte du matin et une courte classe biblique chaque jour</li>
@@ -47,7 +47,7 @@ const EVENT_COPY = {
 <li>Signalez toute note médicale à l'équipe lorsque vous confirmez la place.</li>
 </ol>
 <blockquote>Laissez venir à moi les petits enfants, et ne les en empêchez pas. (Marc 10:14)</blockquote>
-<p>Une question avant d'accepter l'invitation ? Répondez à l'e-mail du camp et un coordinateur vous aidera.</p>`,
+<p>Une question avant d'accepter l'invitation ? Répondez à l'e-mail du camp et un encadreur vous aidera.</p>`,
     },
   },
   sdevent002: {
@@ -73,7 +73,7 @@ const EVENT_COPY = {
 <li>Lunch is provided; the day ends around 16:30.</li>
 </ol>
 <blockquote>Play hard, look after one another, and leave the field better than you found it.</blockquote>
-<p>Coordinators from partner churches will run each station. Parents are welcome to stay and cheer.</p>`,
+<p>Chaperones from partner churches will run each station. Parents are welcome to stay and cheer.</p>`,
     },
     fr: {
       title: "Samedi sportif de Douala",
@@ -96,7 +96,7 @@ const EVENT_COPY = {
 <li>Le déjeuner est offert ; la journée se termine vers 16 h 30.</li>
 </ol>
 <blockquote>Jouez avec cœur, prenez soin les uns des autres, et laissez le terrain plus beau que vous ne l'avez trouvé.</blockquote>
-<p>Des coordinateurs des églises partenaires animent chaque atelier. Les parents sont les bienvenus pour encourager.</p>`,
+<p>Des encadreurs des églises partenaires animent chaque atelier. Les parents sont les bienvenus pour encourager.</p>`,
     },
   },
   sdevent003: {
@@ -104,15 +104,15 @@ const EVENT_COPY = {
     en: {
       title: "Bamenda Easter Retreat 2027",
       summary:
-        "A quieter four-day retreat in Nkwen for older children and coordinators: prayer, walks, and small-group teaching in the highlands.",
+        "A quieter four-day retreat in Nkwen for older children and chaperones: prayer, walks, and small-group teaching in the highlands.",
       venue: "CBC Nkwen guest house",
       description: `<h2>Easter in the highlands</h2>
-<p>From <strong>2 to 5 April 2027</strong>, older children and coordinators gather at the CBC Nkwen guest house for a slower retreat: prayer, walks, and small-group teaching. This programme is still a <em>draft</em> and is not yet open for invitations.</p>
+<p>From <strong>2 to 5 April 2027</strong>, older children and chaperones gather at the CBC Nkwen guest house for a slower retreat: prayer, walks, and small-group teaching. This programme is still a <em>draft</em> and is not yet open for invitations.</p>
 <h3>What we hope to offer</h3>
 <ul>
 <li>Morning prayer and a short teaching each day</li>
 <li>Guided walks and quiet time in the hills</li>
-<li>Coordinator sessions on caring for campers</li>
+<li>Chaperone sessions on caring for campers</li>
 <li>An Easter Sunday gathering with local families</li>
 </ul>
 <h3>Before you plan travel</h3>
@@ -127,15 +127,15 @@ const EVENT_COPY = {
     fr: {
       title: "Retraite de Pâques à Bamenda 2027",
       summary:
-        "Une retraite plus calme de quatre jours à Nkwen pour les plus grands et les coordinateurs: prière, marches et enseignement en petits groupes.",
+        "Une retraite plus calme de quatre jours à Nkwen pour les plus grands et les encadreurs: prière, marches et enseignement en petits groupes.",
       venue: "Maison d'hôtes CBC Nkwen",
       description: `<h2>Pâques dans les collines</h2>
-<p>Du <strong>2 au 5 avril 2027</strong>, les plus grands et les coordinateurs se retrouvent à la maison d'hôtes CBC de Nkwen pour une retraite plus lente : prière, marches et enseignement en petits groupes. Ce programme est encore un <em>brouillon</em> et n'est pas encore ouvert aux invitations.</p>
+<p>Du <strong>2 au 5 avril 2027</strong>, les plus grands et les encadreurs se retrouvent à la maison d'hôtes CBC de Nkwen pour une retraite plus lente : prière, marches et enseignement en petits groupes. Ce programme est encore un <em>brouillon</em> et n'est pas encore ouvert aux invitations.</p>
 <h3>Ce que nous souhaitons proposer</h3>
 <ul>
 <li>Prière du matin et un court enseignement chaque jour</li>
 <li>Marches guidées et temps de silence dans les collines</li>
-<li>Sessions pour coordinateurs sur l'accompagnement des campeurs</li>
+<li>Sessions pour encadreurs sur l'accompagnement des campeurs</li>
 <li>Un rassemblement le dimanche de Pâques avec les familles locales</li>
 </ul>
 <h3>Avant d'organiser le voyage</h3>

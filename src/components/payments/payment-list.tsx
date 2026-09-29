@@ -92,7 +92,7 @@ export function PaymentList({
       <h3
         className={
           compact
-            ? "text-sm font-semibold text-[#182356] dark:text-foreground"
+            ? "text-sm font-semibold text-primary dark:text-foreground"
             : "text-lg font-semibold"
         }
       >

@@ -13,8 +13,8 @@ import { FormStepper } from "@/components/shared/form/form-stepper";
 import { PageHeader } from "@/components/shared/refine-ui/layout/page-header";
 import { Button } from "@/components/shared/ui/button";
 import { PORTAL_SURFACE } from "@/constants/layout";
-import { MAILING_LIST_AUDIENCE_KINDS } from "@/constants/event-participation";
-import { isEventType } from "@/constants/event-type";
+import { EVENT_TYPES, isEventType } from "@/constants/event-type";
+import { PERSON_CATEGORIES } from "@/constants/person";
 import { useBusyAction } from "@/hooks/core/use-busy-action.hook";
 import { useLocale } from "@/hooks/core/use-locale.hook";
 import { useIntegrations } from "@/hooks/integrations/use-integrations.hook";
@@ -29,10 +29,6 @@ import {
   type PrepareEventState,
 } from "@/lib/prepare-event/state";
 import { cn } from "@/lib/utils";
-
-const LIST_DEFAULTS = {
-  audienceKind: MAILING_LIST_AUDIENCE_KINDS.CAMPER,
-};
 
 function directoryTotal(query: {
   data?: { total?: number };
@@ -195,7 +191,17 @@ function ListStep({
         key={state.listId || "new"}
         mode={state.listId ? "edit" : "create"}
         id={state.listId || undefined}
-        defaults={state.listId ? undefined : LIST_DEFAULTS}
+        preferredEventId={state.eventId || undefined}
+        defaults={
+          state.listId
+            ? undefined
+            : {
+                audienceKind:
+                  state.eventType === EVENT_TYPES.DAY_EVENT
+                    ? PERSON_CATEGORIES.TROPHY_PARTICIPANT
+                    : PERSON_CATEGORIES.TROPHY_CAMPER,
+              }
+        }
         onCancel={() => go({ step: previousPrepareStep("list") })}
         onSuccess={(record) => {
           if (!record.id) {
