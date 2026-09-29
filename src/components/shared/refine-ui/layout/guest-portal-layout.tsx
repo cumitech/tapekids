@@ -33,7 +33,7 @@ export function GuestPortalLayout({ children }: PropsWithChildren) {
             className="min-w-0 shrink text-primary"
             aria-label={translate("brand.name")}
           >
-            <AppLogo className="h-8" />
+            <AppLogo className="h-12" />
           </Link>
           <nav className="hidden min-w-0 flex-1 items-center gap-3 text-sm font-medium md:flex">
             {GUEST_NAV_ITEMS.map((item) => (

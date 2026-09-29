@@ -77,7 +77,7 @@ export function PublicHeader() {
           className="min-w-0 shrink"
           aria-label={translate("brand.name")}
         >
-          <AppLogo onDark className="h-12 max-w-full drop-shadow-[0_1px_1px_rgba(8,40,52,0.35)]" />
+          <AppLogo onDark className="h-14 md:h-16 drop-shadow-[0_1px_1px_rgba(8,40,52,0.35)]" />
         </Link>
         <div className="hidden items-center gap-4 md:flex">
           <PublicNavLinks isAuthenticated={isAuthenticated} onPrimary />

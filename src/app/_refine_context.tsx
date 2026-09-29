@@ -43,7 +43,7 @@ export const RefineContext = ({ children }: RefineContextProps) => {
             resources={resources}
             options={{
               title: {
-                icon: <AppLogoMark className="size-9 text-primary" />,
+                icon: <AppLogoMark className="h-9 text-primary" />,
                 text: APP_NAME,
               },
               syncWithLocation: true,

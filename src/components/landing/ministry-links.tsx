@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Caveat } from "next/font/google";
 import { useTranslate } from "@refinedev/core";
 
@@ -26,6 +27,11 @@ const PARTNERS = [
     labelKey: "landing.partners.message",
     art: "message",
   },
+  {
+    href: "https://tapekids.org/",
+    labelKey: "landing.partners.tapekids",
+    art: "tapekids",
+  }
 ] as const;
 
 export function MinistryLinks() {
@@ -33,7 +39,7 @@ export function MinistryLinks() {
 
   return (
     <section className="bg-[#146d8f] px-4 py-8 md:px-6 md:py-10">
-      <ul className="mx-auto grid w-full max-w-5xl list-none gap-8 sm:grid-cols-3 sm:gap-6">
+      <ul className="mx-auto grid w-full max-w-6xl list-none grid-cols-2 gap-6 md:grid-cols-4">
         {PARTNERS.map((partner) => {
           const label = translate(partner.labelKey);
           return (
@@ -63,7 +69,22 @@ export function MinistryLinks() {
 function PartnerArt({ kind }: { kind: (typeof PARTNERS)[number]["art"] }) {
   if (kind === "vgr") return <VoiceOfGodArt />;
   if (kind === "tabernacle") return <TabernacleArt />;
-  return <MessageArt />;
+  if (kind === "message") return <MessageArt />;
+  return <TapeKidsArt />;
+}
+
+function TapeKidsArt() {
+  return (
+    <div className="relative size-full bg-white">
+      <Image
+        src="/tapekids.jpeg"
+        alt=""
+        fill
+        sizes="(min-width: 768px) 22vw, 45vw"
+        className="object-contain p-3"
+      />
+    </div>
+  );
 }
 
 function VoiceOfGodArt() {

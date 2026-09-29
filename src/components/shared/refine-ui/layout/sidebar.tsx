@@ -517,7 +517,7 @@ function SidebarHeader() {
         >
           <AppLogo
             showWordmark={open}
-            className={cn("text-primary", open ? "h-9" : "size-8")}
+            className={cn("text-primary", open ? "h-11" : "h-12")}
           />
           {open ? (
             <span className="pl-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">

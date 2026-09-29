@@ -1,8 +1,12 @@
 "use strict";
 
-const { tableExists, columnExists } = require("../migration-guard");
+const { columnExists } = require("../migration-guard");
 
-/** Longer forms first so "coordinators" is not left half-replaced. */
+/**
+ * Longer forms first so "coordinators" is not left half-replaced.
+ * Each column is rewritten in one statement: protect machine tokens, swap
+ * wording, then restore the tokens. A second run finds nothing to change.
+ */
 const WORDS = [
   ["Coordinators", "Chaperones"],
   ["coordinators", "chaperones"],
@@ -19,34 +23,55 @@ const PROTECTED = [
   ["coordinator_fund", "___FUND_KIND___"],
 ];
 
+function replaceCall(expression, from, to) {
+  return `REPLACE(${expression}, ${from}, ${to})`;
+}
+
+function rewritten(escape, column) {
+  let expression = `\`${column}\``;
+  for (const [from, to] of PROTECTED) {
+    expression = replaceCall(expression, escape(from), escape(to));
+  }
+  for (const [from, to] of WORDS) {
+    expression = replaceCall(expression, escape(from), escape(to));
+  }
+  for (const [from, to] of PROTECTED) {
+    expression = replaceCall(expression, escape(to), escape(from));
+  }
+  return expression;
+}
+
+/** True only when visible wording would change. Machine tokens are ignored. */
+function stillHasOldWording(escape, column) {
+  let stripped = `\`${column}\``;
+  for (const [from] of PROTECTED) {
+    stripped = replaceCall(stripped, escape(from), escape(""));
+  }
+  // REPLACE is case-sensitive. LOCATE follows the column collation, so the
+  // search string is binary and only rows REPLACE will change are selected.
+  return WORDS.map(
+    ([from]) =>
+      `LOCATE(CAST(${escape(from)} AS BINARY(${Buffer.byteLength(from)})), ${stripped}) > 0`
+  ).join(" OR ");
+}
+
 async function replaceInColumn(queryInterface, table, column) {
   if (!(await columnExists(queryInterface, table, column))) {
     return;
   }
-  for (const [from, to] of PROTECTED) {
-    await queryInterface.sequelize.query(
-      `UPDATE \`${table}\` SET \`${column}\` = REPLACE(\`${column}\`, ?, ?) WHERE \`${column}\` LIKE ?`,
-      { replacements: [from, to, `%${from}%`] }
-    );
-  }
-  for (const [from, to] of WORDS) {
-    await queryInterface.sequelize.query(
-      `UPDATE \`${table}\` SET \`${column}\` = REPLACE(\`${column}\`, ?, ?) WHERE \`${column}\` LIKE ?`,
-      { replacements: [from, to, `%${from}%`] }
-    );
-  }
-  for (const [from, to] of PROTECTED) {
-    await queryInterface.sequelize.query(
-      `UPDATE \`${table}\` SET \`${column}\` = REPLACE(\`${column}\`, ?, ?) WHERE \`${column}\` LIKE ?`,
-      { replacements: [to, from, `%${to}%`] }
-    );
-  }
+  const escape = (value) => queryInterface.sequelize.escape(value);
+  await queryInterface.sequelize.query(
+    `UPDATE \`${table}\`
+     SET \`${column}\` = ${rewritten(escape, column)}
+     WHERE \`${column}\` IS NOT NULL
+       AND (${stillHasOldWording(escape, column)})`
+  );
 }
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface) {
-    if (await tableExists(queryInterface, "mailing_lists")) {
+    if (await columnExists(queryInterface, "mailing_lists", "audienceKind")) {
       await queryInterface.sequelize.query(
         "UPDATE mailing_lists SET audienceKind = 'chaperone' WHERE audienceKind = 'coordinator'"
       );

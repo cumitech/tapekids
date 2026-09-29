@@ -21,9 +21,9 @@ export function AppLogo({
       src={APP_LOGO_SRC}
       alt={title}
       className={cn(
-        "object-contain object-center",
-        showWordmark ? "h-10 w-auto" : "size-9",
-        onDark && "rounded-md bg-[#f6f3ee]",
+        "h-auto w-auto max-w-none object-contain object-center",
+        showWordmark ? "h-12" : "h-10",
+        onDark && "rounded-lg bg-[#f6f3ee]",
         className
       )}
     />

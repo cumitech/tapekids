@@ -28,7 +28,7 @@ export function AppFooter({ className }: { className?: string }) {
       <span className="pointer-events-none absolute bottom-0 right-1/3 h-1 w-40 bg-destructive/70" />
       <div className="relative mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6 md:flex-row md:flex-wrap md:items-center md:justify-between md:px-8">
         <div className="flex min-w-0 items-center gap-3">
-          <AppLogoMark onDark className="size-16 drop-shadow-[0_1px_1px_rgba(8,40,52,0.35)]" />
+          <AppLogoMark onDark className="h-20 drop-shadow-[0_1px_1px_rgba(8,40,52,0.35)]" />
           <div>
             <p className="font-serif text-base tracking-tight">
               {translate("brand.name")}
