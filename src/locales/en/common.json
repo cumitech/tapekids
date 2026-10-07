@@ -738,6 +738,8 @@
       "failed": "Could not check that Young Foundations ID."
     },
     "roster": "Roster",
+    "rosterSearch": "Search by name, email, or YF ID",
+    "rosterNoMatch": "No one matches this search.",
     "batches": "Invitation batches",
     "sendBatch": "Send",
     "resendBatch": "Resend failed",

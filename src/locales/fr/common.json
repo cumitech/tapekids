@@ -738,6 +738,8 @@
       "failed": "Impossible de vérifier cet identifiant Young Foundations."
     },
     "roster": "Liste des participants",
+    "rosterSearch": "Rechercher par nom, e-mail ou ID YF",
+    "rosterNoMatch": "Personne ne correspond à cette recherche.",
     "batches": "Lots d'invitations",
     "sendBatch": "Envoyer",
     "resendBatch": "Renvoyer les échecs",
