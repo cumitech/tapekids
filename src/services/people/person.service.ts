@@ -79,9 +79,11 @@ export class PersonService {
     const before = await personRepository.findById(id);
     const { emergencyContacts, ...fields } = input;
     const payload = toUpdatePersonPayload(fields) as PersonUpdatePayload;
-    const birthDate =
-      payload.dateOfBirth !== undefined ? payload.dateOfBirth : before.dateOfBirth;
-    payload.ageYears = ageInYears(birthDate);
+    if (payload.ageYears === undefined) {
+      const birthDate =
+        payload.dateOfBirth !== undefined ? payload.dateOfBirth : before.dateOfBirth;
+      payload.ageYears = ageInYears(birthDate);
+    }
     await personRepository.update(id, payload);
 
     if (emergencyContacts) {

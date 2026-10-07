@@ -52,6 +52,9 @@ function DialogContent({
   children,
   showCloseButton = true,
   overlayClassName,
+  onPointerDownOutside,
+  onInteractOutside,
+  onEscapeKeyDown,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
@@ -64,6 +67,18 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(dialogContentPositionClass, className)}
         {...props}
+        onPointerDownOutside={(event) => {
+          event.preventDefault();
+          onPointerDownOutside?.(event);
+        }}
+        onInteractOutside={(event) => {
+          event.preventDefault();
+          onInteractOutside?.(event);
+        }}
+        onEscapeKeyDown={(event) => {
+          event.preventDefault();
+          onEscapeKeyDown?.(event);
+        }}
       >
         {children}
         {showCloseButton && (

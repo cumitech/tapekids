@@ -1,9 +1,10 @@
 "use client";
 
+import { useId, useState } from "react";
 import { useTranslate } from "@refinedev/core";
-import { useState } from "react";
 import { Controller } from "react-hook-form";
 
+import { ModalActions } from "@/components/shared/modals/app-modal";
 import { FormField } from "@/components/shared/form/form-field";
 import { GeoFields } from "@/components/shared/form/geo-fields.component";
 import { ImageUpload } from "@/components/shared/form/image-upload";
@@ -73,9 +74,14 @@ export function EventForm({ mode, id, onCancel, onSuccess }: EventFormProps) {
   const imageUrl = watch("imageUrl");
   const city = watch("city");
   const [region, setRegion] = useState("");
+  const formId = useId();
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      id={formId}
+      className="flex flex-col gap-4"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <LocalizedTabs>
         {(locale: AppLocale) => (
           <>
@@ -230,14 +236,19 @@ export function EventForm({ mode, id, onCancel, onSuccess }: EventFormProps) {
           <Input {...register("currency")} />
         </FormField>
       </div>
-      <div className="flex flex-col-reverse gap-2 sm:flex-row">
-        <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+      <ModalActions className="flex flex-col-reverse gap-2 sm:flex-row">
+        <Button
+          type="submit"
+          form={formId}
+          disabled={isLoading}
+          className="w-full sm:w-auto"
+        >
           {labels.actions.save}
         </Button>
         <Button type="button" variant="outline" onClick={cancel} className="w-full sm:w-auto">
           {labels.actions.cancel}
         </Button>
-      </div>
+      </ModalActions>
     </form>
   );
 }

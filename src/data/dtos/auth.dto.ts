@@ -4,7 +4,7 @@ import { USER_ROLES } from "@/constants/user-roles";
 import { matchingPasswordPair } from "@/data/dtos/password.dto";
 
 export const loginSchema = z.object({
-  email: z.string().trim().email().toLowerCase(),
+  email: z.string().trim().min(1).max(128),
   password: z.string().min(1),
 });
 
@@ -14,7 +14,7 @@ export const registerSchema = matchingPasswordPair({
 });
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().trim().email().toLowerCase(),
+  email: z.string().trim().min(1).max(128),
 });
 
 export const resetPasswordSchema = matchingPasswordPair({

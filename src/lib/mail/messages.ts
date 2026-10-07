@@ -129,6 +129,7 @@ export function registrationConfirmedMail(input: {
   firstName?: string;
   eventTitle: string;
   kind: string;
+  setPasswordUrl?: string;
 }): MailMessage {
   return composeMail({
     to: input.to,
@@ -136,8 +137,14 @@ export function registrationConfirmedMail(input: {
     subject: `You are registered for ${input.eventTitle}`,
     paragraphs: [
       `Your ${input.kind} place at ${input.eventTitle} is confirmed.`,
+      input.setPasswordUrl
+        ? "Choose a password to open your dashboard. This link expires in 48 hours. After that, sign in with your Young Foundations ID and the password you set."
+        : "",
       "We will write again if a payment is recorded, or if chaperones send another update. Place God and His Word first in all things.",
-    ],
+    ].filter(Boolean),
+    cta: input.setPasswordUrl
+      ? { label: "Set your password", url: input.setPasswordUrl }
+      : undefined,
   });
 }
 

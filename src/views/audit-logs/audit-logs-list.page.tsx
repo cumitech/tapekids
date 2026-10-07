@@ -1,19 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslate } from "@refinedev/core";
 
+import { useAppModal } from "@/components/shared/modals/app-modal";
 import { columnFilter } from "@/components/shared/refine-ui/data-table/data-table-column-filter";
 import { DataTable } from "@/components/shared/refine-ui/data-table/data-table";
 import { ListView, ListViewHeader } from "@/components/shared/refine-ui/views/list-view";
 import { Button } from "@/components/shared/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/shared/ui/dialog";
 import { useCachedTable } from "@/hooks/core/use-cached-table.hook";
 import { useLocale } from "@/hooks/core/use-locale.hook";
 import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
@@ -23,7 +18,7 @@ import type { AuditLog } from "@/models/audit-logs/audit-log.model";
 function AuditChangesCell({ record }: { record: AuditLog }) {
   const translate = useTranslate();
   const { locale } = useLocale();
-  const [open, setOpen] = useState(false);
+  const { openModal } = useAppModal();
   const changes = record.changes;
   const hasChanges = Boolean(
     changes && typeof changes === "object" && Object.keys(changes).length > 0
@@ -38,21 +33,24 @@ function AuditChangesCell({ record }: { record: AuditLog }) {
   }
 
   return (
-    <>
-      <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)}>
-        {translate("auditLogs.viewChanges")}
-      </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{translate("auditLogs.viewChanges")}</DialogTitle>
-          </DialogHeader>
-          <pre className="overflow-x-auto rounded-md bg-muted p-3 text-xs">
-            {JSON.stringify(formatPresentedValue(changes, locale), null, 2)}
-          </pre>
-        </DialogContent>
-      </Dialog>
-    </>
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      onClick={() =>
+        openModal({
+          title: translate("auditLogs.viewChanges"),
+          className: "sm:max-w-2xl",
+          body: (
+            <pre className="overflow-x-auto rounded-md bg-muted p-3 text-xs">
+              {JSON.stringify(formatPresentedValue(changes, locale), null, 2)}
+            </pre>
+          ),
+        })
+      }
+    >
+      {translate("auditLogs.viewChanges")}
+    </Button>
   );
 }
 

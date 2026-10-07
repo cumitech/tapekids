@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { useTranslate } from "@refinedev/core";
 import { ChevronRight, Loader2, Upload } from "lucide-react";
 
-import { PeopleImportDialog } from "@/components/people/people-import-dialog";
+import { PeopleImportForm } from "@/components/people/people-import-form";
 import { PersonForm } from "@/components/people/person-form.component";
+import { useAppModal } from "@/components/shared/modals/app-modal";
 import { ListView, ListViewHeader } from "@/components/shared/refine-ui/views/list-view";
 import { Button } from "@/components/shared/ui/button";
 import {
@@ -130,13 +131,13 @@ function CategoryPeoplePreview({
 export function PeopleListPage() {
   const translate = useTranslate();
   const { openCreate } = useDashboardFormModal();
+  const { openModal, closeModal } = useAppModal();
   const { path } = useLocale();
   const router = useRouter();
   const [rows, setRows] = useState<CategorySummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [openCategories, setOpenCategories] = useState<Set<PersonCategory>>(() => new Set());
-  const [importOpen, setImportOpen] = useState(false);
   const [summaryVersion, setSummaryVersion] = useState(0);
   const translateRef = useRef(translate);
   translateRef.current = translate;
@@ -201,7 +202,22 @@ export function PeopleListPage() {
           ))
         }
       >
-        <Button type="button" variant="outline" onClick={() => setImportOpen(true)}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() =>
+            openModal({
+              title: translate("people.import.title"),
+              className: "sm:max-w-lg",
+              body: (
+                <PeopleImportForm
+                  onCancel={closeModal}
+                  onImported={() => setSummaryVersion((version) => version + 1)}
+                />
+              ),
+            })
+          }
+        >
           <Upload className="mr-2 h-4 w-4" />
           {translate("people.import.action")}
         </Button>
@@ -291,11 +307,6 @@ export function PeopleListPage() {
           })
         )}
       </ul>
-      <PeopleImportDialog
-        open={importOpen}
-        onOpenChange={setImportOpen}
-        onImported={() => setSummaryVersion((version) => version + 1)}
-      />
     </ListView>
   );
 }

@@ -154,12 +154,12 @@ export function LandingPage({ events = [] }: { events?: PublicEvent[] }) {
               <p className="mt-4 max-w-xl font-serif text-base leading-relaxed text-[#cfecf7] md:text-lg">
                 {translate("landing.waitingListBody")}
               </p>
-              <Link
+              {/* <Link
                 href={path("/waiting-list")}
                 className="mt-8 inline-flex w-fit items-center rounded-[10px] bg-white px-7 py-2.5 text-sm font-semibold text-primary transition duration-200 hover:bg-[#cfecf7]"
               >
                 {translate("landing.waitingListCta")}
-              </Link>
+              </Link> */}
             </div>
             <div className="relative h-64 sm:h-80 md:h-full md:min-h-72">
               <Image
@@ -196,12 +196,12 @@ export function LandingPage({ events = [] }: { events?: PublicEvent[] }) {
               <p className="mt-4 max-w-xl font-serif text-base leading-relaxed text-[#cfecf7] md:text-lg">
                 {translate("landing.sponsorsBody")}
               </p>
-              <Link
+              {/* <Link
                 href={path("/sponsors")}
                 className="mt-8 inline-flex w-fit items-center rounded-[10px] bg-white px-7 py-2.5 text-sm font-semibold text-primary transition duration-200 hover:bg-[#cfecf7]"
               >
                 {translate("landing.sponsorsCta")}
-              </Link>
+              </Link> */}
             </div>
           </div>
         </section>

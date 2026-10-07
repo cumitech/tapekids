@@ -15,6 +15,7 @@ import {
 import { passwordPairSchema } from "@/data/dtos/password.dto";
 import type { Person } from "@/data/entities/person";
 import { PasswordResetRepository } from "@/data/repositories/password-reset.repository";
+import { PersonRepository } from "@/data/repositories/person.repository";
 import { UserRepository } from "@/data/repositories/user.repository";
 import { ConflictException } from "@/exceptions/conflict.exception";
 import { UnauthorizedException } from "@/exceptions/unauthorized.exception";
@@ -24,11 +25,13 @@ import { hashToken } from "@/lib/api/request-context";
 import { signSession, toPublicUser, type PublicUser } from "@/lib/api/session";
 import { isMailConfigured } from "@/lib/integrations/env";
 import { logger } from "@/lib/logger";
+import { passwordResetUrl } from "@/lib/mail/messages";
 import { normalizeYfId, yfGuestEmail, yfGuestHandle } from "@/lib/people/yf-id";
 import { auditService } from "@/services/audit/audit.service";
 import { notificationService } from "@/services/notifications/notification.service";
 
 const userRepository = new UserRepository();
+const personRepository = new PersonRepository();
 const passwordResetRepository = new PasswordResetRepository();
 
 const AUTH_TOKEN_MS = 2 * 60 * 60 * 1000;
@@ -42,14 +45,20 @@ export type RegisterResult =
 export class AuthService {
   async login(body: unknown): Promise<AuthSessionResult> {
     const input = parseLogin(body);
-    const user = await userRepository.findByEmail(input.email);
+    const user = await this.findBySignIn(input.email);
     if (!user) {
-      throw new UnauthorizedException("Invalid email or password.");
+      throw new UnauthorizedException("Invalid email, YF ID, or password.");
+    }
+
+    if (user.passwordChosen === false) {
+      throw new ValidationException(
+        "Set a password from the link sent to your contact email, or use Forgot password with your YF ID."
+      );
     }
 
     const matches = await bcrypt.compare(input.password, user.password);
     if (!matches) {
-      throw new UnauthorizedException("Invalid email or password.");
+      throw new UnauthorizedException("Invalid email, YF ID, or password.");
     }
 
     if (!user.verified) {
@@ -122,20 +131,21 @@ export class AuthService {
 
   async forgotPassword(body: unknown): Promise<{ sent: boolean }> {
     const input = parseForgotPassword(body);
-    const user = await userRepository.findByEmail(input.email);
+    const user = await this.findBySignIn(input.email);
     if (!user) {
-      logger.info("auth.forgot_unknown_email");
+      logger.info("auth.forgot_unknown_account");
       return { sent: true };
     }
+    const to = await this.mailAddressFor(user);
     if (!user.verified) {
-      await this.issueEmailVerification(user.id, user.email, user.username);
+      await this.issueEmailVerification(user.id, to, user.username);
       return { sent: true };
     }
     if (!isMailConfigured()) {
       logger.warn("auth.password_reset_skipped_no_mail", { userId: user.id });
       return { sent: true };
     }
-    await this.issuePasswordReset(user.id, user.email, false);
+    await this.issuePasswordReset(user.id, to, !user.passwordChosen, user.username);
     await auditService.record({
       action: "password_reset_requested",
       entity: "User",
@@ -160,8 +170,30 @@ export class AuthService {
       entity: "User",
       entityId: user.id,
     });
-    await notificationService.passwordChanged({ to: user.email });
+    await notificationService.passwordChanged({
+      to: await this.mailAddressFor(user),
+      firstName: user.username,
+    });
     return this.sessionFor(user);
+  }
+
+  /** One-time link for a guest who was registered without choosing a password. */
+  async createSetPasswordUrl(personId: string): Promise<string | null> {
+    const person = await personRepository.findById(personId);
+    const byPerson = await userRepository.findByPersonId(personId);
+    const byYf = person.yfId
+      ? await userRepository.findByYfId(person.yfId)
+      : null;
+    const user = byPerson ?? byYf;
+    if (!user || user.passwordChosen) {
+      return null;
+    }
+    const token = await this.createOneTimeToken(
+      user.id,
+      VERIFY_TOKEN_MS,
+      AUTH_TOKEN_PURPOSES.RESET_PASSWORD
+    );
+    return passwordResetUrl(token);
   }
 
   async hasAccountForPerson(person: Person): Promise<boolean> {
@@ -299,6 +331,39 @@ export class AuthService {
       return user;
     }
     return userRepository.updateEmail(user.id, synthetic);
+  }
+
+  private async findBySignIn(identifier: string) {
+    const value = identifier.trim();
+    if (value.includes("@")) {
+      return userRepository.findByEmail(value);
+    }
+    const byUser = await userRepository.findByYfId(value);
+    if (byUser) {
+      return byUser;
+    }
+    const person = await personRepository.findByYfId(value);
+    if (!person) {
+      return null;
+    }
+    return userRepository.findByPersonId(person.id);
+  }
+
+  private async mailAddressFor(
+    user: Awaited<ReturnType<UserRepository["findById"]>>
+  ) {
+    if (user.personId) {
+      try {
+        const person = await personRepository.findById(user.personId);
+        const contact = person.email?.trim();
+        if (contact) {
+          return contact;
+        }
+      } catch {
+        // The linked person record is gone. Fall back to the account address.
+      }
+    }
+    return user.email;
   }
 
   private sessionFor(user: Awaited<ReturnType<UserRepository["findById"]>>): AuthSessionResult {

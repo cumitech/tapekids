@@ -334,11 +334,14 @@ export class InvitationService {
         : await invitationRepository.markAccepted(invitation.id);
     await eventMembershipRepository.markRegistered(membership.id);
     if (invitation.status !== INVITATION_STATUSES.ACCEPTED && person.email) {
+      const setPasswordUrl =
+        (await authService.createSetPasswordUrl(person.id)) ?? undefined;
       await notificationService.registrationConfirmed({
         to: person.email,
         firstName: personGreetingName(person),
         eventTitle: event.title,
         kind: invitation.kind,
+        setPasswordUrl,
       });
     }
     await auditService.record({

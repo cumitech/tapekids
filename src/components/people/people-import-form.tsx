@@ -5,6 +5,7 @@ import { useTranslate } from "@refinedev/core";
 import { FileSpreadsheet } from "lucide-react";
 
 import { PersonCategorySelect } from "@/components/people/person-category-select";
+import { ModalActions } from "@/components/shared/modals/app-modal";
 import { RequiredMark } from "@/components/shared/form/required-mark";
 import { Button } from "@/components/shared/ui/button";
 import { Label } from "@/components/shared/ui/label";
@@ -158,7 +159,7 @@ export function PeopleImportForm({
           ) : null}
         </div>
       ) : null}
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <ModalActions className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         {onCancel ? (
           <Button type="button" variant="outline" disabled={busy} onClick={onCancel}>
             {translate("buttons.cancel")}
@@ -169,7 +170,7 @@ export function PeopleImportForm({
             ? translate("people.import.importing")
             : translate("people.import.submit")}
         </Button>
-      </div>
+      </ModalActions>
     </div>
   );
 }

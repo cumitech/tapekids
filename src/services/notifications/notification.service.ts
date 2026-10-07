@@ -72,6 +72,7 @@ export class NotificationService {
     firstName?: string;
     eventTitle: string;
     kind: string;
+    setPasswordUrl?: string;
   }) {
     return this.sendQuiet(registrationConfirmedMail(input));
   }

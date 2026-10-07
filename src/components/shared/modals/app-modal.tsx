@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -45,55 +46,66 @@ type AppModalContextValue = {
 };
 
 const AppModalContext = createContext<AppModalContextValue | null>(null);
+const ModalFrameContext = createContext(false);
+
+export function ModalActions({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  const inModal = useContext(ModalFrameContext);
+  if (inModal) {
+    return <DialogFooter className={className}>{children}</DialogFooter>;
+  }
+  return <div className={className}>{children}</div>;
+}
 
 export function AppModalProvider({ children }: { children: ReactNode }) {
   const translate = useTranslate();
   const [content, setContent] = useState<ModalContent | null>(null);
+  const [confirming, setConfirming] = useState<ConfirmOptions | null>(null);
   const [busy, setBusy] = useState(false);
+  const confirmingRef = useRef<ConfirmOptions | null>(null);
+  confirmingRef.current = confirming;
 
   const closeModal = useCallback(() => {
     setBusy(false);
+    setConfirming(null);
     setContent(null);
   }, []);
 
   const openModal = useCallback((next: ModalContent) => {
     setBusy(false);
+    setConfirming(null);
     setContent(next);
   }, []);
 
-  const confirm = useCallback(
-    (options: ConfirmOptions) => {
-      openModal({
-        title: options.title,
-        description: options.description,
-        className: "sm:max-w-md",
-        body: (
-          <DialogFooter className="mt-2">
-            <Button type="button" variant="outline" onClick={closeModal} disabled={busy}>
-              {options.cancelLabel ?? translate("actions.cancel")}
-            </Button>
-            <Button
-              type="button"
-              variant={options.destructive ? "destructive" : "default"}
-              disabled={busy}
-              onClick={async () => {
-                setBusy(true);
-                try {
-                  await options.onConfirm();
-                  closeModal();
-                } catch {
-                  setBusy(false);
-                }
-              }}
-            >
-              {options.confirmLabel ?? translate("actions.delete")}
-            </Button>
-          </DialogFooter>
-        ),
-      });
-    },
-    [closeModal, openModal, translate]
-  );
+  const confirm = useCallback((options: ConfirmOptions) => {
+    setBusy(false);
+    setConfirming(options);
+    setContent({
+      title: options.title,
+      description: options.description,
+      className: "sm:max-w-md",
+      body: null,
+    });
+  }, []);
+
+  const runConfirm = useCallback(async () => {
+    const options = confirmingRef.current;
+    if (!options) {
+      return;
+    }
+    setBusy(true);
+    try {
+      await options.onConfirm();
+      closeModal();
+    } catch {
+      setBusy(false);
+    }
+  }, [closeModal]);
 
   const value = useMemo(
     () => ({ openModal, closeModal, confirm }),
@@ -110,9 +122,6 @@ export function AppModalProvider({ children }: { children: ReactNode }) {
             "flex max-h-[min(90dvh,40rem)] w-auto flex-col overflow-hidden sm:max-w-2xl",
             content?.className
           )}
-          onPointerDownOutside={(event) => event.preventDefault()}
-          onInteractOutside={(event) => event.preventDefault()}
-          onEscapeKeyDown={(event) => event.preventDefault()}
         >
           <DialogHeader className="pr-12 sm:pr-10">
             <DialogTitle>{content?.title}</DialogTitle>
@@ -133,7 +142,31 @@ export function AppModalProvider({ children }: { children: ReactNode }) {
           >
             <XIcon className="size-4" />
           </button>
-          <div className="min-w-0 overflow-x-hidden overflow-y-auto">{content?.body}</div>
+          <ModalFrameContext.Provider value>
+            <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+              {content?.body}
+            </div>
+            {confirming ? (
+              <DialogFooter className="shrink-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={closeModal}
+                  disabled={busy}
+                >
+                  {confirming.cancelLabel ?? translate("actions.cancel")}
+                </Button>
+                <Button
+                  type="button"
+                  variant={confirming.destructive ? "destructive" : "default"}
+                  disabled={busy}
+                  onClick={() => void runConfirm()}
+                >
+                  {confirming.confirmLabel ?? translate("actions.delete")}
+                </Button>
+              </DialogFooter>
+            ) : null}
+          </ModalFrameContext.Provider>
         </DialogContent>
       </Dialog>
     </AppModalContext.Provider>

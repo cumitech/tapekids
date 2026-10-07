@@ -176,6 +176,7 @@ function withoutDirectoryFields(body: unknown) {
   const next = { ...(body as Record<string, unknown>) };
   delete next.yfId;
   delete next.points;
+  delete next.ageYears;
   delete next.isTrophy;
   delete next.category;
   return next;

@@ -9,6 +9,7 @@ import {
   type PersonFormLayout,
 } from "@/components/people/person-fields";
 import { FormStepper } from "@/components/shared/form/form-stepper";
+import { ModalActions } from "@/components/shared/modals/app-modal";
 import { Button } from "@/components/shared/ui/button";
 import {
   PERSON_FORM_STEPS,
@@ -134,7 +135,7 @@ export function PersonForm({
         />
       </div>
 
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+      <ModalActions className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         {stepped && !steps.isFirst ? (
           <Button
             type="button"
@@ -179,7 +180,7 @@ export function PersonForm({
             </Button>
           ) : null}
         </div>
-      </div>
+      </ModalActions>
     </form>
   );
 }

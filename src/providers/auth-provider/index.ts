@@ -53,7 +53,7 @@ export const authProvider: AuthProvider = {
     if (!email || !password) {
       return {
         success: false,
-        error: { name: "LoginError", message: "Email and password are required." },
+        error: { name: "LoginError", message: "Email or YF ID, and a password, are required." },
       };
     }
 
@@ -70,7 +70,7 @@ export const authProvider: AuthProvider = {
     } catch (error) {
       const message =
         (error as { response?: { data?: { message?: string } } }).response?.data
-          ?.message || "Invalid email or password.";
+          ?.message || "Invalid email, YF ID, or password.";
       return {
         success: false,
         error: { name: "LoginError", message },
@@ -129,7 +129,7 @@ export const authProvider: AuthProvider = {
     if (!email) {
       return {
         success: false,
-        error: { name: "ForgotPasswordError", message: "Email is required." },
+        error: { name: "ForgotPasswordError", message: "Email or YF ID is required." },
       };
     }
     try {

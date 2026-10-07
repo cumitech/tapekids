@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useId, useMemo, useRef } from "react";
 import { useList, useTranslate } from "@refinedev/core";
 import { Controller } from "react-hook-form";
 
 import { MailingListPeoplePicker } from "@/components/mailing-lists/mailing-list-people-picker";
+import { ModalActions } from "@/components/shared/modals/app-modal";
 import { FormField } from "@/components/shared/form/form-field";
 import { LabeledCombobox } from "@/components/shared/form/labeled-combobox";
 import { LabeledSelect } from "@/components/shared/form/labeled-select";
@@ -67,6 +68,7 @@ export function MailingListForm({
     formState: { errors },
   } = form;
   const audienceKind = watch("audienceKind");
+  const formId = useId();
   const audienceCategory = categoryForAudience(audienceKind);
   const { query } = useList<Event>({
     resource: "events",
@@ -162,7 +164,11 @@ export function MailingListForm({
   }
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      id={formId}
+      className="flex flex-col gap-4"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <LocalizedTabs>
         {(locale: AppLocale) => (
           <>
@@ -247,14 +253,14 @@ export function MailingListForm({
           />
         )}
       />
-      <div className="flex gap-2">
-        <Button type="submit" disabled={isLoading}>
+      <ModalActions className="flex gap-2">
+        <Button type="submit" form={formId} disabled={isLoading}>
           {labels.actions.save}
         </Button>
         <Button type="button" variant="outline" onClick={cancel}>
           {labels.actions.cancel}
         </Button>
-      </div>
+      </ModalActions>
     </form>
   );
 }

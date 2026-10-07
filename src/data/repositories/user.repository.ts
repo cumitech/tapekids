@@ -72,7 +72,7 @@ export class UserRepository {
 
   async updatePassword(id: string, password: string): Promise<User> {
     const user = await this.findById(id);
-    await user.update({ password });
+    await user.update({ password, passwordChosen: true });
     await user.increment("sessionVersion");
     return this.findById(id);
   }

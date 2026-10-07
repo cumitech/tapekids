@@ -8,12 +8,7 @@ import Link from "next/link";
 import { EventJoinLink } from "@/components/events/event-join-link";
 import { AssignYfIdButton } from "@/components/people/assign-yf-id-button";
 import { InvitationRecipients } from "@/components/invitations/invitation-deliveries";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/shared/ui/dialog";
+import { useAppModal } from "@/components/shared/modals/app-modal";
 import { PaymentList } from "@/components/payments/payment-list";
 import { StatusBadge } from "@/components/portal/status-badge";
 import { Button } from "@/components/shared/ui/button";
@@ -184,10 +179,10 @@ function rosterMatches(row: MembershipRow, query: string) {
 function InvitationBatchHistory({ eventId }: { eventId: string }) {
   const translate = useTranslate();
   const { locale } = useLocale();
+  const { openModal } = useAppModal();
   const integrations = useIntegrations();
   const { busy, run, notify } = useBusyAction();
   const [rows, setRows] = useState<BatchRow[]>([]);
-  const [openBatch, setOpenBatch] = useState<BatchRow | null>(null);
 
   const load = useCallback(async () => {
     const { data } = await http.get<BatchRow[]>(
@@ -225,7 +220,13 @@ function InvitationBatchHistory({ eventId }: { eventId: string }) {
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={() => setOpenBatch(row)}
+                onClick={() =>
+                  openModal({
+                    title: row.subject || translate("events.recipients"),
+                    className: "sm:max-w-4xl",
+                    body: <InvitationRecipients batchId={row.id} />,
+                  })
+                }
               >
                 {translate("events.recipients")}
               </Button>
@@ -264,23 +265,6 @@ function InvitationBatchHistory({ eventId }: { eventId: string }) {
           </li>
         ) : null}
       </ul>
-      <Dialog
-        open={Boolean(openBatch)}
-        onOpenChange={(open) => {
-          if (!open) {
-            setOpenBatch(null);
-          }
-        }}
-      >
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>
-              {openBatch?.subject || translate("events.recipients")}
-            </DialogTitle>
-          </DialogHeader>
-          {openBatch ? <InvitationRecipients batchId={openBatch.id} /> : null}
-        </DialogContent>
-      </Dialog>
     </section>
   );
 }

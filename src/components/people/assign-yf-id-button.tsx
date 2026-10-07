@@ -5,14 +5,8 @@ import { useTranslate } from "@refinedev/core";
 import { toast } from "sonner";
 
 import { FormField } from "@/components/shared/form/form-field";
+import { ModalActions, useAppModal } from "@/components/shared/modals/app-modal";
 import { Button } from "@/components/shared/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/shared/ui/dialog";
 import { Input } from "@/components/shared/ui/input";
 import { apiErrorMessage, apiPost } from "@/lib/client/api";
 import { normalizeYfId } from "@/lib/people/yf-id";
@@ -31,16 +25,49 @@ export function AssignYfIdButton({
   onSaved,
 }: AssignYfIdButtonProps) {
   const translate = useTranslate();
-  const [open, setOpen] = useState(false);
+  const { openModal, closeModal } = useAppModal();
+  const name = fullName?.trim() || translate("people.titles.show");
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      onClick={() =>
+        openModal({
+          title: translate("people.assignYfId.title"),
+          description: translate("people.assignYfId.hint", { name }),
+          body: (
+            <AssignYfIdForm
+              personId={personId}
+              yfId={yfId}
+              onClose={closeModal}
+              onSaved={onSaved}
+            />
+          ),
+        })
+      }
+    >
+      {translate("people.assignYfId.action")}
+    </Button>
+  );
+}
+
+function AssignYfIdForm({
+  personId,
+  yfId,
+  onClose,
+  onSaved,
+}: {
+  personId: string;
+  yfId?: string | null;
+  onClose: () => void;
+  onSaved?: () => void;
+}) {
+  const translate = useTranslate();
   const [value, setValue] = useState(yfId ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-
-  function openDialog() {
-    setValue(yfId ?? "");
-    setError("");
-    setOpen(true);
-  }
 
   async function save() {
     const next = normalizeYfId(value);
@@ -55,7 +82,7 @@ export function AssignYfIdButton({
         `/people/${personId}/yf-id`,
         { yfId: next }
       );
-      setOpen(false);
+      onClose();
       toast.success(
         result.acceptedCount > 0
           ? translate("people.assignYfId.accepted", {
@@ -71,58 +98,23 @@ export function AssignYfIdButton({
     }
   }
 
-  const name = fullName?.trim() || translate("people.titles.show");
-
   return (
-    <>
-      <Button type="button" variant="outline" size="sm" onClick={openDialog}>
-        {translate("people.assignYfId.action")}
-      </Button>
-      <Dialog
-        open={open}
-        onOpenChange={(next) => {
-          if (!busy) {
-            setOpen(next);
-          }
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{translate("people.assignYfId.title")}</DialogTitle>
-            <DialogDescription>
-              {translate("people.assignYfId.hint", { name })}
-            </DialogDescription>
-          </DialogHeader>
-          <form
-            className="flex flex-col gap-4"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void save();
-            }}
-          >
-            <FormField label={translate("people.fields.yfId")} error={error}>
-              <Input
-                value={value}
-                autoComplete="off"
-                onChange={(event) => setValue(event.target.value)}
-              />
-            </FormField>
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                disabled={busy}
-                onClick={() => setOpen(false)}
-              >
-                {translate("buttons.cancel")}
-              </Button>
-              <Button type="submit" disabled={busy}>
-                {translate("buttons.save")}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </>
+    <div className="flex flex-col gap-4">
+      <FormField label={translate("people.fields.yfId")} error={error}>
+        <Input
+          value={value}
+          autoComplete="off"
+          onChange={(event) => setValue(event.target.value)}
+        />
+      </FormField>
+      <ModalActions className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <Button type="button" variant="outline" disabled={busy} onClick={onClose}>
+          {translate("buttons.cancel")}
+        </Button>
+        <Button type="button" disabled={busy} onClick={() => void save()}>
+          {translate("buttons.save")}
+        </Button>
+      </ModalActions>
+    </div>
   );
 }

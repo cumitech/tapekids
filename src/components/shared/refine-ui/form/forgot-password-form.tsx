@@ -49,14 +49,15 @@ export const ForgotPasswordForm = () => {
         <form onSubmit={handleForgotPassword}>
           <div className="flex flex-col gap-2">
             <Label htmlFor="email">
-              {translate("auth.email")}
+              {translate("auth.identifier")}
               <RequiredMark required />
             </Label>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
                 id="email"
-                type="email"
-                placeholder=""
+                type="text"
+                autoComplete="username"
+                placeholder={translate("auth.identifierPlaceholder")}
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

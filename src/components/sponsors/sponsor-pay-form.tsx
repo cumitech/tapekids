@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useTranslate } from "@refinedev/core";
 
+import { ModalActions } from "@/components/shared/modals/app-modal";
 import { FormField } from "@/components/shared/form/form-field";
 import { LabeledSelect } from "@/components/shared/form/labeled-select";
 import { PhoneField } from "@/components/shared/form/phone-field";
@@ -236,7 +237,7 @@ export function SponsorPayForm({
           {error}
         </p>
       ) : null}
-      <div className="flex flex-wrap gap-2">
+      <ModalActions className="flex flex-wrap gap-2">
         <Button type="button" disabled={busy} onClick={() => void launch()}>
           {busy ? translate("sponsors.paying") : translate("sponsors.pay")}
         </Button>
@@ -245,7 +246,7 @@ export function SponsorPayForm({
             {translate("buttons.cancel")}
           </Button>
         ) : null}
-      </div>
+      </ModalActions>
     </div>
   );
 }

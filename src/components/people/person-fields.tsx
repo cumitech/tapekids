@@ -20,6 +20,7 @@ import { PersonCategorySelect } from "@/components/people/person-category-select
 import { Button } from "@/components/shared/ui/button";
 import { Checkbox } from "@/components/shared/ui/checkbox";
 import { Input } from "@/components/shared/ui/input";
+import { Label } from "@/components/shared/ui/label";
 import {
   Select,
   SelectContent,
@@ -29,7 +30,7 @@ import {
 } from "@/components/shared/ui/select";
 import { Textarea } from "@/components/shared/ui/textarea";
 import { PERSON_GENDERS, SHIRT_SIZES, MAX_GUARDIANS, MIN_GUARDIANS } from "@/constants/person";
-import { ageInYears } from "@/lib/people/age";
+import { ageBoundError, ageInYears } from "@/lib/people/age";
 import {
   PROFILE_GEO_FIELDS,
   requiredIfComplete,
@@ -42,7 +43,7 @@ import {
 import type { PersonFormStep } from "@/constants/person-form-steps";
 import type { GeoSelection } from "@/types/geo";
 import type { PersonFormValues } from "@/types/forms";
-import type { ReactNode } from "react";
+import { type ReactNode, useId } from "react";
 
 function StepBlock({
   active,
@@ -88,6 +89,7 @@ export const PERSON_FIELD_KEYS = [
   "yfId",
   "points",
   "ageYears",
+  "isTrophy",
   "address",
   "churchName",
   "churchPastorName",
@@ -165,6 +167,7 @@ export function PersonFields({
     town: watch("town"),
   };
   const ageYears = ageInYears(watch("dateOfBirth"));
+  const trophyFieldId = useId();
   const isSectionActive = (name: PersonFormStep) =>
     layout === "identity"
       ? name === "identity"
@@ -334,26 +337,37 @@ export function PersonFields({
                 <FormField label={labels.fields.points} error={errors.points?.message}>
                   <Input type="number" min={0} step={1} {...register("points")} />
                 </FormField>
-                <FormField label={labels.fields.ageYears}>
+                <FormField
+                  label={labels.fields.ageYears}
+                  error={errors.ageYears?.message}
+                >
                   <Input
-                    value={ageYears ?? ""}
-                    readOnly
-                    disabled
-                    aria-readonly
-                    className="cursor-default bg-muted text-foreground disabled:opacity-100"
+                    type="number"
+                    min={0}
+                    max={120}
+                    step={1}
+                    inputMode="numeric"
+                    {...register("ageYears", {
+                      validate: (value) => ageBoundError(value) ?? true,
+                    })}
                   />
                 </FormField>
                 <Controller
                   control={control}
                   name="isTrophy"
                   render={({ field }) => (
-                    <label className="flex items-center gap-2 text-sm sm:col-span-2">
-                      <Checkbox
-                        checked={Boolean(field.value)}
-                        onCheckedChange={(checked) => field.onChange(checked === true)}
-                      />
-                      {labels.fields.isTrophy}
-                    </label>
+                    <div className="flex min-w-0 flex-col gap-1.5">
+                      <Label htmlFor={trophyFieldId}>{labels.fields.isTrophy}</Label>
+                      <div className="flex h-12 items-center md:h-9">
+                        <Checkbox
+                          id={trophyFieldId}
+                          checked={Boolean(field.value)}
+                          onCheckedChange={(checked) =>
+                            field.onChange(checked === true)
+                          }
+                        />
+                      </div>
+                    </div>
                   )}
                 />
               </>

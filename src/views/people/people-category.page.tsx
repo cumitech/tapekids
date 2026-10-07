@@ -9,7 +9,7 @@ import { ChevronLeft, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 import { AssignYfIdButton } from "@/components/people/assign-yf-id-button";
-import { PeopleImportDialog } from "@/components/people/people-import-dialog";
+import { PeopleImportForm } from "@/components/people/people-import-form";
 import { PersonForm } from "@/components/people/person-form.component";
 import { useAppModal } from "@/components/shared/modals/app-modal";
 import { ResourceRowActions } from "@/components/shared/refine-ui/buttons/resource-row-actions";
@@ -68,10 +68,9 @@ function onlyCategoryFilter(filters: CrudFilter[], category: PersonCategory) {
 export function PeopleCategoryPage({ category }: PeopleCategoryPageProps) {
   const translate = useTranslate();
   const { path } = useLocale();
-  const { confirm } = useAppModal();
+  const { confirm, openModal, closeModal } = useAppModal();
   const { openCreate, openEdit } = useDashboardFormModal();
   const refreshRef = useRef<() => void>(() => undefined);
-  const [importOpen, setImportOpen] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [selectingAll, setSelectingAll] = useState(false);
   const pageIdsRef = useRef<string[]>([]);
@@ -286,7 +285,26 @@ export function PeopleCategoryPage({ category }: PeopleCategoryPageProps) {
             {translate("people.summary.back")}
           </Link>
         </Button>
-        <Button type="button" variant="outline" onClick={() => setImportOpen(true)}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() =>
+            openModal({
+              title: translate("people.import.title"),
+              className: "sm:max-w-lg",
+              body: (
+                <PeopleImportForm
+                  lockedCategory={category}
+                  onCancel={closeModal}
+                  onImported={() => {
+                    setSelected(new Set());
+                    refresh();
+                  }}
+                />
+              ),
+            })
+          }
+        >
           <Upload className="mr-2 h-4 w-4" />
           {translate("people.import.action")}
         </Button>
@@ -321,15 +339,6 @@ export function PeopleCategoryPage({ category }: PeopleCategoryPageProps) {
         </p>
       ) : null}
       <DataTable table={table} />
-      <PeopleImportDialog
-        open={importOpen}
-        lockedCategory={category}
-        onOpenChange={setImportOpen}
-        onImported={() => {
-          setSelected(new Set());
-          refresh();
-        }}
-      />
     </ListView>
   );
 }

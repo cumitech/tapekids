@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useState, useRef } from "react";
 
 import { EventSelect } from "@/components/events/event-select";
+import { ModalActions } from "@/components/shared/modals/app-modal";
 import { FormField } from "@/components/shared/form/form-field";
 import { LabeledSelect } from "@/components/shared/form/labeled-select";
 import { PhoneField } from "@/components/shared/form/phone-field";
@@ -191,7 +192,7 @@ export function PaymentCheckout({
           ) : null}
         </FormField>
       ) : null}
-      <div className="flex flex-wrap gap-2">
+      <ModalActions className="flex flex-wrap gap-2">
         <Button
           type="button"
           disabled={busy || watching || !eventId || !amountReady}
@@ -238,7 +239,7 @@ export function PaymentCheckout({
             {translate("buttons.cancel")}
           </Button>
         ) : null}
-      </div>
+      </ModalActions>
       {watching ? (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="size-4 animate-spin" />

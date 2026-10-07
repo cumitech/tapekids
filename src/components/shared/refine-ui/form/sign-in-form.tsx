@@ -99,13 +99,14 @@ export const SignInForm = ({
         <form onSubmit={handleSignIn}>
           <div className="flex flex-col gap-2">
             <Label htmlFor="email">
-              {translate("auth.email")}
+              {translate("auth.identifier")}
               <RequiredMark required />
             </Label>
             <Input
               id="email"
-              type="email"
-              placeholder=""
+              type="text"
+              autoComplete="username"
+              placeholder={translate("auth.identifierPlaceholder")}
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}

@@ -135,7 +135,8 @@ export function toCreatePersonPayload(input: CreatePerson) {
     medicalNotes: input.medicalNotes ?? null,
     yfId: input.yfId ?? null,
     points: input.points ?? null,
-    ageYears: ageInYears(input.dateOfBirth),
+    ageYears:
+      input.ageYears != null ? input.ageYears : ageInYears(input.dateOfBirth),
     isTrophy: input.isTrophy ?? false,
     category: input.category ?? null,
   };
@@ -149,6 +150,10 @@ export function toUpdatePersonPayload(input: UpdatePerson) {
   if (input.phone !== undefined) payload.phone = normalizeStoredPhone(input.phone);
   if (input.dateOfBirth !== undefined) {
     payload.dateOfBirth = dateOnly(input.dateOfBirth);
+  }
+  if (typeof input.ageYears === "number") {
+    payload.ageYears = input.ageYears;
+  } else if (input.dateOfBirth !== undefined) {
     payload.ageYears = ageInYears(input.dateOfBirth);
   }
   if (input.gender !== undefined) payload.gender = input.gender;
