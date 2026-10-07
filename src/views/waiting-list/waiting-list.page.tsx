@@ -191,6 +191,12 @@ function useWaitingListColumns({
         header: translate("people.fields.fullName"),
       },
       {
+        id: "yfId",
+        accessorKey: "yfId",
+        header: translate("people.fields.yfId"),
+        cell: ({ row }) => row.original.yfId || "-",
+      },
+      {
         id: "email",
         accessorKey: "email",
         header: translate("people.fields.email"),

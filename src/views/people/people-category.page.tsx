@@ -8,6 +8,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { ChevronLeft, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
+import { AssignYfIdButton } from "@/components/people/assign-yf-id-button";
 import { PeopleImportDialog } from "@/components/people/people-import-dialog";
 import { PersonForm } from "@/components/people/person-form.component";
 import { useAppModal } from "@/components/shared/modals/app-modal";
@@ -68,7 +69,8 @@ export function PeopleCategoryPage({ category }: PeopleCategoryPageProps) {
   const translate = useTranslate();
   const { path } = useLocale();
   const { confirm } = useAppModal();
-  const { openEdit } = useDashboardFormModal();
+  const { openCreate, openEdit } = useDashboardFormModal();
+  const refreshRef = useRef<() => void>(() => undefined);
   const [importOpen, setImportOpen] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [selectingAll, setSelectingAll] = useState(false);
@@ -109,6 +111,7 @@ export function PeopleCategoryPage({ category }: PeopleCategoryPageProps) {
   const renderActions = useCallback(
     (row: Person) => (
       <ResourceRowActions
+        resource="people"
         id={row.id}
         onEdit={() =>
           openEdit("people", row.id, ({ close }) => (
@@ -116,11 +119,21 @@ export function PeopleCategoryPage({ category }: PeopleCategoryPageProps) {
               mode="edit"
               id={row.id}
               onCancel={close}
-              onSuccess={close}
+              onSuccess={() => {
+                close();
+                refreshRef.current();
+              }}
             />
           ))
         }
-      />
+      >
+        <AssignYfIdButton
+          personId={row.id}
+          fullName={row.fullName}
+          yfId={row.yfId}
+          onSaved={() => refreshRef.current()}
+        />
+      </ResourceRowActions>
     ),
     [openEdit]
   );
@@ -206,6 +219,7 @@ export function PeopleCategoryPage({ category }: PeopleCategoryPageProps) {
     clearListQueryCache("people");
     void table.refineCore.tableQuery.refetch();
   }
+  refreshRef.current = refresh;
 
   function askDelete() {
     if (!isPersonCategory(category) || selected.size === 0) {
@@ -249,7 +263,23 @@ export function PeopleCategoryPage({ category }: PeopleCategoryPageProps) {
 
   return (
     <ListView>
-      <ListViewHeader canCreate={false} title={categoryLabel}>
+      <ListViewHeader
+        resource="people"
+        title={categoryLabel}
+        onCreate={() =>
+          openCreate("people", ({ close }) => (
+            <PersonForm
+              mode="create"
+              defaultCategory={category}
+              onCancel={close}
+              onSuccess={() => {
+                close();
+                refresh();
+              }}
+            />
+          ))
+        }
+      >
         <Button variant="outline" asChild>
           <Link href={path("/dashboard/people")}>
             <ChevronLeft className="size-4" />

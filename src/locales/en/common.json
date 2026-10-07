@@ -422,6 +422,15 @@
       "failed": "Could not delete the selected people.",
       "success": "Deleted {{count}} people."
     },
+    "assignYfId": {
+      "action": "Enter YF ID",
+      "title": "Enter YF ID",
+      "hint": "Save the Young Foundations ID for {{name}}. If they received an invitation and could not enter it, this also accepts that invitation for them.",
+      "required": "YF ID is required",
+      "saved": "YF ID saved.",
+      "accepted": "YF ID saved. Open invitations accepted: {{count}}.",
+      "failed": "Could not save the YF ID."
+    },
     "sections": {
       "identity": "Personal details",
       "location": "Location",
@@ -485,7 +494,11 @@
     "approvedPartial": "Approved {{approved}}. {{failed}} could not be approved.",
     "forEvent": "This registration is for {{title}}.",
     "changeYfId": "Use a different Young Foundations ID",
-    "event": "Event"
+    "event": "Event",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved"
+    }
   },
   "sponsors": {
     "titles": {
@@ -536,11 +549,11 @@
     "kinds": {
       "trophy-campers": {
         "title": "Trophy campers",
-        "description": "People registered as trophy campers for multi-day camps."
+        "description": "Trophy campers invited to an event, and those who have registered."
       },
       "trophy-participants": {
         "title": "Trophy participants",
-        "description": "People registered as trophy participants for day events."
+        "description": "Trophy participants invited to an event, and those who have registered."
       },
       "chaperones": {
         "title": "Chaperones / Encadreurs",
@@ -556,7 +569,7 @@
       },
       "waiting-list": {
         "title": "Waiting list",
-        "description": "People without trophies who asked to take part and are waiting for approval."
+        "description": "People who registered through an event join link."
       }
     }
   },
@@ -609,6 +622,37 @@
     "invitationsSent": "{{count}} invitations sent ({{failed}} failed)",
     "invitationsFailed": "Could not queue invitations",
     "invitationsSendFailed": "Could not send the invitations. Check email settings and try again.",
+    "deliveries": {
+      "title": "Sends",
+      "empty": "No emails have been sent from this list yet.",
+      "open": "View recipients",
+      "close": "Hide recipients",
+      "status": "Status",
+      "failed": "Failed",
+      "pending": "Pending",
+      "success": "Success",
+      "all": "All",
+      "resend": "Resend selected",
+      "selected": "{{count}} selected",
+      "selectAll": "Select all",
+      "selectRow": "Select recipient",
+      "editEmail": "Edit email",
+      "saveEmail": "Save",
+      "emailSaved": "Email updated",
+      "emailFailed": "Could not update that email",
+      "resendDone": "{{sent}} resent, {{failed}} still failed",
+      "resendFailed": "Could not resend the selected emails",
+      "noneInFilter": "No recipients with this status.",
+      "summary": "{{success}} sent · {{failed}} failed · {{pending}} pending",
+      "loadFailed": "Could not load these sends",
+      "statuses": {
+        "queued": "Pending",
+        "sent": "Success",
+        "failed": "Failed",
+        "accepted": "Accepted",
+        "expired": "Expired"
+      }
+    },
     "audienceKinds": {
       "trophy_camper": "Trophy Camper",
       "trophy_participant": "Trophy Participant",
@@ -697,6 +741,7 @@
     "batches": "Invitation batches",
     "sendBatch": "Send",
     "resendBatch": "Resend failed",
+    "recipients": "Recipients",
     "batchSent": "Invitation emails sent",
     "batchSendFailed": "Could not send this batch"
   },

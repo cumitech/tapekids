@@ -20,4 +20,5 @@ export type SponsorReportRow = {
   category?: PersonCategory | null;
   points?: number | null;
   ageYears?: number | null;
+  isTrophy?: boolean;
 };

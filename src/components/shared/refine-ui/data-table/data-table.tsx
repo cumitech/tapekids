@@ -346,9 +346,9 @@ export function getCommonStyles<TData>({
     return {
       position: "sticky",
       right: 0,
-      width: 112,
-      minWidth: 112,
-      maxWidth: 112,
+      width: 152,
+      minWidth: 152,
+      maxWidth: 152,
       zIndex: 2,
       boxShadow: isOverflowing.horizontal
         ? "-8px 0 12px -8px rgba(15, 23, 42, 0.18)"

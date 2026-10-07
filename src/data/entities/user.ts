@@ -15,6 +15,7 @@ export class User extends Model<
 > {
   declare id: string;
   declare email: string;
+  declare yfId: CreationOptional<string | null>;
   declare username: string;
   declare password: string;
   declare role: UserRole;
@@ -35,6 +36,11 @@ export function initUser(sequelize: Sequelize) {
         type: DataTypes.STRING(128),
         unique: true,
         allowNull: false,
+      },
+      yfId: {
+        type: DataTypes.STRING(32),
+        allowNull: true,
+        unique: true,
       },
       username: {
         type: DataTypes.STRING(50),

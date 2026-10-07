@@ -1,5 +1,10 @@
 import { CONTENT_ENTITY_TYPES } from "@/constants/content-i18n";
-import { EVENT_MEMBERSHIP_KINDS } from "@/constants/event-participation";
+import {
+  EVENT_MEMBERSHIP_KINDS,
+  MEMBERSHIP_STATUSES,
+  type MembershipStatus,
+} from "@/constants/event-participation";
+import type { PersonCategory } from "@/constants/person";
 import type { AppLocale } from "@/constants/locales";
 import {
   isPersonReportKind,
@@ -70,6 +75,7 @@ function toSponsorRow(
     category: person?.category ?? null,
     points: person?.points ?? null,
     ageYears: person?.ageYears ?? null,
+    isTrophy: person?.isTrophy ?? false,
   };
 }
 
@@ -96,8 +102,16 @@ export class ReportService {
     return this.listMemberships(EVENT_MEMBERSHIP_KINDS.CAMPER, query);
   }
 
+  listTrophyCampers(query: ListQuery) {
+    return this.listTrophyMemberships(REPORT_KINDS.TROPHY_CAMPERS, query);
+  }
+
+  listTrophyParticipants(query: ListQuery) {
+    return this.listTrophyMemberships(REPORT_KINDS.TROPHY_PARTICIPANTS, query);
+  }
+
   listWaiting(query: ListQuery) {
-    return waitingListRepository.listPending(query);
+    return waitingListRepository.listJoinRegistrations(query);
   }
 
   async exportWorkbook(kind: string, locale = getRequestLocale()) {
@@ -108,11 +122,11 @@ export class ReportService {
 
     if (
       report === REPORT_KINDS.SPONSORS ||
-      report === REPORT_KINDS.PARTICIPANTS
+      report === REPORT_KINDS.PARTICIPANTS ||
+      report === REPORT_KINDS.TROPHY_CAMPERS ||
+      report === REPORT_KINDS.TROPHY_PARTICIPANTS
     ) {
-      const result = await (report === REPORT_KINDS.SPONSORS
-        ? this.listSponsors({ ...PERSON_SEARCH, sort: "fullName" })
-        : this.listParticipants({ ...PERSON_SEARCH, sort: "fullName" }));
+      const result = await this.exportMemberships(report);
       return {
         filename,
         buffer: workbookBuffer([
@@ -133,12 +147,21 @@ export class ReportService {
           {
             name: sheetName,
             columns: [
+              { header: translate("waitingList.event"), width: 32 },
+              { header: translate("payments.fields.status"), width: 14 },
+              { header: translate("people.fields.yfId"), width: 16 },
               { header: translate("people.fields.fullName"), width: 28 },
               { header: translate("people.fields.email"), width: 32 },
               { header: translate("people.fields.phone"), width: 18 },
               { header: translate("waitingList.registeredAt"), width: 18 },
             ],
             rows: result.data.map((row) => [
+              eventTitleOf(row.details),
+              translate(
+                `waitingList.status.${row.status}`,
+                row.status
+              ),
+              row.yfId ?? "",
               row.fullName,
               row.email,
               row.phone ?? "",
@@ -164,11 +187,39 @@ export class ReportService {
     };
   }
 
-  private async listMemberships(
-    kind: (typeof EVENT_MEMBERSHIP_KINDS)[keyof typeof EVENT_MEMBERSHIP_KINDS],
+  private listTrophyMemberships(
+    kind: typeof REPORT_KINDS.TROPHY_CAMPERS | typeof REPORT_KINDS.TROPHY_PARTICIPANTS,
     query: ListQuery
   ) {
-    const result = await eventMembershipRepository.listByKind(kind, query);
+    return this.listMemberships(EVENT_MEMBERSHIP_KINDS.CAMPER, query, {
+      category: reportPersonCategory(kind),
+      statuses: [MEMBERSHIP_STATUSES.INVITED, MEMBERSHIP_STATUSES.REGISTERED],
+    });
+  }
+
+  private exportMemberships(report: ReportKind) {
+    const query = { ...PERSON_SEARCH, sort: "fullName" };
+    if (report === REPORT_KINDS.SPONSORS) {
+      return this.listSponsors(query);
+    }
+    if (report === REPORT_KINDS.PARTICIPANTS) {
+      return this.listParticipants(query);
+    }
+    if (report === REPORT_KINDS.TROPHY_CAMPERS) {
+      return this.listTrophyCampers(query);
+    }
+    return this.listTrophyParticipants(query);
+  }
+
+  private async listMemberships(
+    kind: (typeof EVENT_MEMBERSHIP_KINDS)[keyof typeof EVENT_MEMBERSHIP_KINDS],
+    query: ListQuery,
+    options?: {
+      category?: PersonCategory;
+      statuses?: MembershipStatus[];
+    }
+  ) {
+    const result = await eventMembershipRepository.listByKind(kind, query, options);
     return {
       ...result,
       data: await this.withEventTitles(result.data),
@@ -202,6 +253,27 @@ export class ReportService {
         titleById.get(row.eventId) || row.event?.title || ""
       )
     );
+  }
+}
+
+function eventTitleOf(details: unknown): string {
+  const record =
+    typeof details === "string"
+      ? parsedDetails(details)
+      : details && typeof details === "object"
+        ? (details as { eventTitle?: unknown })
+        : null;
+  return typeof record?.eventTitle === "string" ? record.eventTitle : "";
+}
+
+function parsedDetails(value: string): { eventTitle?: unknown } | null {
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? (parsed as { eventTitle?: unknown })
+      : null;
+  } catch {
+    return null;
   }
 }
 

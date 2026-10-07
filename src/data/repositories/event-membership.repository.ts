@@ -1,7 +1,11 @@
-import type { InferCreationAttributes, Order } from "sequelize";
+import { Op, type InferCreationAttributes, type Order, type WhereOptions } from "sequelize";
 
-import type { EventMembershipKind } from "@/constants/event-participation";
+import type {
+  EventMembershipKind,
+  MembershipStatus,
+} from "@/constants/event-participation";
 import { MEMBERSHIP_STATUSES } from "@/constants/event-participation";
+import type { PersonCategory } from "@/constants/person";
 import { Event, EventMembership, Person } from "@/data/entities";
 import { listSearchWhere } from "@/data/list-where";
 import type { ListQuery, PaginatedResult } from "@/data/types/pagination";
@@ -93,21 +97,34 @@ export class EventMembershipRepository {
 
   async listByKind(
     kind: EventMembershipKind,
-    query: ListQuery
+    query: ListQuery,
+    options?: {
+      category?: PersonCategory;
+      statuses?: MembershipStatus[];
+    }
   ): Promise<PaginatedResult<EventMembership>> {
     const personWhere = listSearchWhere(
       { ...query, eq: undefined, likes: undefined },
       ["email", "fullName", "phone", "yfId"]
     );
+    const personFilter: WhereOptions | undefined = options?.category
+      ? personWhere
+        ? { [Op.and]: [{ category: options.category }, personWhere] }
+        : { category: options.category }
+      : personWhere;
+    const membershipWhere: WhereOptions = { kind };
+    if (options?.statuses?.length) {
+      membershipWhere.status = { [Op.in]: options.statuses };
+    }
 
     const { rows, count } = await EventMembership.findAndCountAll({
-      where: { kind },
+      where: membershipWhere,
       include: [
         {
           model: Person,
           as: "person",
-          required: Boolean(query.q),
-          where: personWhere,
+          required: Boolean(query.q) || Boolean(options?.category),
+          where: personFilter,
         },
         { model: Event, as: "event" },
       ],
@@ -133,6 +150,9 @@ function membershipListOrder(query: ListQuery): Order {
   }
   if (sort === "title") {
     return [[{ model: Event, as: "event" }, "title", query.order]];
+  }
+  if (sort === "status") {
+    return [["status", query.order]];
   }
   return [["createdAt", query.order]];
 }

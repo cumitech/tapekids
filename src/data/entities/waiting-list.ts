@@ -22,6 +22,7 @@ export class WaitingListEntry extends Model<
   declare id: string;
   declare fullName: string;
   declare email: string;
+  declare yfId: CreationOptional<string | null>;
   declare phone: CreationOptional<string | null>;
   declare details: CreationOptional<Record<string, unknown> | null>;
   declare status: CreationOptional<WaitingListStatus>;
@@ -44,6 +45,10 @@ export function initWaitingList(sequelize: Sequelize) {
       email: {
         type: DataTypes.STRING(128),
         allowNull: false,
+      },
+      yfId: {
+        type: DataTypes.STRING(32),
+        allowNull: true,
         unique: true,
       },
       phone: {

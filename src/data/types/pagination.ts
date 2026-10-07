@@ -54,6 +54,7 @@ const ALLOWED_SORT = new Set([
   "category",
   "eventType",
   "sentAt",
+  "status",
   "action",
   "entity",
 ]);

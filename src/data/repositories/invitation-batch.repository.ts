@@ -49,6 +49,14 @@ export class InvitationBatchRepository {
     };
   }
 
+  async listByMailingList(mailingListId: string): Promise<InvitationBatch[]> {
+    return InvitationBatch.findAll({
+      where: { mailingListId },
+      order: [["createdAt", "DESC"]],
+      limit: 50,
+    });
+  }
+
   async listForSettings(): Promise<InvitationBatch[]> {
     return InvitationBatch.findAll({
       include: [{ model: Event, as: "event", attributes: ["id", "title"] }],

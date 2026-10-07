@@ -1,13 +1,15 @@
 import { col, fn, where } from "sequelize";
 
 import type { UserRole } from "@/constants/user-roles";
-import { NotFoundException } from "@/exceptions/not-found.exception";
 import { User } from "@/data/entities";
+import { NotFoundException } from "@/exceptions/not-found.exception";
+import { normalizeYfId } from "@/lib/people/yf-id";
 
 export class UserRepository {
   async create(payload: {
     id: string;
     email: string;
+    yfId?: string | null;
     username: string;
     password: string;
     role: UserRole;
@@ -34,6 +36,26 @@ export class UserRepository {
 
   async findByPersonId(personId: string): Promise<User | null> {
     return User.findOne({ where: { personId } });
+  }
+
+  async findByYfId(yfId: string): Promise<User | null> {
+    const normalized = normalizeYfId(yfId);
+    if (!normalized) {
+      return null;
+    }
+    return User.findOne({ where: { yfId: normalized } });
+  }
+
+  async setYfId(id: string, yfId: string | null): Promise<User> {
+    const user = await this.findById(id);
+    await user.update({ yfId });
+    return this.findById(id);
+  }
+
+  async updateEmail(id: string, email: string): Promise<User> {
+    const user = await this.findById(id);
+    await user.update({ email });
+    return this.findById(id);
   }
 
   async markVerified(id: string): Promise<User> {

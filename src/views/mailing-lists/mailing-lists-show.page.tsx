@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useShow, useTranslate } from "@refinedev/core";
 
+import { MailingListDeliveries } from "@/components/invitations/invitation-deliveries";
 import { InvitationQueueForm } from "@/components/invitations/invitation-queue-form";
 import { MailingListForm } from "@/components/mailing-lists/mailing-list-form.component";
 import { useAppModal } from "@/components/shared/modals/app-modal";
@@ -29,6 +31,7 @@ export function MailingListsShowPage() {
   const { busy, run } = useBusyAction();
 
   const members = record?.members ?? [];
+  const [focusBatchId, setFocusBatchId] = useState<string | null>(null);
 
   return (
     <ShowView>
@@ -114,7 +117,14 @@ export function MailingListsShowPage() {
             </ul>
           </section>
 
-          <InvitationQueueForm mailingListId={record.id} />
+          <InvitationQueueForm
+            mailingListId={record.id}
+            onSent={(result) => setFocusBatchId(result.batch?.id ?? null)}
+          />
+          <MailingListDeliveries
+            mailingListId={record.id}
+            focusBatchId={focusBatchId}
+          />
         </div>
       ) : null}
     </ShowView>

@@ -25,6 +25,7 @@ type PersonFormProps = {
   resource?: string;
   layout?: PersonFormLayout;
   record?: Person | null;
+  defaultCategory?: string;
   showCancel?: boolean;
   onCancel?: () => void;
   onSuccess?: () => void;
@@ -36,6 +37,7 @@ export function PersonForm({
   resource,
   layout = mode === "create" ? "identity" : "full",
   record,
+  defaultCategory,
   showCancel = true,
   onCancel,
   onSuccess,
@@ -52,6 +54,7 @@ export function PersonForm({
     id,
     resource,
     record,
+    defaultCategory,
     onCancel,
     onSuccess,
   });

@@ -5,6 +5,14 @@ import { useTranslate } from "@refinedev/core";
 import Link from "next/link";
 
 import { EventJoinLink } from "@/components/events/event-join-link";
+import { AssignYfIdButton } from "@/components/people/assign-yf-id-button";
+import { InvitationRecipients } from "@/components/invitations/invitation-deliveries";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/shared/ui/dialog";
 import { PaymentList } from "@/components/payments/payment-list";
 import { StatusBadge } from "@/components/portal/status-badge";
 import { Button } from "@/components/shared/ui/button";
@@ -27,6 +35,7 @@ type MembershipRow = {
       id: string;
       fullName: string;
       email?: string | null;
+      yfId?: string | null;
     };
 };
 
@@ -96,7 +105,19 @@ function EventRoster({ eventId }: { eventId: string }) {
                 {translate(`payments.kinds.${row.kind}`, row.kind)}
               </p>
             </div>
-            <StatusBadge namespace="membership" value={row.status} />
+            <div className="flex flex-wrap items-center gap-2">
+              {row.person ? (
+                <AssignYfIdButton
+                  personId={row.person.id}
+                  fullName={row.person.fullName}
+                  yfId={row.person.yfId}
+                  onSaved={() => {
+                    void load();
+                  }}
+                />
+              ) : null}
+              <StatusBadge namespace="membership" value={row.status} />
+            </div>
           </li>
         ))}
         {rows.length === 0 ? (
@@ -115,6 +136,7 @@ function InvitationBatchHistory({ eventId }: { eventId: string }) {
   const integrations = useIntegrations();
   const { busy, run, notify } = useBusyAction();
   const [rows, setRows] = useState<BatchRow[]>([]);
+  const [openBatch, setOpenBatch] = useState<BatchRow | null>(null);
 
   const load = useCallback(async () => {
     const { data } = await http.get<BatchRow[]>(
@@ -148,6 +170,14 @@ function InvitationBatchHistory({ eventId }: { eventId: string }) {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <StatusBadge namespace="batch" value={row.status} />
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setOpenBatch(row)}
+              >
+                {translate("events.recipients")}
+              </Button>
               {integrations.mailEnabled &&
               row.status !== INVITATION_BATCH_STATUSES.SENDING ? (
                 <Button
@@ -183,6 +213,23 @@ function InvitationBatchHistory({ eventId }: { eventId: string }) {
           </li>
         ) : null}
       </ul>
+      <Dialog
+        open={Boolean(openBatch)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setOpenBatch(null);
+          }
+        }}
+      >
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>
+              {openBatch?.subject || translate("events.recipients")}
+            </DialogTitle>
+          </DialogHeader>
+          {openBatch ? <InvitationRecipients batchId={openBatch.id} /> : null}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

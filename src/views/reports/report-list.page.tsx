@@ -15,7 +15,6 @@ import {
   ListViewHeader,
 } from "@/components/shared/refine-ui/views/list-view";
 import {
-  isPersonReportKind,
   isReportKind,
   REPORT_KINDS,
   reportPersonCategory,
@@ -104,10 +103,50 @@ function MembershipReportTable({ resource }: { resource: string }) {
   return <DataTable table={table} />;
 }
 
+function eventTitleOf(row: WaitingListEntry) {
+  const details = row.details;
+  if (!details) {
+    return "";
+  }
+  if (typeof details === "string") {
+    try {
+      return eventTitleOf({
+        ...row,
+        details: JSON.parse(details) as WaitingListEntry["details"],
+      });
+    } catch {
+      return "";
+    }
+  }
+  return typeof details.eventTitle === "string" ? details.eventTitle : "";
+}
+
 function WaitingListReportTable() {
   const translate = useTranslate();
   const columns = useMemo<ColumnDef<WaitingListEntry>[]>(
     () => [
+      {
+        id: "event",
+        enableSorting: false,
+        header: translate("waitingList.event"),
+        cell: ({ row }) => eventTitleOf(row.original) || "-",
+      },
+      {
+        id: "status",
+        accessorKey: "status",
+        header: translate("payments.fields.status"),
+        cell: ({ row }) =>
+          translate(
+            `waitingList.status.${row.original.status}`,
+            row.original.status ?? ""
+          ),
+      },
+      {
+        id: "yfId",
+        accessorKey: "yfId",
+        header: translate("people.fields.yfId"),
+        cell: ({ row }) => row.original.yfId || "-",
+      },
       {
         id: "fullName",
         accessorKey: "fullName",
@@ -157,9 +196,13 @@ export function ReportListPage() {
         <MembershipReportTable resource="reports/sponsors" />
       ) : kind === REPORT_KINDS.PARTICIPANTS ? (
         <MembershipReportTable resource="reports/participants" />
+      ) : kind === REPORT_KINDS.TROPHY_CAMPERS ? (
+        <MembershipReportTable resource="reports/trophy-campers" />
+      ) : kind === REPORT_KINDS.TROPHY_PARTICIPANTS ? (
+        <MembershipReportTable resource="reports/trophy-participants" />
       ) : kind === REPORT_KINDS.WAITING_LIST ? (
         <WaitingListReportTable />
-      ) : isPersonReportKind(kind) ? (
+      ) : kind === REPORT_KINDS.CHAPERONES ? (
         <PeopleReportTable kind={kind} />
       ) : (
         <ErrorComponent />

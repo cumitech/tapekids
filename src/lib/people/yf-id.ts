@@ -41,11 +41,10 @@ export function yfGuestHandle(person: {
   return normalizeYfId(person.yfId) || person.id;
 }
 
+/** Account address. The family's contact email stays on the person and may be shared. */
 export function yfGuestEmail(person: {
   id: string;
-  email?: string | null;
   yfId?: string | null;
 }): string {
-  const email = person.email?.trim().toLowerCase();
-  return email || `yf.${yfGuestHandle(person)}@guest.kids-event.cm`;
+  return `yf.${yfGuestHandle(person)}@guest.kids-event.cm`;
 }

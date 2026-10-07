@@ -39,25 +39,19 @@ export class WaitingListService {
       );
     }
     const email = input.email;
-    const existingEntry = await waitingListRepository.findByEmail(email);
-    if (existingEntry) {
-      throw new ConflictException(
-        existingEntry.status === WAITING_LIST_STATUS.APPROVED
-          ? "This email is already in the directory."
-          : "This email is already on the waiting list."
-      );
-    }
-
-    const existingPerson = await personRepository.findByEmail(email);
-    if (existingPerson) {
-      throw new ConflictException("This email is already in the directory.");
-    }
-
     if (input.yfId) {
       const existingYf = await personRepository.findByYfId(input.yfId);
       if (existingYf) {
         throw new ConflictException(
           "This Young Foundations ID already belongs to someone in the directory."
+        );
+      }
+      const existingEntry = await waitingListRepository.findByYfId(input.yfId);
+      if (existingEntry) {
+        throw new ConflictException(
+          existingEntry.status === WAITING_LIST_STATUS.APPROVED
+            ? "This Young Foundations ID is already in the directory."
+            : "This Young Foundations ID is already on the waiting list."
         );
       }
     }
@@ -67,13 +61,16 @@ export class WaitingListService {
         id: nanoid(),
         fullName: input.fullName,
         email,
+        yfId: input.yfId,
         phone: normalizeStoredPhone(input.phone),
         details: input as unknown as Record<string, unknown>,
         status: WAITING_LIST_STATUS.PENDING,
       });
     } catch (error) {
       if (isUniqueConstraintError(error)) {
-        throw new ConflictException("This email is already on the waiting list.");
+        throw new ConflictException(
+          "This Young Foundations ID is already on the waiting list."
+        );
       }
       throw error;
     }
@@ -109,19 +106,24 @@ export class WaitingListService {
         throw new ValidationException("This registration is no longer waiting.");
       }
 
-      const existingPerson = await personRepository.findByEmail(entry.email);
-      if (existingPerson) {
-        throw new ConflictException("This email is already in the directory.");
-      }
-
+      const details = storedDetails(entry.details);
       const input = parseCreatePerson({
-        ...storedDetails(entry.details),
+        ...details,
         fullName: entry.fullName,
         email: entry.email,
         phone: entry.phone,
+        yfId: entry.yfId || details.yfId,
         isTrophy: false,
         category: null,
       });
+      if (input.yfId) {
+        const existingYf = await personRepository.findByYfId(input.yfId);
+        if (existingYf) {
+          throw new ConflictException(
+            "This Young Foundations ID already belongs to someone in the directory."
+          );
+        }
+      }
       const created = await Person.create(toCreatePersonPayload(input), {
         transaction,
       });

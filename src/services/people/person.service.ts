@@ -2,6 +2,7 @@ import {
   PERSON_CATEGORY_VALUES,
   type PersonCategory,
 } from "@/constants/person";
+import { parseInviteYfId } from "@/data/dtos/invitation.dto";
 import {
   parseCreatePerson,
   parseUpdatePerson,
@@ -15,6 +16,7 @@ import {
   PersonRepository,
   type PersonUpdatePayload,
 } from "@/data/repositories/person.repository";
+import { UserRepository } from "@/data/repositories/user.repository";
 import type { ListQuery } from "@/data/types/pagination";
 import { ConflictException } from "@/exceptions/conflict.exception";
 import { ValidationException } from "@/exceptions/validation.exception";
@@ -23,9 +25,11 @@ import { ageInYears } from "@/lib/people/age";
 import { parsePeopleWorkbook } from "@/lib/people/import-people";
 import type { PeopleImportResult } from "@/models/people/people-import.model";
 import { auditService } from "@/services/audit/audit.service";
+import { invitationService } from "@/services/invitations/invitation.service";
 
 const personRepository = new PersonRepository();
 const emergencyContactRepository = new EmergencyContactRepository();
+const userRepository = new UserRepository();
 
 export class PersonService {
   list(query: ListQuery) {
@@ -69,10 +73,7 @@ export class PersonService {
   async update(id: string, body: unknown) {
     const input = parseUpdatePerson(body);
     if (input.yfId) {
-      const existingYf = await personRepository.findByYfId(input.yfId);
-      if (existingYf && existingYf.id !== id) {
-        throw new ConflictException("A person with this YF ID already exists.");
-      }
+      await assertYfIdAvailable(input.yfId, id);
     }
 
     const before = await personRepository.findById(id);
@@ -93,6 +94,10 @@ export class PersonService {
       );
     }
 
+    if (input.yfId !== undefined) {
+      await syncLinkedUserYfId(id, input.yfId ?? null);
+    }
+
     const after = await personRepository.findById(id);
     await auditService.record({
       action: "update",
@@ -102,6 +107,25 @@ export class PersonService {
       after,
     });
     return after;
+  }
+
+  async assignYfId(id: string, body: unknown) {
+    const { yfId } = parseInviteYfId(body);
+    await assertYfIdAvailable(yfId, id);
+    const before = await personRepository.findById(id);
+    await personRepository.update(id, { yfId });
+    const person = await personRepository.findById(id);
+    const acceptedCount = await invitationService.acceptDeliveredYfInvites(person);
+    await syncLinkedUserYfId(id, yfId);
+    const after = await personRepository.findById(id);
+    await auditService.record({
+      action: "update",
+      entity: "Person",
+      entityId: id,
+      before,
+      after,
+    });
+    return { person: after, acceptedCount };
   }
 
   async delete(id: string) {
@@ -329,6 +353,37 @@ function importMatchesPerson(person: Person, input: CreatePerson) {
   return Object.entries(next).every(
     ([field, value]) => stamp(person.get(field as keyof Person)) === stamp(value)
   );
+}
+
+async function assertYfIdAvailable(yfId: string, personId: string) {
+  const existingYf = await personRepository.findByYfId(yfId);
+  if (existingYf && existingYf.id !== personId) {
+    throw new ConflictException("A person with this YF ID already exists.");
+  }
+  const linked = await userRepository.findByPersonId(personId);
+  const taken = await userRepository.findByYfId(yfId);
+  if (taken && taken.id !== linked?.id && (taken.personId || linked)) {
+    throw new ConflictException(
+      "This Young Foundations ID is already used by another account."
+    );
+  }
+}
+
+async function syncLinkedUserYfId(personId: string, yfId: string | null) {
+  const linked = await userRepository.findByPersonId(personId);
+  const next = yfId || null;
+  if (!linked || (linked.yfId ?? null) === next) {
+    return;
+  }
+  if (next) {
+    const taken = await userRepository.findByYfId(next);
+    if (taken && taken.id !== linked.id) {
+      throw new ConflictException(
+        "This Young Foundations ID is already used by another account."
+      );
+    }
+  }
+  await userRepository.setYfId(linked.id, next);
 }
 
 function isUniqueConstraintError(error: unknown) {

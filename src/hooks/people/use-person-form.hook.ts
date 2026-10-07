@@ -16,6 +16,7 @@ type UsePersonFormParams = {
   id?: BaseKey;
   resource?: string;
   record?: Person | null;
+  defaultCategory?: string;
   onCancel?: () => void;
   onSuccess?: () => void;
 };
@@ -25,6 +26,7 @@ export function usePersonForm({
   id,
   resource = "people",
   record,
+  defaultCategory,
   onCancel,
   onSuccess,
 }: UsePersonFormParams) {
@@ -36,7 +38,10 @@ export function usePersonForm({
     resource,
     mode,
     id,
-    emptyValues: emptyPersonForm,
+    emptyValues: {
+      ...emptyPersonForm,
+      category: defaultCategory ?? "",
+    },
     initialRecord: record,
     toFormValues: personToFormValues,
     toPayload: personFormToPayload,

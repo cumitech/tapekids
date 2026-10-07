@@ -24,7 +24,7 @@ import { hashToken } from "@/lib/api/request-context";
 import { signSession, toPublicUser, type PublicUser } from "@/lib/api/session";
 import { isMailConfigured } from "@/lib/integrations/env";
 import { logger } from "@/lib/logger";
-import { yfGuestEmail, yfGuestHandle } from "@/lib/people/yf-id";
+import { normalizeYfId, yfGuestEmail, yfGuestHandle } from "@/lib/people/yf-id";
 import { auditService } from "@/services/audit/audit.service";
 import { notificationService } from "@/services/notifications/notification.service";
 
@@ -169,10 +169,11 @@ export class AuthService {
     if (byPerson) {
       return true;
     }
-    if (!person.email) {
+    const yfId = normalizeYfId(person.yfId);
+    if (!yfId) {
       return false;
     }
-    return Boolean(await userRepository.findByEmail(person.email));
+    return Boolean(await userRepository.findByYfId(yfId));
   }
 
   async completeGuestInvite(
@@ -183,20 +184,19 @@ export class AuthService {
       actor?: { id: string } | null;
     } = {}
   ): Promise<{ created: boolean; token: string; user: PublicUser }> {
+    const yfId = normalizeYfId(person.yfId) || null;
     const existingByPerson = await userRepository.findByPersonId(person.id);
-    const existingByEmail = person.email
-      ? await userRepository.findByEmail(person.email)
-      : null;
+    const existingByYf = yfId ? await userRepository.findByYfId(yfId) : null;
     if (
-      existingByEmail &&
-      existingByEmail.personId &&
-      existingByEmail.personId !== person.id
+      existingByYf &&
+      ((existingByPerson && existingByYf.id !== existingByPerson.id) ||
+        (existingByYf.personId && existingByYf.personId !== person.id))
     ) {
       throw new ConflictException(
-        "This email is already used by another account."
+        "This Young Foundations ID is already used by another account."
       );
     }
-    const existing = existingByPerson ?? existingByEmail;
+    const existing = existingByPerson ?? existingByYf;
 
     if (existing) {
       const signedIn = options.actor?.id === existing.id;
@@ -214,9 +214,13 @@ export class AuthService {
           throw new UnauthorizedException("Invalid email or password.");
         }
       }
-      const user = existing.personId
+      let user = existing.personId
         ? existing
         : await userRepository.linkPerson(existing.id, person.id);
+      if (yfId && user.yfId !== yfId) {
+        user = await userRepository.setYfId(user.id, yfId);
+      }
+      user = await this.releaseSharedContactEmail(user, person);
       const verified = user.verified
         ? user
         : await userRepository.markVerified(user.id);
@@ -238,6 +242,7 @@ export class AuthService {
     const user = await userRepository.create({
       id: nanoid(),
       email,
+      yfId,
       username,
       password: await bcrypt.hash(password, 10),
       role: USER_ROLES.GUEST,
@@ -271,6 +276,29 @@ export class AuthService {
       entityId: user.id,
     });
     return toPublicUser(user);
+  }
+
+  private async releaseSharedContactEmail(
+    user: Awaited<ReturnType<UserRepository["findById"]>>,
+    person: Person
+  ) {
+    const contact = person.email?.trim().toLowerCase();
+    if (
+      user.role !== USER_ROLES.GUEST ||
+      !contact ||
+      user.email.trim().toLowerCase() !== contact
+    ) {
+      return user;
+    }
+    const synthetic = yfGuestEmail(person);
+    if (user.email === synthetic) {
+      return user;
+    }
+    const taken = await userRepository.findByEmail(synthetic);
+    if (taken && taken.id !== user.id) {
+      return user;
+    }
+    return userRepository.updateEmail(user.id, synthetic);
   }
 
   private sessionFor(user: Awaited<ReturnType<UserRepository["findById"]>>): AuthSessionResult {

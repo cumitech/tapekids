@@ -138,16 +138,17 @@ export class MeService {
   }
 
   async updatePerson(user: User, body: unknown) {
+    const input = withoutDirectoryFields(body);
     if (!user.personId) {
       const created = await personService.create({
-        ...(typeof body === "object" && body ? body : {}),
+        ...(typeof input === "object" && input ? input : {}),
         email: user.email,
       });
       await userRepository.linkPerson(user.id, created.id);
       return personService.getById(created.id);
     }
 
-    return personService.update(user.personId, body);
+    return personService.update(user.personId, input);
   }
 
   async listPayments(user: User) {
@@ -167,3 +168,15 @@ export class MeService {
 }
 
 export const meService = new MeService();
+
+function withoutDirectoryFields(body: unknown) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return body;
+  }
+  const next = { ...(body as Record<string, unknown>) };
+  delete next.yfId;
+  delete next.points;
+  delete next.isTrophy;
+  delete next.category;
+  return next;
+}

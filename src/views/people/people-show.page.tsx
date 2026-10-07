@@ -3,6 +3,7 @@
 import { useShow, useTranslate } from "@refinedev/core";
 import { Trophy } from "lucide-react";
 
+import { AssignYfIdButton } from "@/components/people/assign-yf-id-button";
 import { PersonForm } from "@/components/people/person-form.component";
 import { PaymentList } from "@/components/payments/payment-list";
 import { RecordDetails } from "@/components/shared/record-details";
@@ -114,6 +115,16 @@ export function PeopleShowPage() {
       {record ? (
         <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_18rem]">
           <div className="flex min-w-0 flex-col gap-8">
+            <div>
+              <AssignYfIdButton
+                personId={record.id}
+                fullName={record.fullName}
+                yfId={record.yfId}
+                onSaved={() => {
+                  void query.refetch();
+                }}
+              />
+            </div>
             <RecordDetails
               labels={labels.fields}
               fields={Object.fromEntries(

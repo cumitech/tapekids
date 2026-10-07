@@ -7,6 +7,7 @@ import { useTranslate } from "@refinedev/core";
 import { ChevronRight, Loader2, Upload } from "lucide-react";
 
 import { PeopleImportDialog } from "@/components/people/people-import-dialog";
+import { PersonForm } from "@/components/people/person-form.component";
 import { ListView, ListViewHeader } from "@/components/shared/refine-ui/views/list-view";
 import { Button } from "@/components/shared/ui/button";
 import {
@@ -18,6 +19,7 @@ import {
   TableRow,
 } from "@/components/shared/ui/table";
 import { PERSON_CATEGORY_VALUES, type PersonCategory } from "@/constants/person";
+import { useDashboardFormModal } from "@/hooks/core/use-dashboard-form-modal.hook";
 import { useLocale } from "@/hooks/core/use-locale.hook";
 import { apiErrorMessage, apiGet } from "@/lib/client/api";
 import { cn } from "@/lib/utils";
@@ -127,6 +129,7 @@ function CategoryPeoplePreview({
 
 export function PeopleListPage() {
   const translate = useTranslate();
+  const { openCreate } = useDashboardFormModal();
   const { path } = useLocale();
   const router = useRouter();
   const [rows, setRows] = useState<CategorySummary[]>([]);
@@ -184,7 +187,20 @@ export function PeopleListPage() {
 
   return (
     <ListView>
-      <ListViewHeader canCreate={false}>
+      <ListViewHeader
+        onCreate={() =>
+          openCreate("people", ({ close }) => (
+            <PersonForm
+              mode="create"
+              onCancel={close}
+              onSuccess={() => {
+                close();
+                setSummaryVersion((version) => version + 1);
+              }}
+            />
+          ))
+        }
+      >
         <Button type="button" variant="outline" onClick={() => setImportOpen(true)}>
           <Upload className="mr-2 h-4 w-4" />
           {translate("people.import.action")}

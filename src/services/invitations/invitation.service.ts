@@ -7,12 +7,15 @@ import {
   INVITATION_STATUSES,
   usesYfIdInvite,
 } from "@/constants/event-participation";
+import type { Invitation } from "@/data/entities/invitation";
 import type { InvitationBatch } from "@/data/entities/invitation-batch";
 import { parseCreateInvitationBatch } from "@/data/dtos/invitation-batch.dto";
 import {
   parseAcceptInvitation,
   parseInviteYfId,
   parseNewInvitePassword,
+  parseRecipientEmail,
+  parseResendInvitations,
 } from "@/data/dtos/invitation.dto";
 import { AppSettingRepository } from "@/data/repositories/app-setting.repository";
 import { contentTranslationRepository } from "@/data/repositories/content-translation.repository";
@@ -37,6 +40,7 @@ import { resolveContentLocale } from "@/lib/api/request-locale";
 import { translationsFromInput } from "@/lib/content-i18n/input";
 import { pickTranslatedField } from "@/lib/content-i18n/pick";
 import { isEmptyHtml } from "@/lib/html";
+import { isStandardEmail, normalizeEmail } from "@/lib/email";
 import { isMailConfigured } from "@/lib/integrations/env";
 import { sanitizeRichText } from "@/lib/sanitize-html";
 import { eventService } from "@/services/events/event.service";
@@ -177,80 +181,91 @@ export class InvitationService {
     };
   }
 
+  async listByMailingList(mailingListId: string) {
+    await mailingListRepository.findById(mailingListId);
+    const batches = await invitationBatchRepository.listByMailingList(mailingListId);
+    const counts = await invitationRepository.countByBatches(
+      batches.map((batch) => batch.id)
+    );
+    return batches.map((batch) => ({
+      id: batch.id,
+      eventId: batch.eventId,
+      subject: batch.subject,
+      status: batch.status,
+      sentAt: batch.sentAt,
+      counts: deliveryCounts(
+        counts.filter((row) => row.batchId === batch.id)
+      ),
+    }));
+  }
+
+  async listRecipients(batchId: string) {
+    await invitationBatchRepository.findById(batchId);
+    const invitations = await invitationRepository.listByBatch(batchId);
+    return invitations.map(recipientOf);
+  }
+
   async sendBatch(id: string) {
-    if (!isMailConfigured()) {
-      throw new ValidationException("Mail is not configured.");
-    }
-
-    const event = await eventService.getById(
-      (await invitationBatchRepository.findById(id)).eventId
-    );
-    const rawBatch = await invitationBatchRepository.updateStatus(
-      id,
-      INVITATION_BATCH_STATUSES.SENDING
-    );
-    const copies = await this.localizedBatchCopies(rawBatch);
-    const primary = copies[DEFAULT_LOCALE];
     const invitations = await invitationRepository.listByBatch(id);
-    let failed = 0;
-
-    for (const invitation of invitations) {
-      if (
-        invitation.status === INVITATION_STATUSES.SENT ||
-        invitation.status === INVITATION_STATUSES.ACCEPTED
-      ) {
-        continue;
-      }
-
-      const person = invitation.person;
-      const to = invitation.emailSnapshot || person?.email;
-      if (!to) {
-        await invitationRepository.markFailed(invitation.id);
-        failed += 1;
-        continue;
-      }
-
-      try {
-        await notificationService.invitation({
-          to,
-          firstName: personGreetingName(person),
-          eventTitle: event.title,
-          eventVenue: event.venue,
-          eventCity: event.city,
-          startsAt: event.startsAt,
-          endsAt: event.endsAt,
-          eventType: event.eventType === "day_event" ? "day_event" : "camp",
-          subject: primary.subject,
-          body: this.bilingualInvitationBody(copies),
-          token: invitation.token,
-          locale: DEFAULT_LOCALE,
-        });
-        await invitationRepository.markSent(invitation.id);
-        await eventMembershipRepository.upsertInvited(
-          invitation.eventId,
-          invitation.personId,
-          invitation.kind
-        );
-      } catch {
-        await invitationRepository.markFailed(invitation.id);
-        failed += 1;
-      }
-    }
-
-    const updated = await invitationBatchRepository.updateStatus(
-      id,
-      failed > 0 && failed === invitations.length
-        ? INVITATION_BATCH_STATUSES.FAILED
-        : INVITATION_BATCH_STATUSES.SENT,
-      new Date()
-    );
-
+    const { failed, total } = await this.deliverInvitations(id, invitations);
     return {
-      batch: updated,
+      batch: await invitationBatchRepository.findById(id),
       invitations: await invitationRepository.listByBatch(id),
-      queuedCount: invitations.length,
+      queuedCount: total,
       failedCount: failed,
     };
+  }
+
+  async resendSelected(batchId: string, body: unknown) {
+    const { ids } = parseResendInvitations(body);
+    const unique = [...new Set(ids)];
+    const invitations = await invitationRepository.listByBatch(batchId);
+    const byId = new Map(invitations.map((row) => [row.id, row]));
+    const chosen = unique.map((id) => byId.get(id));
+    if (chosen.some((row) => !row)) {
+      throw new ValidationException(
+        "One or more recipients are not in this send."
+      );
+    }
+    const pending: Invitation[] = [];
+    for (const row of chosen) {
+      if (row && RETRYABLE_INVITATION_STATUSES.has(row.status)) {
+        pending.push(row);
+      }
+    }
+    if (pending.length === 0) {
+      throw new ValidationException(
+        "Select failed or pending recipients to resend."
+      );
+    }
+    const { failed } = await this.deliverInvitations(batchId, pending);
+    return {
+      sentCount: pending.length - failed,
+      failedCount: failed,
+    };
+  }
+
+  async updateRecipientEmail(invitationId: string, body: unknown) {
+    const invitation = await invitationRepository.findById(invitationId);
+    if (!RETRYABLE_INVITATION_STATUSES.has(invitation.status)) {
+      throw new ValidationException("This invitation was already sent.");
+    }
+    const email = normalizeEmail(parseRecipientEmail(body).email);
+    if (!isStandardEmail(email, 128)) {
+      throw new ValidationException("Enter a valid email address.");
+    }
+    const before = await personRepository.findById(invitation.personId);
+    await personRepository.update(invitation.personId, { email });
+    await invitationRepository.updateEmailSnapshot(invitation.id, email);
+    const after = await personRepository.findById(invitation.personId);
+    await auditService.record({
+      action: "update",
+      entity: "Person",
+      entityId: invitation.personId,
+      before,
+      after,
+    });
+    return recipientOf(await invitationRepository.findById(invitation.id));
   }
 
   async acceptByToken(
@@ -261,13 +276,53 @@ export class InvitationService {
     const invitation = await this.requireByToken(token);
     await this.assertLinkUsable(invitation);
 
-    const event = await eventService.getById(invitation.eventId);
     const kind = invitation.kind || EVENT_MEMBERSHIP_KINDS.CAMPER;
     const person = await personRepository.findById(invitation.personId);
+    const event = await eventService.getById(invitation.eventId);
 
     const session = usesYfIdInvite(kind)
       ? await this.acceptWithYfId(person, body, actor)
       : await this.acceptWithPassword(person, body, actor);
+    const registered = await this.finishAcceptance(invitation, person, kind, event);
+    return {
+      ...registered,
+      accountCreated: session.created,
+      token: session.token,
+      user: session.user,
+    };
+  }
+
+  /** Enter the YF ID on behalf of someone who received an invite and could not type it. */
+  async acceptDeliveredYfInvites(
+    person: Awaited<ReturnType<PersonRepository["findById"]>>
+  ) {
+    if (!normalizeYfId(person.yfId)) {
+      return 0;
+    }
+    const invitations = await invitationRepository.listByPersonStatus(
+      person.id,
+      INVITATION_STATUSES.SENT
+    );
+    let acceptedCount = 0;
+    for (const invitation of invitations) {
+      const kind = invitation.kind || EVENT_MEMBERSHIP_KINDS.CAMPER;
+      if (!usesYfIdInvite(kind)) {
+        continue;
+      }
+      const event = await eventService.getById(invitation.eventId);
+      await authService.completeGuestInvite(person, { verifiedByYfId: true });
+      await this.finishAcceptance(invitation, person, kind, event);
+      acceptedCount += 1;
+    }
+    return acceptedCount;
+  }
+
+  private async finishAcceptance(
+    invitation: Invitation,
+    person: Awaited<ReturnType<PersonRepository["findById"]>>,
+    kind: (typeof EVENT_MEMBERSHIP_KINDS)[keyof typeof EVENT_MEMBERSHIP_KINDS],
+    event: { title: string }
+  ) {
     const membership = await eventMembershipRepository.upsertInvited(
       invitation.eventId,
       invitation.personId,
@@ -293,14 +348,7 @@ export class InvitationService {
       before: invitation,
       after: accepted,
     });
-    return {
-      invitation: accepted,
-      membership,
-      person,
-      accountCreated: session.created,
-      token: session.token,
-      user: session.user,
-    };
+    return { invitation: accepted, membership, person };
   }
 
   async getByToken(
@@ -474,6 +522,92 @@ export class InvitationService {
     }
   }
 
+  private async deliverInvitations(batchId: string, invitations: Invitation[]) {
+    if (!isMailConfigured()) {
+      throw new ValidationException("Mail is not configured.");
+    }
+
+    const event = await eventService.getById(
+      (await invitationBatchRepository.findById(batchId)).eventId
+    );
+    const rawBatch = await invitationBatchRepository.updateStatus(
+      batchId,
+      INVITATION_BATCH_STATUSES.SENDING
+    );
+    const copies = await this.localizedBatchCopies(rawBatch);
+    const primary = copies[DEFAULT_LOCALE];
+    let failed = 0;
+
+    for (const invitation of invitations) {
+      if (
+        invitation.status === INVITATION_STATUSES.SENT ||
+        invitation.status === INVITATION_STATUSES.ACCEPTED
+      ) {
+        continue;
+      }
+
+      const person = invitation.person;
+      const directoryEmail = normalizeEmail(person?.email);
+      const to = directoryEmail || normalizeEmail(invitation.emailSnapshot);
+      if (directoryEmail && directoryEmail !== invitation.emailSnapshot) {
+        await invitationRepository.updateEmailSnapshot(
+          invitation.id,
+          directoryEmail
+        );
+      }
+      if (!to) {
+        await invitationRepository.markFailed(invitation.id);
+        failed += 1;
+        continue;
+      }
+
+      try {
+        await notificationService.invitation({
+          to,
+          firstName: personGreetingName(person),
+          eventTitle: event.title,
+          eventVenue: event.venue,
+          eventCity: event.city,
+          startsAt: event.startsAt,
+          endsAt: event.endsAt,
+          eventType: event.eventType === "day_event" ? "day_event" : "camp",
+          subject: primary.subject,
+          body: this.bilingualInvitationBody(copies),
+          token: invitation.token,
+          locale: DEFAULT_LOCALE,
+        });
+        await invitationRepository.markSent(invitation.id);
+        await eventMembershipRepository.upsertInvited(
+          invitation.eventId,
+          invitation.personId,
+          invitation.kind
+        );
+      } catch {
+        await invitationRepository.markFailed(invitation.id);
+        failed += 1;
+      }
+    }
+
+    const all = await invitationRepository.listByBatch(batchId);
+    const anySent = all.some(
+      (row) =>
+        row.status === INVITATION_STATUSES.SENT ||
+        row.status === INVITATION_STATUSES.ACCEPTED
+    );
+    const stillFailed = all.some(
+      (row) => row.status === INVITATION_STATUSES.FAILED
+    );
+    await invitationBatchRepository.updateStatus(
+      batchId,
+      stillFailed && !anySent
+        ? INVITATION_BATCH_STATUSES.FAILED
+        : INVITATION_BATCH_STATUSES.SENT,
+      new Date()
+    );
+
+    return { failed, total: all.length };
+  }
+
   private async localizedBatchCopies(batch: InvitationBatch) {
     const copies = {} as Record<
       AppLocale,
@@ -507,6 +641,47 @@ export class InvitationService {
     }
     return `${french}<hr /><p><strong>English</strong></p>${english}`;
   }
+}
+
+const RETRYABLE_INVITATION_STATUSES = new Set<string>([
+  INVITATION_STATUSES.QUEUED,
+  INVITATION_STATUSES.FAILED,
+  INVITATION_STATUSES.EXPIRED,
+]);
+
+function recipientOf(invitation: Invitation) {
+  const person = invitation.person;
+  const directoryEmail = normalizeEmail(person?.email);
+    return {
+    id: invitation.id,
+    personId: invitation.personId,
+    fullName: person?.fullName ?? "",
+    email: directoryEmail || normalizeEmail(invitation.emailSnapshot),
+    yfId: person?.yfId ?? null,
+    status: invitation.status,
+    sentAt: invitation.sentAt,
+  };
+}
+
+function deliveryCounts(
+  rows: Array<{ status: string; total: string | number }>
+) {
+  const counts = { pending: 0, success: 0, failed: 0, accepted: 0, expired: 0 };
+  for (const row of rows) {
+    const total = Number(row.total) || 0;
+    if (row.status === INVITATION_STATUSES.QUEUED) {
+      counts.pending += total;
+    } else if (row.status === INVITATION_STATUSES.SENT) {
+      counts.success += total;
+    } else if (row.status === INVITATION_STATUSES.FAILED) {
+      counts.failed += total;
+    } else if (row.status === INVITATION_STATUSES.ACCEPTED) {
+      counts.accepted += total;
+    } else if (row.status === INVITATION_STATUSES.EXPIRED) {
+      counts.expired += total;
+    }
+  }
+  return counts;
 }
 
 function flagOpen(value: unknown) {

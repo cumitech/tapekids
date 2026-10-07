@@ -422,6 +422,15 @@
       "failed": "Impossible de supprimer les personnes sélectionnées.",
       "success": "{{count}} personnes supprimées."
     },
+    "assignYfId": {
+      "action": "Saisir l'ID YF",
+      "title": "Saisir l'ID YF",
+      "hint": "Enregistrez l'identifiant Young Foundations de {{name}}. Si cette personne a reçu une invitation et n'a pas pu le saisir, l'invitation est aussi acceptée pour elle.",
+      "required": "L'ID YF est requis",
+      "saved": "ID YF enregistré.",
+      "accepted": "ID YF enregistré. Invitations ouvertes acceptées : {{count}}.",
+      "failed": "Impossible d'enregistrer l'ID YF."
+    },
     "sections": {
       "identity": "Informations personnelles",
       "location": "Localisation",
@@ -485,7 +494,11 @@
     "approvedPartial": "{{approved}} approuvé(s). {{failed}} n'ont pas pu être approuvés.",
     "forEvent": "Cette inscription concerne {{title}}.",
     "changeYfId": "Utiliser un autre identifiant Young Foundations",
-    "event": "Événement"
+    "event": "Événement",
+    "status": {
+      "pending": "En attente",
+      "approved": "Approuvé"
+    }
   },
   "sponsors": {
     "titles": {
@@ -536,11 +549,11 @@
     "kinds": {
       "trophy-campers": {
         "title": "Campeurs Trophy",
-        "description": "Personnes enregistrées comme campeurs Trophy pour les camps de plusieurs jours."
+        "description": "Campeurs Trophy invités à un événement, et ceux qui se sont inscrits."
       },
       "trophy-participants": {
         "title": "Participants Trophy",
-        "description": "Personnes enregistrées comme participants Trophy pour les événements d'une journée."
+        "description": "Participants Trophy invités à un événement, et ceux qui se sont inscrits."
       },
       "chaperones": {
         "title": "Chaperones / Encadreurs",
@@ -556,7 +569,7 @@
       },
       "waiting-list": {
         "title": "Liste d'attente",
-        "description": "Personnes sans trophée qui souhaitent participer et attendent une approbation."
+        "description": "Personnes inscrites via le lien de participation d'un événement."
       }
     }
   },
@@ -609,6 +622,37 @@
     "invitationsSent": "{{count}} invitations envoyées ({{failed}} échecs)",
     "invitationsFailed": "Impossible de préparer les invitations",
     "invitationsSendFailed": "Impossible d'envoyer les invitations. Vérifiez la configuration e-mail et réessayez.",
+    "deliveries": {
+      "title": "Envois",
+      "empty": "Aucun e-mail n'a encore été envoyé depuis cette liste.",
+      "open": "Voir les destinataires",
+      "close": "Masquer les destinataires",
+      "status": "Statut",
+      "failed": "Échec",
+      "pending": "En attente",
+      "success": "Réussi",
+      "all": "Tous",
+      "resend": "Renvoyer la sélection",
+      "selected": "{{count}} sélectionné(s)",
+      "selectAll": "Tout sélectionner",
+      "selectRow": "Sélectionner le destinataire",
+      "editEmail": "Modifier l'e-mail",
+      "saveEmail": "Enregistrer",
+      "emailSaved": "E-mail mis à jour",
+      "emailFailed": "Impossible de mettre à jour cet e-mail",
+      "resendDone": "{{sent}} renvoyé(s), {{failed}} encore en échec",
+      "resendFailed": "Impossible de renvoyer les e-mails sélectionnés",
+      "noneInFilter": "Aucun destinataire avec ce statut.",
+      "summary": "{{success}} envoyés · {{failed}} échecs · {{pending}} en attente",
+      "loadFailed": "Impossible de charger ces envois",
+      "statuses": {
+        "queued": "En attente",
+        "sent": "Réussi",
+        "failed": "Échec",
+        "accepted": "Acceptée",
+        "expired": "Expirée"
+      }
+    },
     "audienceKinds": {
       "trophy_camper": "Trophy Camper",
       "trophy_participant": "Trophy Participant",
@@ -697,6 +741,7 @@
     "batches": "Lots d'invitations",
     "sendBatch": "Envoyer",
     "resendBatch": "Renvoyer les échecs",
+    "recipients": "Destinataires",
     "batchSent": "E-mails d'invitation envoyés",
     "batchSendFailed": "Impossible d'envoyer ce lot"
   },
