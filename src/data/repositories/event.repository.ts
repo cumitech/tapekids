@@ -88,6 +88,7 @@ export class EventRepository {
         "startsAt",
         "endsAt",
         "imageUrl",
+        "createdAt",
       ],
     });
   }

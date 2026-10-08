@@ -2,6 +2,7 @@ import { col, fn, Op } from "sequelize";
 
 import { APP_SETTING_KEYS } from "@/constants/app-settings";
 import {
+  EVENT_MEMBERSHIP_KINDS,
   INVITATION_STATUSES,
   PAYMENT_STATUSES,
 } from "@/constants/event-participation";
@@ -15,6 +16,7 @@ const appSettingRepository = new AppSettingRepository();
 export class DashboardService {
   async stats(): Promise<DashboardStats> {
     const [
+      trophies,
       trophyCampers,
       trophyParticipants,
       invitationsSent,
@@ -22,6 +24,14 @@ export class DashboardService {
       totalEvents,
       invitationLinksOpen,
     ] = await Promise.all([
+      Invitation.count({
+        distinct: true,
+        col: "personId",
+        where: {
+          status: INVITATION_STATUSES.ACCEPTED,
+          kind: EVENT_MEMBERSHIP_KINDS.CAMPER,
+        },
+      }),
       Person.count({ where: { category: PERSON_CATEGORIES.TROPHY_CAMPER } }),
       Person.count({
         where: { category: PERSON_CATEGORIES.TROPHY_PARTICIPANT },
@@ -42,6 +52,7 @@ export class DashboardService {
     ]);
 
     return {
+      trophies,
       trophyCampers,
       trophyParticipants,
       invitationsSent,

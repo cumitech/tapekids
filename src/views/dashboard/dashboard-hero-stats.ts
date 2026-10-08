@@ -6,14 +6,9 @@ type Translate = (key: string, options?: Record<string, unknown>) => string;
 export function opsHeroStats(translate: Translate, stats: DashboardStats) {
   return [
     {
-      label: translate("dashboard.statTrophyCampers"),
-      shortLabel: translate("dashboard.statTrophyCampersShort"),
-      value: stats.trophyCampers,
-    },
-    {
-      label: translate("dashboard.statTrophyParticipants"),
-      shortLabel: translate("dashboard.statTrophyParticipantsShort"),
-      value: stats.trophyParticipants,
+      label: translate("dashboard.statTrophies"),
+      shortLabel: translate("dashboard.statTrophiesShort"),
+      value: stats.trophies,
     },
     {
       label: translate("dashboard.statInvitationsSent"),

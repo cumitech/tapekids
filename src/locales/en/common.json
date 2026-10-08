@@ -149,6 +149,8 @@
     "statPeople": "People",
     "statLists": "Lists",
     "statEvents": "Events",
+    "statTrophies": "Trophies",
+    "statTrophiesShort": "Trophies",
     "statTrophyCampers": "Trophy campers",
     "statTrophyCampersShort": "Campers",
     "statTrophyParticipants": "Trophy participants",
@@ -168,6 +170,7 @@
     "noMembershipsDescription": "When you are invited to a camp or asked to sponsor, it will appear here.",
     "sections": {
       "people": "Import trophy campers, trophy participants, and chaperones from Excel.",
+      "trophy": "Review and export invitees who responded to invitations and completed registration.",
       "waiting-list": "Review people without trophies and approve them into the directory.",
       "mailing-lists": "Group people and queue invitations when it is time to write.",
       "events": "Plan camps and day gatherings with a venue, dates, and a published page.",
@@ -472,6 +475,43 @@
       "progress": "Step {{current}} of {{total}}"
     }
   },
+  "trophy": {
+    "titles": {
+      "list": "Trophy",
+      "create": "Trophy",
+      "edit": "Trophy",
+      "show": "Trophy"
+    },
+    "hero": {
+      "title": "Trophy registrations",
+      "description": "Invitees who responded to invitations and completed registration."
+    },
+    "stats": {
+      "registered": "Trophies registered",
+      "invitationsSent": "Invitations sent",
+      "responseRate": "Response rate"
+    },
+    "fields": {
+      "fullName": "Full name",
+      "yfId": "YF ID",
+      "email": "Email",
+      "phone": "Phone",
+      "event": "Event",
+      "category": "Category",
+      "sentAt": "Invitation sent",
+      "registeredAt": "Registered at",
+      "status": "Status"
+    },
+    "status": {
+      "registered": "Registered",
+      "accepted": "Accepted"
+    },
+    "export": "Export to Excel",
+    "exporting": "Exporting...",
+    "exportFailed": "Failed to export Trophy list.",
+    "exportSuccess": "Trophy list exported successfully.",
+    "empty": "No registered invitees found."
+  },
   "waitingList": {
     "titles": {
       "list": "Waiting list",
@@ -551,11 +591,11 @@
     "kinds": {
       "trophy-campers": {
         "title": "Trophy campers",
-        "description": "Trophy campers invited to an event, and those who have registered."
+        "description": "Trophy campers who have registered for an event."
       },
       "trophy-participants": {
         "title": "Trophy participants",
-        "description": "Trophy participants invited to an event, and those who have registered."
+        "description": "Trophy participants who have registered for an event."
       },
       "chaperones": {
         "title": "Chaperones / Encadreurs",

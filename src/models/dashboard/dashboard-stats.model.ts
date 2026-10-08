@@ -1,4 +1,5 @@
 export type DashboardStats = {
+  trophies: number;
   trophyCampers: number;
   trophyParticipants: number;
   invitationsSent: number;
@@ -8,6 +9,7 @@ export type DashboardStats = {
 };
 
 export const EMPTY_DASHBOARD_STATS: DashboardStats = {
+  trophies: 0,
   trophyCampers: 0,
   trophyParticipants: 0,
   invitationsSent: 0,

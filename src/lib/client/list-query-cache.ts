@@ -1,7 +1,7 @@
 import { DEFAULT_LOCALE } from "@/constants/locales";
 import { getClientLocale } from "@/utils/locale-cookie";
 
-const STORAGE_KEY = "kec.list-query.v4";
+const STORAGE_KEY = "kec.list-query.v5";
 
 type ListCacheEntry = {
   data: unknown[];

@@ -4,7 +4,7 @@ import type { PropsWithChildren } from "react";
 
 import { useResourceParams } from "@refinedev/core";
 
-import { ResourceHero } from "@/components/portal/resource-hero";
+import { ResourceHero, type ResourceHeroStat } from "@/components/portal/resource-hero";
 import { CreateButton } from "@/components/shared/refine-ui/buttons/create";
 import { useCanAction } from "@/hooks/core/use-can-action.hook";
 import { useResourceViewTitle } from "@/hooks/core/use-resource-labels.hook";
@@ -27,6 +27,7 @@ type ListHeaderProps = PropsWithChildren<{
   headerClassName?: string;
   wrapperClassName?: string;
   onCreate?: () => void;
+  stats?: ResourceHeroStat[];
 }>;
 
 export const ListViewHeader = ({
@@ -35,6 +36,7 @@ export const ListViewHeader = ({
   title: titleFromProps,
   wrapperClassName,
   onCreate,
+  stats,
   children,
 }: ListHeaderProps) => {
   const { resource, identifier } = useResourceParams({
@@ -54,6 +56,7 @@ export const ListViewHeader = ({
       resource={resourceName}
       title={title}
       className={wrapperClassName}
+      stats={stats}
       actions={
         <>
           {children}

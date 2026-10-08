@@ -15,6 +15,7 @@ import {
   Users,
   Wallet,
   ClipboardList,
+  Trophy,
 } from "lucide-react";
 import type { ResourceProps } from "@refinedev/core";
 import { useTranslate } from "@refinedev/core";
@@ -48,6 +49,14 @@ export function useRefineResources(): ResourceProps[] {
         meta: {
           label: translate(`${resourceI18nKey("people")}.titles.list`),
           icon: createElement(Users, ICON),
+        },
+      },
+      {
+        name: "trophy",
+        list: "/dashboard/trophy",
+        meta: {
+          label: translate(`${resourceI18nKey("trophy")}.titles.list`),
+          icon: createElement(Trophy, ICON),
         },
       },
       {

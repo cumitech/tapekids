@@ -97,6 +97,7 @@ export const PORTAL_CARD_TINTS: Record<
 
 export const RESOURCE_CARD_TINT: Record<string, PortalCardTint> = {
   people: "sage",
+  trophy: "amber",
   "waiting-list": "amber",
   "mailing-lists": "amber",
   events: "navy",
@@ -112,6 +113,10 @@ export const RESOURCE_HEROES: Record<string, { hero: string; glow: string }> = {
   people: {
     hero: "bg-gradient-to-r from-[#4d7c86] via-[#146d8f] to-[#0f4e62]",
     glow: "bg-chart-4/40",
+  },
+  trophy: {
+    hero: "bg-gradient-to-r from-[#0f4e62] via-[#146d8f] to-[#1c96c5]",
+    glow: "bg-warning/40",
   },
   "waiting-list": {
     hero: "bg-gradient-to-r from-[#0f4e62] via-[#146d8f] to-[#1c96c5]",

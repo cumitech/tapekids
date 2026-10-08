@@ -277,6 +277,7 @@ export type PublicEvent = {
   imageUrl: string | null;
   minAge: number | null;
   maxAge: number | null;
+  createdAt: string | null;
   scheduleStatus: EventScheduleStatus;
 };
 
@@ -293,6 +294,7 @@ export function toPublicEvent(event: {
   imageUrl?: string | null;
   minAge?: number | null;
   maxAge?: number | null;
+  createdAt?: string | Date | null;
 }): PublicEvent {
   const startsAt = new Date(event.startsAt).toISOString();
   const endsAt = event.endsAt ? new Date(event.endsAt).toISOString() : null;
@@ -309,6 +311,7 @@ export function toPublicEvent(event: {
     imageUrl: eventImageSrc(event.imageUrl),
     minAge: event.minAge ?? null,
     maxAge: event.maxAge ?? null,
+    createdAt: event.createdAt ? new Date(event.createdAt).toISOString() : null,
     scheduleStatus: eventScheduleStatus(startsAt, endsAt),
   };
 }

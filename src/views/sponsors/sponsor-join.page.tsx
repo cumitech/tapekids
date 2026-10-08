@@ -22,13 +22,14 @@ import { PAYMENT_STATUSES } from "@/constants/event-participation";
 import {
   SPONSOR_AMOUNT_XAF,
   acceptedSponsorAmount,
+  latestCreatedEventId,
 } from "@/constants/sponsor";
 import { PAYMENT_POLL_MS } from "@/hooks/payments/use-watch-payment.hook";
 import { unwrapEnvelope } from "@/lib/client/api";
 import { http } from "@/utils/axios";
 import { PublicShell } from "@/views/auth/public-shell";
 
-type PublicEvent = { id: string; title: string };
+type PublicEvent = { id: string; title: string; createdAt?: string | null };
 type Charge = {
   sponsor?: { id: string };
   payment?: { id: string; status: string; trackingId?: string };
@@ -56,7 +57,9 @@ export function SponsorJoinPage() {
   useEffect(() => {
     void http.get("/public/events").then(({ data }) => {
       const rows = unwrapEnvelope<PublicEvent[]>(data);
-      setEvents(Array.isArray(rows) ? rows : []);
+      const list = Array.isArray(rows) ? rows : [];
+      setEvents(list);
+      setEventId((current) => current || latestCreatedEventId(list));
     });
   }, []);
 

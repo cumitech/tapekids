@@ -188,6 +188,7 @@ function organizeMenuItems(
     }
     const directory = pickItems(usable, [
       "people",
+      "trophy",
       "waiting-list",
       "mailing-lists",
       "events",

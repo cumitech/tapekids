@@ -193,7 +193,7 @@ export class ReportService {
   ) {
     return this.listMemberships(EVENT_MEMBERSHIP_KINDS.CAMPER, query, {
       category: reportPersonCategory(kind),
-      statuses: [MEMBERSHIP_STATUSES.INVITED, MEMBERSHIP_STATUSES.REGISTERED],
+      statuses: [MEMBERSHIP_STATUSES.REGISTERED],
     });
   }
 

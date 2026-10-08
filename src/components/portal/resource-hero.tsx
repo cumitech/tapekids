@@ -7,7 +7,7 @@ import { RESOURCE_HEROES } from "@/components/portal/portal-tone";
 import { PageHeader } from "@/components/shared/refine-ui/layout/page-header";
 import { cn } from "@/lib/utils";
 
-type ResourceHeroStat = {
+export type ResourceHeroStat = {
   label: string;
   value: string | number;
   accent?: "glass" | "ivory" | "gold";
@@ -93,7 +93,14 @@ export function ResourceHero({
           ) : null}
         </div>
         {stats?.length ? (
-          <div className="grid max-w-md grid-cols-2 gap-2 sm:gap-3">
+          <div
+            className={cn(
+              "grid gap-2 sm:gap-3",
+              stats.length > 2
+                ? "max-w-xl grid-cols-2 sm:grid-cols-3"
+                : "max-w-md grid-cols-2"
+            )}
+          >
             {stats.map((stat) => {
               const accent = STAT_ACCENTS[stat.accent ?? "glass"];
               return (

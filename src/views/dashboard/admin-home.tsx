@@ -17,6 +17,7 @@ const ADMIN_GROUPS = [
     titleKey: "dashboard.adminNavDirectory",
     names: [
       "people",
+      "trophy",
       "waiting-list",
       "mailing-lists",
       "events",

@@ -14,12 +14,13 @@ import { PAYMENT_STATUSES } from "@/constants/event-participation";
 import {
   SPONSOR_AMOUNT_XAF,
   acceptedSponsorAmount,
+  latestCreatedEventId,
 } from "@/constants/sponsor";
 import { PAYMENT_POLL_MS } from "@/hooks/payments/use-watch-payment.hook";
 import { unwrapEnvelope } from "@/lib/client/api";
 import { http } from "@/utils/axios";
 
-type PublicEvent = { id: string; title: string };
+type PublicEvent = { id: string; title: string; createdAt?: string | null };
 
 type Charge = {
   sponsor?: { id: string };
@@ -61,9 +62,7 @@ export function SponsorPayForm({
       const rows = unwrapEnvelope<PublicEvent[]>(data);
       const list = Array.isArray(rows) ? rows : [];
       setEvents(list);
-      if (list.length === 1) {
-        setEventId(list[0].id);
-      }
+      setEventId((current) => current || latestCreatedEventId(list));
     });
   }, []);
 

@@ -1,6 +1,7 @@
 export const RESOURCE_I18N_KEYS = {
   dashboard: "dashboard",
   people: "people",
+  trophy: "trophy",
   "waiting-list": "waitingList",
   "mailing-lists": "mailingLists",
   events: "events",

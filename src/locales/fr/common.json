@@ -149,6 +149,8 @@
     "statPeople": "Personnes",
     "statLists": "Listes",
     "statEvents": "Événements",
+    "statTrophies": "Trophées",
+    "statTrophiesShort": "Trophées",
     "statTrophyCampers": "Campeurs Trophy",
     "statTrophyCampersShort": "Campeurs",
     "statTrophyParticipants": "Participants Trophy",
@@ -168,6 +170,7 @@
     "noMembershipsDescription": "Lorsqu'on vous invitera à un camp ou comme parrain, cela apparaîtra ici.",
     "sections": {
       "people": "Importez les campeurs Trophy, les participants Trophy et les encadreurs depuis Excel.",
+      "trophy": "Consulter et exporter les invités ayant répondu aux invitations et finalisé leur inscription.",
       "waiting-list": "Examinez les personnes sans trophée et approuvez-les dans l'annuaire.",
       "mailing-lists": "Regroupez les personnes et préparez les invitations au bon moment.",
       "events": "Organisez les camps et les journées avec un lieu, des dates et une page publiée.",
@@ -472,6 +475,43 @@
       "progress": "Étape {{current}} sur {{total}}"
     }
   },
+  "trophy": {
+    "titles": {
+      "list": "Trophy",
+      "create": "Trophy",
+      "edit": "Trophy",
+      "show": "Trophy"
+    },
+    "hero": {
+      "title": "Inscriptions Trophy",
+      "description": "Invités ayant répondu aux invitations et finalisé leur inscription."
+    },
+    "stats": {
+      "registered": "Trophies inscrits",
+      "invitationsSent": "Invitations envoyées",
+      "responseRate": "Taux de réponse"
+    },
+    "fields": {
+      "fullName": "Nom complet",
+      "yfId": "ID YF",
+      "email": "Email",
+      "phone": "Téléphone",
+      "event": "Événement",
+      "category": "Catégorie",
+      "sentAt": "Invitation envoyée",
+      "registeredAt": "Inscrit le",
+      "status": "Statut"
+    },
+    "status": {
+      "registered": "Inscrit",
+      "accepted": "Accepté"
+    },
+    "export": "Exporter vers Excel",
+    "exporting": "Exportation en cours...",
+    "exportFailed": "Échec de l'exportation de la liste Trophy.",
+    "exportSuccess": "Liste Trophy exportée avec succès.",
+    "empty": "Aucun invité inscrit trouvé."
+  },
   "waitingList": {
     "titles": {
       "list": "Liste d'attente",
@@ -551,11 +591,11 @@
     "kinds": {
       "trophy-campers": {
         "title": "Campeurs Trophy",
-        "description": "Campeurs Trophy invités à un événement, et ceux qui se sont inscrits."
+        "description": "Campeurs Trophy inscrits à un événement."
       },
       "trophy-participants": {
         "title": "Participants Trophy",
-        "description": "Participants Trophy invités à un événement, et ceux qui se sont inscrits."
+        "description": "Participants Trophy inscrits à un événement."
       },
       "chaperones": {
         "title": "Chaperones / Encadreurs",
