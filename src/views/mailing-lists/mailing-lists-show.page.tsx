@@ -12,17 +12,22 @@ import {
   ShowViewHeader,
 } from "@/components/shared/refine-ui/views/show-view";
 import { Button } from "@/components/shared/ui/button";
+import { Badge } from "@/components/shared/ui/badge";
 import { useBusyAction } from "@/hooks/core/use-busy-action.hook";
 import { useDashboardFormModal } from "@/hooks/core/use-dashboard-form-modal.hook";
+import { useLocale } from "@/hooks/core/use-locale.hook";
 import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
 import { apiDelete } from "@/lib/client/api";
+import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { CalendarIcon, MailCheckIcon } from "lucide-react";
 import { PORTAL_SURFACE } from "@/constants/layout";
 import { categoryForAudience } from "@/constants/person";
 import type { MailingList } from "@/models/mailing-lists/mailing-list.model";
 
 export function MailingListsShowPage() {
   const translate = useTranslate();
+  const { locale } = useLocale();
   const { confirm } = useAppModal();
   const { openEdit } = useDashboardFormModal();
   const labels = useResourceLabels("mailingLists", ["name", "audienceKind"]);
@@ -72,20 +77,52 @@ export function MailingListsShowPage() {
           </p>
 
           <section className={cn(PORTAL_SURFACE, "bg-white p-5 dark:bg-card")}>
-            <h3 className="mb-3 text-lg font-semibold">
-              {translate("mailingLists.members")}
-            </h3>
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-lg font-semibold">
+                {translate("mailingLists.members")} ({members.length})
+              </h3>
+            </div>
             <ul className="divide-y rounded-md border bg-white dark:bg-card">
               {members.map((member) => (
                 <li
                   key={member.id}
-                  className="flex items-center justify-between gap-2 px-3 py-2"
+                  className="flex items-center justify-between gap-2 px-3 py-2.5"
                 >
-                  <span>
-                    {member.person
-                      ? `${member.person.fullName}${member.person.email ? ` (${member.person.email})` : ""}`
-                      : member.personId}
-                  </span>
+                  <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+                    <span className="truncate text-sm font-medium">
+                      {member.person
+                        ? member.person.fullName
+                        : member.personId}
+                    </span>
+                    {member.person?.email ? (
+                      <span className="truncate text-xs text-muted-foreground">
+                        {member.person.email}
+                      </span>
+                    ) : null}
+                    <div className="flex flex-wrap items-center gap-1.5 pt-0.5 sm:pt-0">
+                      {member.person?.importedAt ? (
+                        <Badge
+                          variant="outline"
+                          className="gap-1 text-[11px] font-normal text-muted-foreground"
+                        >
+                          <CalendarIcon className="size-3 opacity-70" />
+                          {translate("mailingLists.importedBadge", {
+                            date: formatDate(member.person.importedAt, locale),
+                          })}
+                        </Badge>
+                      ) : null}
+                      {member.person?.invitations &&
+                      member.person.invitations.length > 0 ? (
+                        <Badge
+                          variant="outline"
+                          className="gap-1 border-amber-300 bg-amber-50 px-1.5 py-0 text-[10px] font-medium text-amber-700 dark:border-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
+                        >
+                          <MailCheckIcon className="size-3" />
+                          {translate("mailingLists.invitedBadge", "Invited")}
+                        </Badge>
+                      ) : null}
+                    </div>
+                  </div>
                   <Button
                     type="button"
                     variant="ghost"

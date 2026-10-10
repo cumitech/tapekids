@@ -25,6 +25,12 @@ export interface MailingList {
       fullName: string;
       email: string;
       phone?: string | null;
+      importedAt?: string | null;
+      invitations?: Array<{
+        id: string;
+        status: string;
+        sentAt?: string | null;
+      }>;
     };
   }>;
 }

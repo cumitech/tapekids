@@ -379,6 +379,7 @@
       "parentGuardianPhone": "Téléphone",
       "medicalNotes": "Notes médicales",
       "country": "Pays",
+      "importedAt": "Date d'importation",
       "sentAt": "Invitation envoyée",
       "registeredAt": "Inscrit le",
       "isTrophy": "Trophées"
@@ -645,6 +646,15 @@
     "filterByBatch": "Filtrer par lot d'importation",
     "allBatches": "Tous les imports",
     "selectBatchOnly": "Sélectionner uniquement ce lot",
+    "groups": {
+      "importedOn": "Importé le {{date}}",
+      "manual": "Entrée manuelle / Autre",
+      "groupSummary": "{{count}} personnes • {{invited}} invité(s)"
+    },
+    "selectGroup": "Sélectionner le groupe",
+    "deselectGroup": "Désélectionner le groupe",
+    "invitedBadge": "Invité",
+    "importedBadge": "Importé : {{date}}",
     "searchCampers": "Rechercher par nom ou e-mail",
     "selectAll": "Tout sélectionner",
     "selectAllMatching": "Tout sélectionner",

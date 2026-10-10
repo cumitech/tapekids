@@ -1,6 +1,6 @@
 import type { InferCreationAttributes } from "sequelize";
 
-import { MailingList, MailingListMember, Person, User } from "@/data/entities";
+import { Invitation, MailingList, MailingListMember, Person, User } from "@/data/entities";
 import { listSearchWhere } from "@/data/list-where";
 import { contentTranslationRepository } from "@/data/repositories/content-translation.repository";
 import type { ListQuery, PaginatedResult } from "@/data/types/pagination";
@@ -14,7 +14,20 @@ export type MailingListUpdatePayload = Partial<
 const memberInclude = {
   model: MailingListMember,
   as: "members",
-  include: [{ model: Person, as: "person" }],
+  include: [
+    {
+      model: Person,
+      as: "person",
+      include: [
+        {
+          model: Invitation,
+          as: "invitations",
+          attributes: ["id", "status", "sentAt"],
+          required: false,
+        },
+      ],
+    },
+  ],
 };
 
 export class MailingListRepository {

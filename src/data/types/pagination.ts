@@ -65,7 +65,7 @@ export function parseListQuery(searchParams: URLSearchParams): ListQuery {
   const start = Math.max(0, Number(searchParams.get("_start") ?? 0) || 0);
   const rawEnd = Number(searchParams.get("_end"));
   const end = Number.isFinite(rawEnd) ? rawEnd : start + 10;
-  const limit = Math.max(1, Math.min(100, end - start || 10));
+  const limit = Math.max(1, Math.min(500, end - start || 10));
   const sortParam = searchParams.get("_sort") ?? "createdAt";
   const sort = ALLOWED_SORT.has(sortParam) ? sortParam : "createdAt";
   const order: SortOrder = searchParams.get("_order")?.toLowerCase() === "asc" ? "ASC" : "DESC";

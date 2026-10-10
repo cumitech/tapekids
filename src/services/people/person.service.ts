@@ -328,9 +328,10 @@ export class PersonService {
     existing: Person | null,
     importedAt: Date
   ): Promise<"created" | "updated" | "unchanged"> {
+    const resolvedImportedAt = existing?.importedAt ?? importedAt;
     const inputWithImport: CreatePerson = {
       ...input,
-      importedAt,
+      importedAt: resolvedImportedAt,
     };
     if (existing) {
       const matches = importMatchesPerson(existing, input);
@@ -352,10 +353,15 @@ export class PersonService {
       if (!raced) {
         throw error;
       }
+      const racedImportedAt = raced.importedAt ?? importedAt;
+      const racedInputWithImport: CreatePerson = {
+        ...input,
+        importedAt: racedImportedAt,
+      };
       const matches = importMatchesPerson(raced, input);
       await personRepository.update(
         raced.id,
-        toUpdatePersonPayload(inputWithImport) as PersonUpdatePayload
+        toUpdatePersonPayload(racedInputWithImport) as PersonUpdatePayload
       );
       return matches ? "unchanged" : "updated";
     }

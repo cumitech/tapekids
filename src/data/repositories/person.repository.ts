@@ -1,7 +1,7 @@
 import { Op, fn, col, type WhereOptions } from "sequelize";
 import type { InferCreationAttributes } from "sequelize";
 
-import { EmergencyContact, Person } from "@/data/entities";
+import { EmergencyContact, Invitation, Person } from "@/data/entities";
 import { listSearchWhere } from "@/data/list-where";
 import type { ListQuery, PaginatedResult } from "@/data/types/pagination";
 import { NotFoundException } from "@/exceptions/not-found.exception";
@@ -96,6 +96,15 @@ export class PersonRepository {
 
     const { rows, count } = await Person.findAndCountAll({
       where,
+      include: [
+        {
+          model: Invitation,
+          as: "invitations",
+          attributes: ["id", "status", "sentAt"],
+          required: false,
+        },
+      ],
+      distinct: true,
       offset: query.offset,
       limit: query.limit,
       order: [[query.sort, query.order]],

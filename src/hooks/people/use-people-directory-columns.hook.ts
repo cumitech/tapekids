@@ -22,6 +22,7 @@ export const PEOPLE_DIRECTORY_FIELDS = [
   "region",
   "town",
   "address",
+  "importedAt",
 ] as const;
 
 export type PeopleDirectoryRow = {
@@ -37,6 +38,7 @@ export type PeopleDirectoryRow = {
   region?: string | null;
   town?: string | null;
   address?: string | null;
+  importedAt?: string | Date | null;
 };
 
 type UsePeopleDirectoryColumnsOptions<T extends PeopleDirectoryRow> = {
@@ -118,6 +120,13 @@ export function usePeopleDirectoryColumns<T extends PeopleDirectoryRow>(
         id: "address",
         accessorKey: "address",
         header: labels.fields.address,
+      },
+      {
+        id: "importedAt",
+        accessorKey: "importedAt",
+        header: labels.fields.importedAt,
+        cell: ({ row }) =>
+          formatDate(row.original.importedAt, locale) || "-",
       },
     ];
 

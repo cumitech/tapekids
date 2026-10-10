@@ -48,6 +48,12 @@ export interface Person {
   ageYears?: number | null;
   isTrophy?: boolean;
   category?: PersonCategory | null;
+  importedAt?: string | null;
+  invitations?: Array<{
+    id: string;
+    status: string;
+    sentAt?: string | null;
+  }>;
   emergencyContacts?: Array<{
     id?: string;
     name: string;

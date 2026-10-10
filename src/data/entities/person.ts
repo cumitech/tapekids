@@ -4,10 +4,12 @@ import {
   type CreationOptional,
   type InferAttributes,
   type InferCreationAttributes,
+  type NonAttribute,
   type Sequelize,
 } from "sequelize";
 
 import type { PersonCategory } from "@/constants/person";
+import type { Invitation } from "./invitation";
 
 export class Person extends Model<
   InferAttributes<Person>,
@@ -38,6 +40,7 @@ export class Person extends Model<
   declare isTrophy: CreationOptional<boolean>;
   declare category: CreationOptional<PersonCategory | null>;
   declare importedAt: CreationOptional<Date | null>;
+  declare invitations?: NonAttribute<Invitation[]>;
 }
 
 export function initPerson(sequelize: Sequelize) {
