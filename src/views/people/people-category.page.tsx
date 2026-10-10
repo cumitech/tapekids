@@ -14,6 +14,9 @@ import { PersonForm } from "@/components/people/person-form.component";
 import { useAppModal } from "@/components/shared/modals/app-modal";
 import { ResourceRowActions } from "@/components/shared/refine-ui/buttons/resource-row-actions";
 import { DataTable } from "@/components/shared/refine-ui/data-table/data-table";
+import { formatDate } from "@/lib/format";
+
+
 import { ErrorComponent } from "@/components/shared/refine-ui/layout/error-component";
 import { ListView, ListViewHeader } from "@/components/shared/refine-ui/views/list-view";
 import { Button } from "@/components/shared/ui/button";
@@ -338,7 +341,7 @@ export function PeopleCategoryPage({ category }: PeopleCategoryPageProps) {
           {translate("people.bulkDelete.pageSelected")}
         </p>
       ) : null}
-      <DataTable table={table} />
+             <DataTable table={table} />
     </ListView>
   );
 }

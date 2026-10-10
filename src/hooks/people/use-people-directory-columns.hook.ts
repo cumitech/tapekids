@@ -19,7 +19,6 @@ export const PEOPLE_DIRECTORY_FIELDS = [
   "shirtSize",
   "phone",
   "dateOfBirth",
-  "region",
   "town",
   "address",
   "importedAt",
@@ -104,12 +103,7 @@ export function usePeopleDirectoryColumns<T extends PeopleDirectoryRow>(
         cell: ({ row }) =>
           formatDate(row.original.dateOfBirth, locale) || "-",
       },
-      {
-        id: "region",
-        accessorKey: "region",
-        header: labels.fields.region,
-        ...columnFilter(),
-      },
+
       {
         id: "town",
         accessorKey: "town",
@@ -124,9 +118,10 @@ export function usePeopleDirectoryColumns<T extends PeopleDirectoryRow>(
       {
         id: "importedAt",
         accessorKey: "importedAt",
-        header: labels.fields.importedAt,
+        header: "Import date",
         cell: ({ row }) =>
           formatDate(row.original.importedAt, locale) || "-",
+        ...columnFilter("select"),
       },
     ];
 
