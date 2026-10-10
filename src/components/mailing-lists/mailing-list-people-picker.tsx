@@ -1,11 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useList, useTranslate } from "@refinedev/core";
-import { CheckIcon, ChevronsUpDownIcon, XIcon } from "lucide-react";
+import { CheckIcon, ChevronsUpDownIcon, FilterIcon, XIcon } from "lucide-react";
 
 import { Label } from "@/components/shared/ui/label";
 import { Button } from "@/components/shared/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shared/ui/select";
 import {
   Command,
   CommandEmpty,
@@ -23,6 +30,7 @@ import {
 import type { PersonCategory } from "@/constants/person";
 import { cn } from "@/lib/utils";
 import type { Person } from "@/models/people/person.model";
+import type { ImportBatchInfo } from "@/models/people/people-import.model";
 import { apiGet } from "@/lib/client/api";
 
 type MailingListPeoplePickerProps = {
@@ -45,7 +53,32 @@ export function MailingListPeoplePicker({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [busy, setBusy] = useState(false);
+  const [batches, setBatches] = useState<ImportBatchInfo[]>([]);
+  const [selectedBatch, setSelectedBatch] = useState<string>("all");
   const selected = useMemo(() => new Set(value), [value]);
+
+  useEffect(() => {
+    if (!category) {
+      setBatches([]);
+      setSelectedBatch("all");
+      return;
+    }
+    let active = true;
+    apiGet<ImportBatchInfo[]>(`/people/import-batches?category=${category}`)
+      .then((data) => {
+        if (active) {
+          setBatches(Array.isArray(data) ? data : []);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setBatches([]);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [category]);
 
   const filters = useMemo(() => {
     if (!category) {
@@ -62,6 +95,13 @@ export function MailingListPeoplePicker({
         value: category,
       },
     ];
+    if (selectedBatch !== "all") {
+      next.push({
+        field: "importedAt",
+        operator: "eq",
+        value: selectedBatch,
+      });
+    }
     if (search.trim()) {
       next.push({
         field: "q",
@@ -70,7 +110,7 @@ export function MailingListPeoplePicker({
       });
     }
     return next;
-  }, [category, search]);
+  }, [category, search, selectedBatch]);
 
   const { query } = useList<Person>({
     resource: "people",
@@ -117,6 +157,9 @@ export function MailingListPeoplePicker({
     const params = new URLSearchParams();
     params.set("idsOnly", "true");
     params.set("category", category);
+    if (selectedBatch !== "all") {
+      params.set("importedAt", selectedBatch);
+    }
     if (search.trim()) {
       params.set("q", search.trim());
     }
@@ -141,8 +184,33 @@ export function MailingListPeoplePicker({
         : translate("mailingLists.selectedCount", { count: value.length });
 
   return (
-    <div className="flex min-w-0 flex-col gap-1.5">
-      <Label>{translate("mailingLists.pickCampers", "Select campers")}</Label>
+    <div className="flex min-w-0 flex-col gap-2">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <Label>{translate("mailingLists.pickCampers", "Select campers")}</Label>
+        {batches.length > 1 ? (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <FilterIcon className="size-3.5 shrink-0 opacity-70" />
+            <Select value={selectedBatch} onValueChange={setSelectedBatch}>
+              <SelectTrigger className="h-7 w-[200px] text-xs">
+                <SelectValue
+                  placeholder={translate("mailingLists.allBatches", "All imports")}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  {translate("mailingLists.allBatches", "All imports")}
+                </SelectItem>
+                {batches.map((batch) => (
+                  <SelectItem key={batch.importedAt} value={batch.importedAt}>
+                    {batch.label} ({batch.count})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
+      </div>
+
       <Popover
         open={open}
         onOpenChange={(next) => {
@@ -196,7 +264,9 @@ export function MailingListPeoplePicker({
                       allVisibleSelected ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {translate("mailingLists.selectAll", "Select all")}
+                  {selectedBatch !== "all"
+                    ? translate("mailingLists.selectBatchOnly", "Select only this batch")
+                    : translate("mailingLists.selectAll", "Select all")}
                 </CommandItem>
                 {value.length > 0 ? (
                   <CommandItem value="clear-selection" onSelect={() => onChange([])}>

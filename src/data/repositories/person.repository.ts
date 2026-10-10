@@ -152,4 +152,41 @@ export class PersonRepository {
     }
     return Person.destroy({ where });
   }
+
+  async listImportBatches(
+    category?: PersonCategory
+  ): Promise<Array<{ importedAt: Date; category?: string | null; count: number }>> {
+    const where: WhereOptions = {
+      importedAt: { [Op.not]: null },
+    };
+    if (category) {
+      Object.assign(where, { category });
+    }
+
+    const rows = await Person.findAll({
+      attributes: [
+        "importedAt",
+        "category",
+        [fn("COUNT", col("id")), "count"],
+      ],
+      where,
+      group: ["importedAt", "category"],
+      order: [["importedAt", "DESC"]],
+      raw: true,
+    });
+
+    return rows.map((row) => {
+      const record = row as unknown as {
+        importedAt: Date | string;
+        category: string | null;
+        count: string | number;
+      };
+      return {
+        importedAt: new Date(record.importedAt),
+        category: record.category,
+        count: Number(record.count) || 0,
+      };
+    });
+  }
 }
+

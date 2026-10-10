@@ -379,6 +379,8 @@
       "parentGuardianPhone": "Téléphone",
       "medicalNotes": "Notes médicales",
       "country": "Pays",
+      "sentAt": "Invitation envoyée",
+      "registeredAt": "Inscrit le",
       "isTrophy": "Trophées"
     },
     "categories": {
@@ -640,6 +642,9 @@
     "pickCampers": "Sélectionner des campeurs",
     "pickCampersPlaceholder": "Rechercher et sélectionner des campeurs",
     "pickCampersHint": "Recherchez par nom ou e-mail, puis choisissez plusieurs personnes ou tout sélectionner.",
+    "filterByBatch": "Filtrer par lot d'importation",
+    "allBatches": "Tous les imports",
+    "selectBatchOnly": "Sélectionner uniquement ce lot",
     "searchCampers": "Rechercher par nom ou e-mail",
     "selectAll": "Tout sélectionner",
     "selectAllMatching": "Tout sélectionner",

@@ -22,8 +22,13 @@ import { ConflictException } from "@/exceptions/conflict.exception";
 import { ValidationException } from "@/exceptions/validation.exception";
 import { nanoid } from "@/lib/api/id";
 import { ageInYears } from "@/lib/people/age";
+import type { AppLocale } from "@/constants/locales";
+import { formatDateTime } from "@/lib/format";
 import { parsePeopleWorkbook } from "@/lib/people/import-people";
-import type { PeopleImportResult } from "@/models/people/people-import.model";
+import type {
+  ImportBatchInfo,
+  PeopleImportResult,
+} from "@/models/people/people-import.model";
 import { auditService } from "@/services/audit/audit.service";
 import { invitationService } from "@/services/invitations/invitation.service";
 
@@ -260,11 +265,16 @@ export class PersonService {
     let created = 0;
     let updated = 0;
     let unchanged = 0;
+    const importedAt = new Date();
 
     for (const [yfId, row] of Array.from(byYfId.entries())) {
       try {
         const current = existingByYfId.get(yfId) ?? null;
-        const result = await this.upsertImportedPerson(row.person, current);
+        const result = await this.upsertImportedPerson(
+          row.person,
+          current,
+          importedAt
+        );
         if (result === "created") {
           created += 1;
         } else if (result === "updated") {
@@ -286,6 +296,7 @@ export class PersonService {
       updated,
       unchanged,
       skipped,
+      importedAt: importedAt.toISOString(),
       errors: errors.slice(0, 20),
     };
 
@@ -299,23 +310,39 @@ export class PersonService {
     return result;
   }
 
+  async listImportBatches(
+    category?: PersonCategory,
+    locale?: AppLocale
+  ): Promise<ImportBatchInfo[]> {
+    const rows = await personRepository.listImportBatches(category);
+    return rows.map((row) => ({
+      importedAt: row.importedAt.toISOString(),
+      category: row.category,
+      count: row.count,
+      label: formatDateTime(row.importedAt, locale) || row.importedAt.toISOString(),
+    }));
+  }
+
   private async upsertImportedPerson(
     input: CreatePerson,
-    existing: Person | null
+    existing: Person | null,
+    importedAt: Date
   ): Promise<"created" | "updated" | "unchanged"> {
+    const inputWithImport: CreatePerson = {
+      ...input,
+      importedAt,
+    };
     if (existing) {
-      if (importMatchesPerson(existing, input)) {
-        return "unchanged";
-      }
+      const matches = importMatchesPerson(existing, input);
       await personRepository.update(
         existing.id,
-        toUpdatePersonPayload(input) as PersonUpdatePayload
+        toUpdatePersonPayload(inputWithImport) as PersonUpdatePayload
       );
-      return "updated";
+      return matches ? "unchanged" : "updated";
     }
 
     try {
-      await personRepository.create(toCreatePersonPayload(input));
+      await personRepository.create(toCreatePersonPayload(inputWithImport));
       return "created";
     } catch (error) {
       if (!isUniqueConstraintError(error) || !input.yfId) {
@@ -325,14 +352,12 @@ export class PersonService {
       if (!raced) {
         throw error;
       }
-      if (importMatchesPerson(raced, input)) {
-        return "unchanged";
-      }
+      const matches = importMatchesPerson(raced, input);
       await personRepository.update(
         raced.id,
-        toUpdatePersonPayload(input) as PersonUpdatePayload
+        toUpdatePersonPayload(inputWithImport) as PersonUpdatePayload
       );
-      return "updated";
+      return matches ? "unchanged" : "updated";
     }
   }
 }

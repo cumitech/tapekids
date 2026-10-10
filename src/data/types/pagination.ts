@@ -8,6 +8,7 @@ export const PERSON_EQ_FILTERS = [
   "town",
   "churchName",
   "category",
+  "importedAt",
 ] as const;
 
 export const EQ_FILTER_FIELDS = [
@@ -44,6 +45,7 @@ export type PaginatedResult<T> = {
 const ALLOWED_SORT = new Set([
   "createdAt",
   "updatedAt",
+  "importedAt",
   "title",
   "startsAt",
   "fullName",

@@ -21,4 +21,8 @@ export type SponsorReportRow = {
   points?: number | null;
   ageYears?: number | null;
   isTrophy?: boolean;
+  sentAt?: string | Date | null;
+  registeredAt?: string | Date | null;
+  createdAt?: string | Date | null;
+  updatedAt?: string | Date | null;
 };

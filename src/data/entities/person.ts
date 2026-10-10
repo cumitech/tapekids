@@ -37,6 +37,7 @@ export class Person extends Model<
   declare ageYears: CreationOptional<number | null>;
   declare isTrophy: CreationOptional<boolean>;
   declare category: CreationOptional<PersonCategory | null>;
+  declare importedAt: CreationOptional<Date | null>;
 }
 
 export function initPerson(sequelize: Sequelize) {
@@ -138,6 +139,10 @@ export function initPerson(sequelize: Sequelize) {
       },
       category: {
         type: DataTypes.STRING(32),
+        allowNull: true,
+      },
+      importedAt: {
+        type: DataTypes.DATE,
         allowNull: true,
       },
     },

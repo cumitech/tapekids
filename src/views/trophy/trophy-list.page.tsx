@@ -92,7 +92,10 @@ export function TrophyListPage() {
   async function handleExport() {
     setDownloading(true);
     try {
-      await apiDownload("/trophy/export", reportFileName("trophy"));
+      await apiDownload(
+        `/trophy/export?locale=${encodeURIComponent(locale)}`,
+        reportFileName("trophy")
+      );
       toast.success(translate("trophy.exportSuccess"));
     } catch (error) {
       toast.error(

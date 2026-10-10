@@ -379,6 +379,8 @@
       "parentGuardianPhone": "Phone",
       "medicalNotes": "Medical notes",
       "country": "Country",
+      "sentAt": "Invitation sent",
+      "registeredAt": "Registered at",
       "isTrophy": "Trophies"
     },
     "categories": {
@@ -640,6 +642,9 @@
     "pickCampers": "Select campers",
     "pickCampersPlaceholder": "Search and select campers",
     "pickCampersHint": "Search by name or email, then pick several people or select all.",
+    "filterByBatch": "Filter by import batch",
+    "allBatches": "All imports",
+    "selectBatchOnly": "Select only this batch",
     "searchCampers": "Search by name or email",
     "selectAll": "Select all",
     "selectAllMatching": "Select all",

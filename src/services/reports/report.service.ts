@@ -14,6 +14,8 @@ import {
   reportPersonCategory,
   type ReportKind,
 } from "@/constants/reports";
+import { Op } from "sequelize";
+import { Invitation } from "@/data/entities/invitation";
 import type { EventMembership } from "@/data/entities/event-membership";
 import type { Person } from "@/data/entities/person";
 import { contentTranslationRepository } from "@/data/repositories/content-translation.repository";
@@ -27,6 +29,9 @@ import { reportFileName, workbookBuffer } from "@/lib/export/workbook";
 import {
   personExportColumns,
   personExportRow,
+  resolveDateOfBirth,
+  resolveInvitationSent,
+  resolveRegisteredAt,
   sponsorExportColumns,
   sponsorExportRow,
 } from "@/lib/reports/person-export";
@@ -53,9 +58,24 @@ function parseKind(value: string): ReportKind {
 
 function toSponsorRow(
   membership: EventMembership,
-  eventTitle: string
+  eventTitle: string,
+  invitation?: Invitation | null
 ): SponsorReportRow {
   const person = membership.person;
+  const invitationCreatedAt = invitation?.get("createdAt") as Date | undefined;
+  const membershipCreatedAt = membership.get("createdAt") as Date | undefined;
+  const membershipUpdatedAt = membership.get("updatedAt") as Date | undefined;
+  const personCreatedAt = person?.get("createdAt") as Date | undefined;
+  const personUpdatedAt = person?.get("updatedAt") as Date | undefined;
+
+  const sentAt =
+    invitation?.sentAt || invitationCreatedAt || membershipCreatedAt;
+  const registeredAt =
+    invitation?.acceptedAt ||
+    (membership.status === MEMBERSHIP_STATUSES.REGISTERED
+      ? membershipUpdatedAt || membershipCreatedAt
+      : membershipCreatedAt);
+
   return {
     id: membership.id,
     personId: membership.personId,
@@ -76,6 +96,10 @@ function toSponsorRow(
     points: person?.points ?? null,
     ageYears: person?.ageYears ?? null,
     isTrophy: person?.isTrophy ?? false,
+    sentAt,
+    registeredAt,
+    createdAt: personCreatedAt || membershipCreatedAt,
+    updatedAt: personUpdatedAt || membershipUpdatedAt,
   };
 }
 
@@ -153,20 +177,46 @@ export class ReportService {
               { header: translate("people.fields.fullName"), width: 28 },
               { header: translate("people.fields.email"), width: 32 },
               { header: translate("people.fields.phone"), width: 18 },
-              { header: translate("waitingList.registeredAt"), width: 18 },
+              { header: translate("people.fields.dateOfBirth"), width: 14 },
+              {
+                header: translate("trophy.fields.sentAt", "Invitation sent"),
+                width: 20,
+              },
+              {
+                header: translate("trophy.fields.registeredAt", "Registered at"),
+                width: 20,
+              },
             ],
-            rows: result.data.map((row) => [
-              eventTitleOf(row.details),
-              translate(
-                `waitingList.status.${row.status}`,
-                row.status
-              ),
-              row.yfId ?? "",
-              row.fullName,
-              row.email,
-              row.phone ?? "",
-              row.createdAt ? new Date(row.createdAt) : "",
-            ]),
+            rows: result.data.map((row) => {
+              const details = (typeof row.details === "string"
+                ? parsedDetails(row.details)
+                : row.details ?? {}) as Record<string, unknown>;
+              const dob = resolveDateOfBirth(
+                details?.dateOfBirth as string | Date | undefined,
+                typeof details?.ageYears === "number" ? details.ageYears : undefined,
+                row.createdAt
+              );
+              const sentAt = resolveInvitationSent(null, row.createdAt);
+              const registeredAt = resolveRegisteredAt(
+                row.createdAt,
+                row.updatedAt ?? row.createdAt
+              );
+
+              return [
+                eventTitleOf(row.details),
+                translate(
+                  `waitingList.status.${row.status}`,
+                  row.status
+                ),
+                row.yfId ?? "",
+                row.fullName,
+                row.email,
+                row.phone ?? "",
+                dob,
+                sentAt,
+                registeredAt,
+              ];
+            }),
           },
         ]),
       };
@@ -247,10 +297,29 @@ export class ReportService {
       localized.map((event) => [event.id, event.title ?? ""])
     );
 
+    const pairs = rows.map((r) => ({ eventId: r.eventId, personId: r.personId }));
+    const invitations =
+      pairs.length > 0
+        ? await Invitation.findAll({
+            where: {
+              [Op.or]: pairs,
+            },
+          })
+        : [];
+    const invitationMap = new Map<string, Invitation>();
+    for (const inv of invitations) {
+      const key = `${inv.eventId}::${inv.personId}`;
+      const existing = invitationMap.get(key);
+      if (!existing || (!existing.acceptedAt && inv.acceptedAt)) {
+        invitationMap.set(key, inv);
+      }
+    }
+
     return rows.map((row) =>
       toSponsorRow(
         row,
-        titleById.get(row.eventId) || row.event?.title || ""
+        titleById.get(row.eventId) || row.event?.title || "",
+        invitationMap.get(`${row.eventId}::${row.personId}`)
       )
     );
   }

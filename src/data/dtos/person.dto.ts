@@ -92,6 +92,7 @@ export const createPersonSchema = z.object({
     .optional()
     .nullable()
     .transform((value) => (value ? value : null)),
+  importedAt: z.coerce.date().nullable().optional(),
   emergencyContacts: z.array(emergencyContactSchema).max(3).optional(),
 });
 
@@ -139,6 +140,7 @@ export function toCreatePersonPayload(input: CreatePerson) {
       input.ageYears != null ? input.ageYears : ageInYears(input.dateOfBirth),
     isTrophy: input.isTrophy ?? false,
     category: input.category ?? null,
+    importedAt: input.importedAt ?? null,
   };
 }
 
@@ -182,6 +184,7 @@ export function toUpdatePersonPayload(input: UpdatePerson) {
   if (input.points !== undefined) payload.points = input.points;
   if (input.isTrophy !== undefined) payload.isTrophy = input.isTrophy;
   if (input.category !== undefined) payload.category = input.category;
+  if (input.importedAt !== undefined) payload.importedAt = input.importedAt;
 
   return payload;
 }
