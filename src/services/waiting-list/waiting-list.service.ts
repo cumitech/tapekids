@@ -7,20 +7,25 @@ import {
   parseCreatePerson,
   toCreatePersonPayload,
 } from "@/data/dtos/person.dto";
-import { EmergencyContact, Person } from "@/data/entities";
+import { EVENT_MEMBERSHIP_KINDS } from "@/constants/event-participation";
+import { EmergencyContact, Event, Person } from "@/data/entities";
+import { EventMembershipRepository } from "@/data/repositories/event-membership.repository";
 import { WaitingListRepository } from "@/data/repositories/waiting-list.repository";
 import { PersonRepository } from "@/data/repositories/person.repository";
 import type { ListQuery } from "@/data/types/pagination";
 import { sequelize } from "@/database/db-sequelize.config";
+import type { Transaction } from "sequelize";
 import { ConflictException } from "@/exceptions/conflict.exception";
 import { ValidationException } from "@/exceptions/validation.exception";
 import { nanoid } from "@/lib/api/id";
+import { personCategoryForEvent } from "@/lib/events/event-span";
 import { isPersonProfileComplete } from "@/lib/people/profile-completeness";
 import { normalizeStoredPhone } from "@/lib/phone";
 import { auditService } from "@/services/audit/audit.service";
 
 const waitingListRepository = new WaitingListRepository();
 const personRepository = new PersonRepository();
+const eventMembershipRepository = new EventMembershipRepository();
 
 export class WaitingListService {
   list(query: ListQuery) {
@@ -39,6 +44,10 @@ export class WaitingListService {
       );
     }
     const email = input.email;
+    const event = await Event.findByPk(input.eventId);
+    if (!event) {
+      throw new ValidationException("This event is no longer available.");
+    }
     if (input.yfId) {
       const existingYf = await personRepository.findByYfId(input.yfId);
       if (existingYf) {
@@ -107,26 +116,52 @@ export class WaitingListService {
       }
 
       const details = storedDetails(entry.details);
+      const event = await eventFromDetails(details, transaction);
+      if (!event) {
+        throw new ValidationException(
+          "This registration is not linked to an event."
+        );
+      }
+      const category = personCategoryForEvent(event);
       const input = parseCreatePerson({
         ...details,
         fullName: entry.fullName,
         email: entry.email,
         phone: entry.phone,
         yfId: entry.yfId || details.yfId,
-        isTrophy: false,
-        category: null,
+        isTrophy: true,
+        category,
       });
       if (input.yfId) {
-        const existingYf = await personRepository.findByYfId(input.yfId);
+        const existingYf = await personRepository.findByYfId(
+          input.yfId,
+          transaction
+        );
         if (existingYf) {
           throw new ConflictException(
             "This Young Foundations ID already belongs to someone in the directory."
           );
         }
       }
-      const created = await Person.create(toCreatePersonPayload(input), {
-        transaction,
-      });
+      let created: Person;
+      try {
+        created = await Person.create(toCreatePersonPayload(input), {
+          transaction,
+        });
+      } catch (error) {
+        if (isUniqueConstraintError(error)) {
+          throw new ConflictException(
+            "This Young Foundations ID already belongs to someone in the directory."
+          );
+        }
+        throw error;
+      }
+      await eventMembershipRepository.upsertRegistered(
+        event.id,
+        created.id,
+        EVENT_MEMBERSHIP_KINDS.CAMPER,
+        transaction
+      );
       if (input.emergencyContacts?.length) {
         await EmergencyContact.bulkCreate(
           input.emergencyContacts.map((contact) => ({
@@ -157,6 +192,28 @@ export class WaitingListService {
       after: person,
     });
   }
+}
+
+async function eventFromDetails(
+  details: Record<string, unknown>,
+  transaction: Transaction
+) {
+  const eventId = eventIdFromDetails(details);
+  if (!eventId) {
+    return null;
+  }
+  return Event.findByPk(eventId, { transaction });
+}
+
+function eventIdFromDetails(details: Record<string, unknown>): string {
+  const raw = details.eventId;
+  if (typeof raw === "string") {
+    return raw.trim();
+  }
+  if (typeof raw === "number" && Number.isFinite(raw)) {
+    return String(raw);
+  }
+  return "";
 }
 
 function storedDetails(value: unknown): Record<string, unknown> {

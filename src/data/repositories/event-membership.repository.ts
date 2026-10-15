@@ -1,4 +1,10 @@
-import { Op, type InferCreationAttributes, type Order, type WhereOptions } from "sequelize";
+import {
+  Op,
+  type InferCreationAttributes,
+  type Order,
+  type Transaction,
+  type WhereOptions,
+} from "sequelize";
 
 import type {
   EventMembershipKind,
@@ -67,6 +73,39 @@ export class EventMembershipRepository {
     }
 
     await existing.update({ status: MEMBERSHIP_STATUSES.INVITED });
+    return existing;
+  }
+
+  async upsertRegistered(
+    eventId: string,
+    personId: string,
+    kind: EventMembershipKind,
+    transaction?: Transaction
+  ): Promise<EventMembership> {
+    const existing = await EventMembership.findOne({
+      where: { eventId, personId, kind },
+      transaction,
+    });
+
+    if (!existing) {
+      return EventMembership.create(
+        {
+          id: nanoid(),
+          eventId,
+          personId,
+          kind,
+          status: MEMBERSHIP_STATUSES.REGISTERED,
+        },
+        { transaction }
+      );
+    }
+
+    if (existing.status !== MEMBERSHIP_STATUSES.REGISTERED) {
+      await existing.update(
+        { status: MEMBERSHIP_STATUSES.REGISTERED },
+        { transaction }
+      );
+    }
     return existing;
   }
 

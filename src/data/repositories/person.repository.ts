@@ -1,4 +1,4 @@
-import { Op, fn, col, type WhereOptions } from "sequelize";
+import { Op, fn, col, type Transaction, type WhereOptions } from "sequelize";
 import type { InferCreationAttributes } from "sequelize";
 
 import { EmergencyContact, Invitation, Person } from "@/data/entities";
@@ -28,16 +28,22 @@ export class PersonRepository {
     return person;
   }
 
-  async findByYfId(yfId: string): Promise<Person | null> {
+  async findByYfId(
+    yfId: string,
+    transaction?: Transaction
+  ): Promise<Person | null> {
     const normalized = normalizeYfId(yfId);
     if (!normalized) {
       return null;
     }
-    const exact = await Person.findOne({ where: { yfId: normalized } });
+    const exact = await Person.findOne({
+      where: { yfId: normalized },
+      transaction,
+    });
     if (exact) {
       return exact;
     }
-    return Person.findOne({ where: { yfId } });
+    return Person.findOne({ where: { yfId }, transaction });
   }
 
   async findByYfIds(yfIds: string[]): Promise<Person[]> {

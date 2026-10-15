@@ -17,7 +17,7 @@ const requiredEmail = z.string().trim().transform((value, ctx) => {
 
 export const registerWaitingListSchema = createPersonSchema.extend({
   email: requiredEmail,
-  eventId: z.string().trim().max(20).optional(),
+  eventId: z.string().trim().min(1).max(20),
   eventTitle: z.string().trim().max(128).optional(),
 });
 

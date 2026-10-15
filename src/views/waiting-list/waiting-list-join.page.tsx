@@ -76,6 +76,22 @@ export function WaitingListJoinForm({
     }
   }
 
+  if (!event) {
+    const missing = (
+      <AuthFormFrame className="max-w-xl">
+        <CardHeader className="px-0">
+          <CardTitle className="text-2xl font-semibold text-primary sm:text-3xl">
+            {translate("waitingList.joinTitle")}
+          </CardTitle>
+          <CardDescription className="font-medium text-muted-foreground">
+            {translate("events.joinPublic.missing")}
+          </CardDescription>
+        </CardHeader>
+      </AuthFormFrame>
+    );
+    return embedded ? missing : <PublicShell>{missing}</PublicShell>;
+  }
+
   const frame = (
       <AuthFormFrame className="max-w-6xl">
         <CardHeader className="px-0">

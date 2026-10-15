@@ -1,4 +1,5 @@
 import { EVENT_TYPES, type EventType } from "@/constants/event-type";
+import { PERSON_CATEGORIES, type PersonCategory } from "@/constants/person";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -48,4 +49,26 @@ export function eventSpanError(
     return "The end must be after the start.";
   }
   return null;
+}
+
+/** Trophy camper if the gathering lasts more than one calendar day; otherwise trophy participant. */
+export function personCategoryForEvent(event: {
+  eventType?: string | null;
+  startsAt: Date | string;
+  endsAt?: Date | string | null;
+}): PersonCategory {
+  const start = asDate(event.startsAt);
+  const end = asDate(event.endsAt);
+  if (start && end) {
+    const span = calendarDay(end) - calendarDay(start);
+    if (span >= DAY_MS) {
+      return PERSON_CATEGORIES.TROPHY_CAMPER;
+    }
+    if (span === 0) {
+      return PERSON_CATEGORIES.TROPHY_PARTICIPANT;
+    }
+  }
+  return event.eventType === EVENT_TYPES.DAY_EVENT
+    ? PERSON_CATEGORIES.TROPHY_PARTICIPANT
+    : PERSON_CATEGORIES.TROPHY_CAMPER;
 }
