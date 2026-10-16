@@ -3,13 +3,13 @@
 import type { DataProvider } from "@refinedev/core";
 import dataProviderSimpleRest from "@refinedev/simple-rest";
 
+import { invalidateListCaches } from "@/lib/client/invalidate-lists";
 import {
-  clearListQueryCache,
   getListQueryCache,
+  listCacheEpoch,
   listQueryCacheKey,
   removeIdFromListQueryCache,
   setListQueryCache,
-  upsertListQueryCacheRecord,
 } from "@/lib/client/list-query-cache";
 import { unwrapEnvelope } from "@/lib/client/api";
 import { http } from "@/utils/axios";
@@ -37,6 +37,7 @@ export const dataProvider = {
 
     const cacheKey = listQueryCacheKey(params);
     const skipCache = Boolean(params.meta?.skipCache);
+    const epoch = listCacheEpoch();
     const cached = skipCache ? undefined : getListQueryCache(cacheKey);
     if (cached) {
       return {
@@ -51,7 +52,7 @@ export const dataProvider = {
     }
 
     const request = restProvider.getList(params).then((result) => {
-      if (!skipCache) {
+      if (!skipCache && listCacheEpoch() === epoch) {
         setListQueryCache(cacheKey, {
           data: result.data,
           total: result.total,
@@ -83,20 +84,16 @@ export const dataProvider = {
     return restProvider.getOne(params);
   },
   create: async (params) => {
-    const result = await restProvider.create(params);
-    clearListQueryCache(params.resource);
-    return result;
+    return restProvider.create(params);
   },
   update: async (params) => {
     if (params.resource === "me") {
       const { data } = await http.patch("/me", params.variables);
       const person = unwrapEnvelope<Record<string, unknown>>(data);
-      clearListQueryCache("people");
+      invalidateListCaches("people");
       return { data: { ...person, id: "me" } };
     }
-    const result = await restProvider.update(params);
-    upsertListQueryCacheRecord(params.resource, result.data);
-    return result;
+    return restProvider.update(params);
   },
   deleteOne: async (params) => {
     const id = String(params.id);
@@ -104,7 +101,7 @@ export const dataProvider = {
     try {
       return await restProvider.deleteOne(params);
     } catch (error) {
-      clearListQueryCache(params.resource);
+      invalidateListCaches(params.resource);
       throw error;
     }
   },

@@ -1,7 +1,13 @@
 import { DEFAULT_LOCALE } from "@/constants/locales";
 import { getClientLocale } from "@/utils/locale-cookie";
 
-const STORAGE_KEY = "kec.list-query.v5";
+const STORAGE_KEY = "kec.list-query.v7";
+
+let cacheEpoch = 0;
+
+export function listCacheEpoch() {
+  return cacheEpoch;
+}
 
 type ListCacheEntry = {
   data: unknown[];
@@ -148,6 +154,8 @@ export function clearListQueryCache(resource?: string) {
   if (typeof window === "undefined") {
     return;
   }
+
+  cacheEpoch += 1;
 
   if (!resource) {
     sessionStorage.removeItem(STORAGE_KEY);

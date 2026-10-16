@@ -27,3 +27,11 @@ export function eventScheduleStatus(
   }
   return EVENT_SCHEDULE_STATUSES.ACTIVE;
 }
+
+export function eventHasPassed(
+  startsAt: string | Date,
+  endsAt?: string | Date | null,
+  now: Date = new Date()
+) {
+  return eventScheduleStatus(startsAt, endsAt, now) === EVENT_SCHEDULE_STATUSES.PAST;
+}

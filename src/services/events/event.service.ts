@@ -11,11 +11,13 @@ import { contentTranslationRepository } from "@/data/repositories/content-transl
 import { EventMembershipRepository } from "@/data/repositories/event-membership.repository";
 import { EventRepository } from "@/data/repositories/event.repository";
 import type { ListQuery } from "@/data/types/pagination";
-import { resolveContentLocale } from "@/lib/api/request-locale";
+import { getRequestLocale, resolveContentLocale } from "@/lib/api/request-locale";
 import { translationsFromInput } from "@/lib/content-i18n/input";
 import { slugify } from "@/lib/api/slug";
+import { eventHasPassed } from "@/lib/events/event-schedule";
 import { eventSpanError } from "@/lib/events/event-span";
 import { ageRangeError } from "@/lib/people/age";
+import { ConflictException } from "@/exceptions/conflict.exception";
 import { ValidationException } from "@/exceptions/validation.exception";
 import { sanitizeRichText } from "@/lib/sanitize-html";
 import { auditService } from "@/services/audit/audit.service";
@@ -181,6 +183,14 @@ export class EventService {
   }
 
   async delete(id: string) {
+    const event = await eventRepository.findById(id);
+    if (!eventHasPassed(event.startsAt, event.endsAt)) {
+      throw new ConflictException(
+        getRequestLocale() === "fr"
+          ? "Cet événement ne peut pas être supprimé tant qu'il n'est pas terminé."
+          : "This event cannot be deleted until it has ended."
+      );
+    }
     const before = await eventRepository.delete(id);
     await auditService.record({
       action: "delete",

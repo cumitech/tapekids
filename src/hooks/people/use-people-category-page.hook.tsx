@@ -16,7 +16,7 @@ import { useDashboardFormModal } from "@/hooks/core/use-dashboard-form-modal.hoo
 import { useLocale } from "@/hooks/core/use-locale.hook";
 import { usePeopleDirectoryColumns } from "@/hooks/people/use-people-directory-columns.hook";
 import { apiErrorMessage, apiGet, apiPost } from "@/lib/client/api";
-import { clearListQueryCache } from "@/lib/client/list-query-cache";
+import { invalidateListCaches } from "@/lib/client/invalidate-lists";
 import {
   matchingPeopleQuery,
   onlyCategoryFilter,
@@ -161,7 +161,7 @@ export function usePeopleCategoryPage(category: string) {
   }, [filterKey]);
 
   function refresh() {
-    clearListQueryCache("people");
+    invalidateListCaches("people");
     void table.refineCore.tableQuery.refetch();
   }
   refreshRef.current = refresh;

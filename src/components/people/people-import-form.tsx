@@ -17,7 +17,7 @@ import {
   isNetworkError,
   withHttpRetry,
 } from "@/lib/client/api";
-import { clearListQueryCache } from "@/lib/client/list-query-cache";
+import { invalidateListCaches } from "@/lib/client/invalidate-lists";
 import type { PeopleImportResult } from "@/models/people/people-import.model";
 
 type PeopleImportFormProps = {
@@ -66,7 +66,7 @@ export function PeopleImportForm({
           timeout: 120_000,
         })
       );
-      clearListQueryCache("people");
+      invalidateListCaches("people");
       setResult(response);
       onImported?.(response);
     } catch (err) {

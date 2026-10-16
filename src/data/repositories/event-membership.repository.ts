@@ -123,6 +123,18 @@ export class EventMembershipRepository {
     return this.findById(id);
   }
 
+  async listEventIdsForPeople(personIds: string[]): Promise<string[]> {
+    if (personIds.length === 0) {
+      return [];
+    }
+    const rows = await EventMembership.findAll({
+      where: { personId: { [Op.in]: personIds } },
+      attributes: ["eventId"],
+      group: ["eventId"],
+    });
+    return rows.map((row) => row.eventId);
+  }
+
   async listByPerson(personId: string): Promise<EventMembership[]> {
     return EventMembership.findAll({
       where: { personId },

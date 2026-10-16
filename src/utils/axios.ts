@@ -6,6 +6,7 @@ import axios, {
 } from "axios";
 
 import { API_URL } from "@/constants/api-url";
+import { invalidateListsForApiPath } from "@/lib/client/invalidate-lists";
 import { getAccessToken } from "@/utils/auth-storage";
 import { getClientLocale } from "@/utils/locale-cookie";
 
@@ -51,6 +52,9 @@ http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 });
 
 http.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    invalidateListsForApiPath(response.config.url, response.config.method);
+    return response;
+  },
   (error: AxiosError) => Promise.reject(error)
 );

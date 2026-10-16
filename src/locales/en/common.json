@@ -670,6 +670,7 @@
     "memberAddFailed": "Could not add that person",
     "memberRemoved": "Person removed from the list",
     "memberRemoveFailed": "Could not remove that person",
+    "cannotDeleteActiveEvent": "This mailing list cannot be deleted while a linked event is still open and people can still register, even if every invitation has already been sent.",
     "queueInvitations": "Queue invitations",
     "sendInvitations": "Send invitations",
     "selectEvent": "Select an event",
@@ -756,6 +757,7 @@
     "typeHint": "A camp lasts more than one day and is for trophy campers. A day event starts and ends the same day and is for trophy participants.",
     "ageRangeHint": "Leave both blank if any age can attend. A camper's age is their completed years on the first day, calculated from their date of birth.",
     "ageRangeInvalid": "Minimum age cannot be greater than maximum age.",
+    "cannotDeleteUntilEnded": "This event cannot be deleted until it has ended.",
     "schedule": {
       "upcoming": "Upcoming",
       "active": "Happening now",

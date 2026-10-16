@@ -63,6 +63,15 @@ export class InvitationBatchRepository {
     });
   }
 
+  async listEventIdsByMailingList(mailingListId: string): Promise<string[]> {
+    const rows = await InvitationBatch.findAll({
+      where: { mailingListId },
+      attributes: ["eventId"],
+      group: ["eventId"],
+    });
+    return rows.map((row) => row.eventId).filter(Boolean);
+  }
+
   async listForSettings(): Promise<InvitationBatch[]> {
     return InvitationBatch.findAll({
       attributes: [...INVITATION_BATCH_LIST_ATTRIBUTES],

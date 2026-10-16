@@ -670,6 +670,7 @@
     "memberAddFailed": "Impossible d'ajouter cette personne",
     "memberRemoved": "Personne retirée de la liste",
     "memberRemoveFailed": "Impossible de retirer cette personne",
+    "cannotDeleteActiveEvent": "Cette liste d'envoi ne peut pas être supprimée tant qu'un événement lié est encore ouvert et que des inscriptions sont possibles, même si toutes les invitations ont déjà été envoyées.",
     "queueInvitations": "Préparer les invitations",
     "sendInvitations": "Envoyer les invitations",
     "selectEvent": "Choisir un événement",
@@ -756,6 +757,7 @@
     "typeHint": "Un camp dure plus d'un jour et concerne les campeurs Trophy. Un événement d'une journée commence et se termine le même jour et concerne les participants Trophy.",
     "ageRangeHint": "Laissez les deux vides si tout âge peut participer. L'âge d'un campeur correspond aux années révolues le premier jour, calculées à partir de sa date de naissance.",
     "ageRangeInvalid": "L'âge minimum ne peut pas être supérieur à l'âge maximum.",
+    "cannotDeleteUntilEnded": "Cet événement ne peut pas être supprimé tant qu'il n'est pas terminé.",
     "schedule": {
       "upcoming": "À venir",
       "active": "En cours",

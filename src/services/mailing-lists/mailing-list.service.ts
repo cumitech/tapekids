@@ -7,19 +7,27 @@ import {
   type CreateMailingList,
 } from "@/data/dtos/mailing-list.dto";
 import { contentTranslationRepository } from "@/data/repositories/content-translation.repository";
+import { EventMembershipRepository } from "@/data/repositories/event-membership.repository";
+import { EventRepository } from "@/data/repositories/event.repository";
+import { InvitationBatchRepository } from "@/data/repositories/invitation-batch.repository";
 import { MailingListMemberRepository } from "@/data/repositories/mailing-list-member.repository";
 import { MailingListRepository } from "@/data/repositories/mailing-list.repository";
 import { PersonRepository } from "@/data/repositories/person.repository";
 import type { ListQuery } from "@/data/types/pagination";
 import { CONTENT_ENTITY_TYPES } from "@/constants/content-i18n";
+import { ConflictException } from "@/exceptions/conflict.exception";
 import { nanoid } from "@/lib/api/id";
-import { resolveContentLocale } from "@/lib/api/request-locale";
+import { getRequestLocale, resolveContentLocale } from "@/lib/api/request-locale";
 import { translationsFromInput } from "@/lib/content-i18n/input";
+import { eventHasPassed } from "@/lib/events/event-schedule";
 import { auditService } from "@/services/audit/audit.service";
 import { personService } from "@/services/people/person.service";
 
 const mailingListRepository = new MailingListRepository();
 const mailingListMemberRepository = new MailingListMemberRepository();
+const invitationBatchRepository = new InvitationBatchRepository();
+const eventMembershipRepository = new EventMembershipRepository();
+const eventRepository = new EventRepository();
 const personRepository = new PersonRepository();
 
 function mailingListTranslations(input: {
@@ -108,6 +116,7 @@ export class MailingListService {
   }
 
   async delete(id: string) {
+    await this.assertDeletable(id);
     const before = await mailingListRepository.delete(id);
     await auditService.record({
       action: "delete",
@@ -155,6 +164,25 @@ export class MailingListService {
 
   listMembers(listId: string) {
     return mailingListMemberRepository.listByList(listId);
+  }
+
+  private async assertDeletable(id: string) {
+    const personIds = await mailingListMemberRepository.listPersonIds(id);
+    const [batchEventIds, membershipEventIds] = await Promise.all([
+      invitationBatchRepository.listEventIdsByMailingList(id),
+      eventMembershipRepository.listEventIdsForPeople(personIds),
+    ]);
+    const eventIds = [...new Set([...batchEventIds, ...membershipEventIds])];
+    const events = await eventRepository.listScheduleByIds(eventIds);
+    const open = events.some((event) => !eventHasPassed(event.startsAt, event.endsAt));
+    if (!open) {
+      return;
+    }
+    throw new ConflictException(
+      getRequestLocale() === "fr"
+        ? "Cette liste d'envoi ne peut pas être supprimée tant qu'un événement lié est encore ouvert et que des inscriptions sont possibles, même si toutes les invitations ont déjà été envoyées."
+        : "This mailing list cannot be deleted while a linked event is still open and people can still register, even if every invitation has already been sent."
+    );
   }
 
   private async syncMembers(

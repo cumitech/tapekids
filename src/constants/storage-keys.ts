@@ -5,7 +5,7 @@ export const STORAGE_KEYS = {
   THEME: "kec.theme",
   UI_PREFERENCES: "kec.ui.preferences",
   SIDEBAR: "kec.sidebar",
-  QUERY_CACHE: "kec.query.cache",
+  QUERY_CACHE: "kec.query.cache.v2",
   ONBOARDING_SNOOZE: "kec.onboarding.snooze",
 } as const;
 

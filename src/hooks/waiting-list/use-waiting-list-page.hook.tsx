@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/shared/ui/checkbox";
 import { useCachedTable } from "@/hooks/core/use-cached-table.hook";
 import { useLocale } from "@/hooks/core/use-locale.hook";
 import { unwrapEnvelope } from "@/lib/client/api";
-import { clearListQueryCache } from "@/lib/client/list-query-cache";
+import { invalidateListCaches } from "@/lib/client/invalidate-lists";
 import { formatDateTime } from "@/lib/format";
 import { formatPhoneDisplay } from "@/lib/phone";
 import { waitingListEventTitle } from "@/lib/waiting-list/event-title";
@@ -78,8 +78,7 @@ export function useWaitingListPage() {
     try {
       const { data } = await http.post("/waiting-list/approve", { ids });
       const result = unwrapEnvelope<{ approved: number; failed: number }>(data);
-      clearListQueryCache("waiting-list");
-      clearListQueryCache("people");
+      invalidateListCaches("waiting-list");
       setSelected(new Set());
       await table.refineCore.tableQuery.refetch();
       open?.({

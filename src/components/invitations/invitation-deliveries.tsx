@@ -22,7 +22,7 @@ import { useBusyAction } from "@/hooks/core/use-busy-action.hook";
 import { useIntegrations } from "@/hooks/integrations/use-integrations.hook";
 import { useLocale } from "@/hooks/core/use-locale.hook";
 import { apiErrorMessage, apiGet, apiPatch, apiPost } from "@/lib/client/api";
-import { clearListQueryCache } from "@/lib/client/list-query-cache";
+import { invalidateListCaches } from "@/lib/client/invalidate-lists";
 import { formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -223,7 +223,7 @@ export function InvitationRecipients({ batchId }: { batchId: string }) {
         );
         return;
       }
-      clearListQueryCache("people");
+      invalidateListCaches("people", "mailing-lists");
       setEditingId(null);
       await load();
       notify?.({

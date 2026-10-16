@@ -1,3 +1,5 @@
+import { Op } from "sequelize";
+
 import { Event } from "@/data/entities";
 import type { EventCreatePayload, EventUpdatePayload } from "@/data/dtos/event.dto";
 import { listSearchWhere } from "@/data/list-where";
@@ -17,6 +19,16 @@ export class EventRepository {
       throw new NotFoundException("Event", id);
     }
     return event;
+  }
+
+  async listScheduleByIds(ids: string[]) {
+    if (ids.length === 0) {
+      return [];
+    }
+    return Event.findAll({
+      where: { id: { [Op.in]: ids } },
+      attributes: ["id", "startsAt", "endsAt"],
+    });
   }
 
   async findByJoinToken(joinToken: string): Promise<Event | null> {
