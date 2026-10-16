@@ -2,6 +2,7 @@ import type { InferCreationAttributes } from "sequelize";
 
 import type { InvitationBatchStatus } from "@/constants/event-participation";
 import { Event, InvitationBatch, MailingList, User } from "@/data/entities";
+import { INVITATION_BATCH_LIST_ATTRIBUTES } from "@/data/query-shape";
 import type { ListQuery, PaginatedResult } from "@/data/types/pagination";
 import { NotFoundException } from "@/exceptions/not-found.exception";
 
@@ -34,12 +35,16 @@ export class InvitationBatchRepository {
     eventId: string,
     query: ListQuery
   ): Promise<PaginatedResult<InvitationBatch>> {
-    const { rows, count } = await InvitationBatch.findAndCountAll({
-      where: { eventId },
-      offset: query.offset,
-      limit: query.limit,
-      order: [[query.sort, query.order]],
-    });
+    const [count, rows] = await Promise.all([
+      InvitationBatch.count({ where: { eventId } }),
+      InvitationBatch.findAll({
+        where: { eventId },
+        attributes: [...INVITATION_BATCH_LIST_ATTRIBUTES],
+        offset: query.offset,
+        limit: query.limit,
+        order: [[query.sort, query.order]],
+      }),
+    ]);
 
     return {
       data: rows,
@@ -52,6 +57,7 @@ export class InvitationBatchRepository {
   async listByMailingList(mailingListId: string): Promise<InvitationBatch[]> {
     return InvitationBatch.findAll({
       where: { mailingListId },
+      attributes: [...INVITATION_BATCH_LIST_ATTRIBUTES],
       order: [["createdAt", "DESC"]],
       limit: 50,
     });
@@ -59,8 +65,10 @@ export class InvitationBatchRepository {
 
   async listForSettings(): Promise<InvitationBatch[]> {
     return InvitationBatch.findAll({
+      attributes: [...INVITATION_BATCH_LIST_ATTRIBUTES],
       include: [{ model: Event, as: "event", attributes: ["id", "title"] }],
       order: [["createdAt", "DESC"]],
+      limit: 100,
     });
   }
 

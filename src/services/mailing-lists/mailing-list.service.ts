@@ -79,7 +79,7 @@ export class MailingListService {
   }
 
   async update(id: string, body: unknown) {
-    const before = await mailingListRepository.findById(id);
+    const before = await mailingListRepository.findById(id, { members: false });
     const input = parseUpdateMailingList(body);
     await mailingListRepository.update(id, toUpdateMailingListPayload(input));
     if (input.translations || input.name !== undefined || input.description !== undefined) {
@@ -108,8 +108,7 @@ export class MailingListService {
   }
 
   async delete(id: string) {
-    const before = await mailingListRepository.findById(id);
-    await mailingListRepository.delete(id);
+    const before = await mailingListRepository.delete(id);
     await auditService.record({
       action: "delete",
       entity: "MailingList",
@@ -119,7 +118,7 @@ export class MailingListService {
   }
 
   async addMember(listId: string, body: unknown) {
-    await mailingListRepository.findById(listId);
+    await mailingListRepository.requireId(listId);
     const input = parseAddMailingListMember(body);
 
     const person = input.personId
@@ -144,7 +143,7 @@ export class MailingListService {
   }
 
   async removeMember(listId: string, personId: string) {
-    await mailingListRepository.findById(listId);
+    await mailingListRepository.requireId(listId);
     await mailingListMemberRepository.remove(listId, personId);
     await auditService.record({
       action: "delete",

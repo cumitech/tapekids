@@ -14,6 +14,11 @@ import { MEMBERSHIP_STATUSES } from "@/constants/event-participation";
 import type { PersonCategory } from "@/constants/person";
 import { Event, EventMembership, Person } from "@/data/entities";
 import { listSearchWhere } from "@/data/list-where";
+import {
+  EVENT_REF_ATTRIBUTES,
+  PERSON_LIST_ATTRIBUTES,
+  PERSON_ROSTER_ATTRIBUTES,
+} from "@/data/query-shape";
 import type { ListQuery, PaginatedResult } from "@/data/types/pagination";
 import { nanoid } from "@/lib/api/id";
 import { NotFoundException } from "@/exceptions/not-found.exception";
@@ -121,7 +126,13 @@ export class EventMembershipRepository {
   async listByPerson(personId: string): Promise<EventMembership[]> {
     return EventMembership.findAll({
       where: { personId },
-      include: [{ model: Event, as: "event" }],
+      include: [
+        {
+          model: Event,
+          as: "event",
+          attributes: [...EVENT_REF_ATTRIBUTES],
+        },
+      ],
       order: [["createdAt", "DESC"]],
     });
   }
@@ -129,7 +140,13 @@ export class EventMembershipRepository {
   async listByEvent(eventId: string): Promise<EventMembership[]> {
     return EventMembership.findAll({
       where: { eventId },
-      include: [{ model: Person, as: "person" }],
+      include: [
+        {
+          model: Person,
+          as: "person",
+          attributes: [...PERSON_ROSTER_ATTRIBUTES],
+        },
+      ],
       order: [["createdAt", "DESC"]],
     });
   }
@@ -162,10 +179,15 @@ export class EventMembershipRepository {
         {
           model: Person,
           as: "person",
+          attributes: [...PERSON_LIST_ATTRIBUTES],
           required: Boolean(query.q) || Boolean(options?.category),
           where: personFilter,
         },
-        { model: Event, as: "event" },
+        {
+          model: Event,
+          as: "event",
+          attributes: [...EVENT_REF_ATTRIBUTES],
+        },
       ],
       offset: query.offset,
       limit: query.limit,

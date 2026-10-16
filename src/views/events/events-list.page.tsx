@@ -1,116 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
-import type { ColumnDef } from "@tanstack/react-table";
-import { useTranslate } from "@refinedev/core";
-
 import { EventForm } from "@/components/events/event-form.component";
-import { EventImage } from "@/components/events/event-image";
-import { EventScheduleBadge } from "@/components/events/event-schedule-badge";
-import { ResourceRowActions } from "@/components/shared/refine-ui/buttons/resource-row-actions";
-import { columnFilter } from "@/components/shared/refine-ui/data-table/data-table-column-filter";
 import { DataTable } from "@/components/shared/refine-ui/data-table/data-table";
 import { ListView, ListViewHeader } from "@/components/shared/refine-ui/views/list-view";
-import { useCachedTable } from "@/hooks/core/use-cached-table.hook";
-import { useLocale } from "@/hooks/core/use-locale.hook";
-import { formatDateTime } from "@/lib/format";
-import { useDashboardFormModal } from "@/hooks/core/use-dashboard-form-modal.hook";
-import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
-import type { Event } from "@/models/events/event.model";
+import { useEventsListPage } from "@/hooks/events/use-events-list.hook";
 
 export function EventsListPage() {
-  const translate = useTranslate();
-  const { locale } = useLocale();
-  const { openCreate, openEdit } = useDashboardFormModal();
-  const labels = useResourceLabels("events", [
-    "title",
-    "imageUrl",
-    "city",
-    "venue",
-    "eventType",
-    "startsAt",
-    "scheduleStatus",
-  ]);
-
-  const columns = useMemo<ColumnDef<Event>[]>(
-    () => [
-      {
-        id: "imageUrl",
-        header: labels.fields.imageUrl,
-        cell: ({ row }) => (
-          <EventImage
-            src={row.original.imageUrl}
-            alt={row.original.title}
-            className="size-14 shrink-0 rounded-md aspect-square"
-          />
-        ),
-      },
-      { id: "title", accessorKey: "title", header: labels.fields.title },
-      {
-        id: "eventType",
-        accessorKey: "eventType",
-        header: labels.fields.eventType,
-        cell: ({ row }) =>
-          translate(
-            `events.types.${row.original.eventType === "day_event" ? "day_event" : "camp"}`
-          ),
-        ...columnFilter(),
-      },
-      {
-        id: "city",
-        accessorKey: "city",
-        header: labels.fields.city,
-        ...columnFilter(),
-      },
-      {
-        id: "venue",
-        accessorKey: "venue",
-        header: labels.fields.venue,
-        ...columnFilter(),
-      },
-      {
-        id: "startsAt",
-        accessorKey: "startsAt",
-        header: labels.fields.startsAt,
-        cell: ({ row }) => formatDateTime(row.original.startsAt, locale) || "-",
-      },
-      {
-        id: "scheduleStatus",
-        header: labels.fields.scheduleStatus,
-        cell: ({ row }) => (
-          <EventScheduleBadge
-            startsAt={row.original.startsAt}
-            endsAt={row.original.endsAt}
-          />
-        ),
-      },
-      {
-        id: "actions",
-        header: labels.tableActions,
-        cell: ({ row }) => (
-          <ResourceRowActions
-            id={row.original.id}
-            onEdit={() =>
-              openEdit("events", row.original.id, ({ close }) => (
-                <EventForm
-                  mode="edit"
-                  id={row.original.id}
-                  onCancel={close}
-                  onSuccess={close}
-                />
-              ))
-            }
-          />
-        ),
-      },
-    ],
-    [labels, locale, openEdit, translate]
-  );
-
-  const { table } = useCachedTable<Event>({
-    resource: "events",
-    columns,
-  });
+  const { table, openCreate } = useEventsListPage();
 
   return (
     <ListView>

@@ -181,8 +181,7 @@ export class EventService {
   }
 
   async delete(id: string) {
-    const before = await eventRepository.findById(id);
-    await eventRepository.delete(id);
+    const before = await eventRepository.delete(id);
     await auditService.record({
       action: "delete",
       entity: "Event",
@@ -192,7 +191,7 @@ export class EventService {
   }
 
   async listMemberships(eventId: string) {
-    await this.getById(eventId);
+    await eventRepository.requireId(eventId);
     return eventMembershipRepository.listByEvent(eventId);
   }
 

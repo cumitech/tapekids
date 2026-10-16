@@ -1,0 +1,82 @@
+"use client";
+
+import { useMemo } from "react";
+import { useTranslate } from "@refinedev/core";
+import type { ColumnDef } from "@tanstack/react-table";
+
+import { MailingListForm } from "@/components/mailing-lists/mailing-list-form.component";
+import { ResourceRowActions } from "@/components/shared/refine-ui/buttons/resource-row-actions";
+import { columnFilter } from "@/components/shared/refine-ui/data-table/data-table-column-filter";
+import { PERSON_CATEGORY_VALUES, categoryForAudience } from "@/constants/person";
+import { useCachedTable } from "@/hooks/core/use-cached-table.hook";
+import { useDashboardFormModal } from "@/hooks/core/use-dashboard-form-modal.hook";
+import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
+import type { MailingList } from "@/models/mailing-lists/mailing-list.model";
+
+export const MAILING_LIST_MODAL = "sm:max-w-3xl";
+
+export function useMailingListsListPage() {
+  const translate = useTranslate();
+  const { openCreate, openEdit } = useDashboardFormModal();
+  const labels = useResourceLabels("mailingLists", ["name", "audienceKind"]);
+
+  const audienceOptions = useMemo(
+    () =>
+      PERSON_CATEGORY_VALUES.map((value) => ({
+        value,
+        label: translate(`people.categories.${value}`),
+      })),
+    [translate]
+  );
+
+  const columns = useMemo<ColumnDef<MailingList>[]>(
+    () => [
+      { id: "name", accessorKey: "name", header: labels.fields.name },
+      {
+        id: "audienceKind",
+        accessorKey: "audienceKind",
+        header: labels.fields.audienceKind,
+        cell: ({ row }) => {
+          const category = categoryForAudience(row.original.audienceKind);
+          return category
+            ? translate(`people.categories.${category}`)
+            : String(row.original.audienceKind);
+        },
+        ...columnFilter("select", audienceOptions),
+      },
+      {
+        id: "actions",
+        header: labels.tableActions,
+        cell: ({ row }) => (
+          <ResourceRowActions
+            resource="mailing-lists"
+            id={row.original.id}
+            onEdit={() =>
+              openEdit(
+                "mailingLists",
+                row.original.id,
+                ({ close }) => (
+                  <MailingListForm
+                    mode="edit"
+                    id={row.original.id}
+                    onCancel={close}
+                    onSuccess={close}
+                  />
+                ),
+                MAILING_LIST_MODAL
+              )
+            }
+          />
+        ),
+      },
+    ],
+    [audienceOptions, labels, openEdit, translate]
+  );
+
+  const { table } = useCachedTable<MailingList>({
+    resource: "mailing-lists",
+    columns,
+  });
+
+  return { table, openCreate };
+}

@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { type BaseKey, useDeleteButton } from "@refinedev/core";
+import { type BaseKey, useDeleteButton, useTranslate } from "@refinedev/core";
 import { Loader2, Trash } from "lucide-react";
 
-import { useAppModal } from "@/components/shared/modals/app-modal";
+import { DeleteConfirmPopover } from "@/components/shared/refine-ui/buttons/delete-confirm-popover";
 import { Button } from "@/components/shared/ui/button";
 import { useCanAction } from "@/hooks/core/use-can-action.hook";
 
@@ -22,7 +22,7 @@ export const DeleteButton = React.forwardRef<
   React.ComponentRef<typeof Button>,
   DeleteButtonProps
 >(({ resource, recordItemId, accessControl, meta, children, ...rest }, ref) => {
-  const { confirm } = useAppModal();
+  const translate = useTranslate();
   const {
     loading,
     onConfirm,
@@ -35,6 +35,8 @@ export const DeleteButton = React.forwardRef<
     id: recordItemId,
     accessControl: { ...accessControl, enabled: false },
     meta,
+    mutationMode: "optimistic",
+    invalidates: ["list"],
   });
   const canDelete = useCanAction(resource, "delete");
   const hideIfUnauthorized = accessControl?.hideIfUnauthorized ?? true;
@@ -44,32 +46,36 @@ export const DeleteButton = React.forwardRef<
   if (isHidden) return null;
 
   return (
-    <Button
-      variant="destructive"
-      type="button"
-      size="icon"
-      aria-label={label}
-      {...rest}
-      ref={ref}
-      disabled={isDisabled}
-      onClick={() =>
-        confirm({
-          title: defaultConfirmTitle,
-          confirmLabel: defaultConfirmOkLabel,
-          cancelLabel: defaultCancelLabel,
-          destructive: true,
-          onConfirm: () => {
-            onConfirm?.();
-          },
-        })
+    <DeleteConfirmPopover
+      title={defaultConfirmTitle}
+      description={
+        resource === "events"
+          ? translate("buttons.confirmDeleteEventDescription")
+          : translate("buttons.confirmDeleteDescription")
       }
+      confirmLabel={defaultConfirmOkLabel}
+      cancelLabel={defaultCancelLabel}
+      disabled={isDisabled}
+      onConfirm={() => {
+        onConfirm?.();
+      }}
     >
-      {loading ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        children ?? <Trash className="h-4 w-4" />
-      )}
-    </Button>
+      <Button
+        variant="destructive"
+        type="button"
+        size="icon"
+        aria-label={label}
+        {...rest}
+        ref={ref}
+        disabled={isDisabled}
+      >
+        {loading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          children ?? <Trash className="h-4 w-4" />
+        )}
+      </Button>
+    </DeleteConfirmPopover>
   );
 });
 

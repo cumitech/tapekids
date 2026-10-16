@@ -1,12 +1,21 @@
 import type { InferCreationAttributes } from "sequelize";
 
 import { Event, Payment, Person, Sponsor } from "@/data/entities";
+import { EVENT_REF_ATTRIBUTES, PERSON_ROSTER_ATTRIBUTES } from "@/data/query-shape";
 import type { ListQuery, PaginatedResult } from "@/data/types/pagination";
 import { NotFoundException } from "@/exceptions/not-found.exception";
 
 const INCLUDE = [
-  { model: Person, as: "person" as const },
-  { model: Event, as: "event" as const },
+  {
+    model: Person,
+    as: "person" as const,
+    attributes: [...PERSON_ROSTER_ATTRIBUTES],
+  },
+  {
+    model: Event,
+    as: "event" as const,
+    attributes: [...EVENT_REF_ATTRIBUTES],
+  },
   { model: Payment, as: "payment" as const },
 ];
 

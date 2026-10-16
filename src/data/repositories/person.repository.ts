@@ -1,8 +1,13 @@
 import { Op, fn, col, type Transaction, type WhereOptions } from "sequelize";
 import type { InferCreationAttributes } from "sequelize";
 
-import { EmergencyContact, Invitation, Person } from "@/data/entities";
+import { EmergencyContact, Person } from "@/data/entities";
 import { listSearchWhere } from "@/data/list-where";
+import {
+  PERSON_LIST_ATTRIBUTES,
+  personIdsWithInvitations,
+  withInvitationFlag,
+} from "@/data/query-shape";
 import type { ListQuery, PaginatedResult } from "@/data/types/pagination";
 import { NotFoundException } from "@/exceptions/not-found.exception";
 import type { PersonCategory } from "@/constants/person";
@@ -18,9 +23,15 @@ export class PersonRepository {
     return Person.create(payload);
   }
 
-  async findById(id: string): Promise<Person> {
+  async findById(
+    id: string,
+    options?: { emergencyContacts?: boolean }
+  ): Promise<Person> {
     const person = await Person.findByPk(id, {
-      include: [{ model: EmergencyContact, as: "emergencyContacts" }],
+      include:
+        options?.emergencyContacts === false
+          ? undefined
+          : [{ model: EmergencyContact, as: "emergencyContacts" }],
     });
     if (!person) {
       throw new NotFoundException("Person", id);
@@ -40,7 +51,7 @@ export class PersonRepository {
       where: { yfId: normalized },
       transaction,
     });
-    if (exact) {
+    if (exact || normalized === yfId) {
       return exact;
     }
     return Person.findOne({ where: { yfId }, transaction });
@@ -100,24 +111,22 @@ export class PersonRepository {
       };
     }
 
-    const { rows, count } = await Person.findAndCountAll({
-      where,
-      include: [
-        {
-          model: Invitation,
-          as: "invitations",
-          attributes: ["id", "status", "sentAt"],
-          required: false,
-        },
-      ],
-      distinct: true,
-      offset: query.offset,
-      limit: query.limit,
-      order: [[query.sort, query.order]],
-    });
+    const [count, rows] = await Promise.all([
+      Person.count({ where }),
+      Person.findAll({
+        where,
+        attributes: [...PERSON_LIST_ATTRIBUTES],
+        offset: query.offset,
+        limit: query.limit,
+        order: [[query.sort, query.order]],
+      }),
+    ]);
+    const invited = await personIdsWithInvitations(rows.map((row) => row.id));
 
     return {
-      data: rows,
+      data: rows.map((row) =>
+        withInvitationFlag(row.toJSON() as { id: string }, invited)
+      ) as unknown as Person[],
       total: count,
       offset: query.offset,
       limit: query.limit,
@@ -130,15 +139,14 @@ export class PersonRepository {
       throw new NotFoundException("Person", id);
     }
     await person.update(payload);
-    return this.findById(id);
+    return person;
   }
 
   async delete(id: string): Promise<void> {
-    const person = await Person.findByPk(id);
-    if (!person) {
+    const deleted = await Person.destroy({ where: { id } });
+    if (!deleted) {
       throw new NotFoundException("Person", id);
     }
-    await person.destroy();
   }
 
   async countByCategory(): Promise<Array<{ category: string | null; count: number }>> {

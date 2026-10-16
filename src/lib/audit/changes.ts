@@ -25,6 +25,9 @@ export function snapshot(value: unknown): unknown {
 
 function redact(value: unknown, seen = new WeakSet<object>()): unknown {
   if (Array.isArray(value)) {
+    if (value.length > 25) {
+      return { _count: value.length };
+    }
     return value.map((item) => redact(item, seen));
   }
   if (!value || typeof value !== "object") {

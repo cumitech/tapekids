@@ -1,16 +1,10 @@
-import { Event, User } from "@/data/entities";
+import { Event } from "@/data/entities";
 import type { EventCreatePayload, EventUpdatePayload } from "@/data/dtos/event.dto";
 import { listSearchWhere } from "@/data/list-where";
+import { EVENT_LIST_ATTRIBUTES } from "@/data/query-shape";
 import { contentTranslationRepository } from "@/data/repositories/content-translation.repository";
 import type { ListQuery, PaginatedResult } from "@/data/types/pagination";
 import { NotFoundException } from "@/exceptions/not-found.exception";
-
-const createdByInclude = {
-  model: User,
-  as: "createdBy",
-  attributes: ["id", "email", "username", "role"],
-  required: false,
-};
 
 export class EventRepository {
   async create(payload: EventCreatePayload): Promise<Event> {
@@ -18,7 +12,7 @@ export class EventRepository {
   }
 
   async findById(id: string): Promise<Event> {
-    const event = await Event.findByPk(id, { include: [createdByInclude] });
+    const event = await Event.findByPk(id);
     if (!event) {
       throw new NotFoundException("Event", id);
     }
@@ -53,13 +47,16 @@ export class EventRepository {
   async list(query: ListQuery): Promise<PaginatedResult<Event>> {
     const where = listSearchWhere(query, ["title", "city", "venue", "summary"]);
 
-    const { rows, count } = await Event.findAndCountAll({
-      where,
-      include: [createdByInclude],
-      offset: query.offset,
-      limit: query.limit,
-      order: [[query.sort, query.order]],
-    });
+    const [count, rows] = await Promise.all([
+      Event.count({ where }),
+      Event.findAll({
+        where,
+        attributes: [...EVENT_LIST_ATTRIBUTES],
+        offset: query.offset,
+        limit: query.limit,
+        order: [[query.sort, query.order]],
+      }),
+    ]);
 
     return {
       data: rows,
@@ -77,19 +74,7 @@ export class EventRepository {
         ["title", "ASC"],
       ],
       limit,
-      attributes: [
-        "id",
-        "title",
-        "slug",
-        "summary",
-        "description",
-        "venue",
-        "city",
-        "startsAt",
-        "endsAt",
-        "imageUrl",
-        "createdAt",
-      ],
+      attributes: [...EVENT_LIST_ATTRIBUTES, "description"],
     });
   }
 
@@ -100,16 +85,26 @@ export class EventRepository {
     }
 
     await event.update(payload);
-    return this.findById(id);
+    return event;
   }
 
-  async delete(id: string): Promise<void> {
-    const event = await Event.findByPk(id);
+  async requireId(id: string): Promise<void> {
+    const event = await Event.findByPk(id, { attributes: ["id"] });
+    if (!event) {
+      throw new NotFoundException("Event", id);
+    }
+  }
+
+  async delete(id: string): Promise<Event> {
+    const event = await Event.findByPk(id, {
+      attributes: ["id", "title", "slug"],
+    });
     if (!event) {
       throw new NotFoundException("Event", id);
     }
 
     await contentTranslationRepository.deleteFor("event", id);
     await event.destroy();
+    return event;
   }
 }

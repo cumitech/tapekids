@@ -6,6 +6,7 @@ import { useResourceParams } from "@refinedev/core";
 
 import { ResourceHero } from "@/components/portal/resource-hero";
 import { HeroActionGroup } from "@/components/shared/refine-ui/buttons/hero-action-group";
+import { DeleteButton } from "@/components/shared/refine-ui/buttons/delete";
 import { EditButton } from "@/components/shared/refine-ui/buttons/edit";
 import { RefreshButton } from "@/components/shared/refine-ui/buttons/refresh";
 import { useResourceViewTitle } from "@/hooks/core/use-resource-labels.hook";
@@ -74,6 +75,14 @@ export const ShowViewHeader = ({
             resource={resourceName}
             onClick={onEdit}
           />
+          {recordItemId ? (
+            <DeleteButton
+              variant="ghost"
+              className="size-10 rounded-none text-destructive hover:bg-destructive/10 hover:text-destructive"
+              recordItemId={recordItemId}
+              resource={resourceName}
+            />
+          ) : null}
         </HeroActionGroup>
       }
     />

@@ -1,9 +1,5 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
-import axios from "axios";
-import { useTranslate } from "@refinedev/core";
-
 import { PhoneField } from "@/components/shared/form/phone-field";
 import { LabeledSelect } from "@/components/shared/form/labeled-select";
 import { AuthFormFrame } from "@/components/shared/refine-ui/form/auth-form-frame";
@@ -18,123 +14,12 @@ import { Input } from "@/components/shared/ui/input";
 import { RequiredMark } from "@/components/shared/form/required-mark";
 import { Label } from "@/components/shared/ui/label";
 import { Separator } from "@/components/shared/ui/separator";
-import { PAYMENT_STATUSES } from "@/constants/event-participation";
-import {
-  SPONSOR_AMOUNT_XAF,
-  acceptedSponsorAmount,
-  latestCreatedEventId,
-} from "@/constants/sponsor";
-import { PAYMENT_POLL_MS } from "@/hooks/payments/use-watch-payment.hook";
-import { unwrapEnvelope } from "@/lib/client/api";
-import { http } from "@/utils/axios";
+import { useSponsorJoinPage } from "@/hooks/sponsors/use-sponsor-join.hook";
 import { PublicShell } from "@/views/auth/public-shell";
 
-type PublicEvent = { id: string; title: string; createdAt?: string | null };
-type Charge = {
-  sponsor?: { id: string };
-  payment?: { id: string; status: string; trackingId?: string };
-  ussdCode?: string;
-  link?: string;
-  waived?: boolean;
-  alreadyPaid?: boolean;
-};
-
 export function SponsorJoinPage() {
-  const translate = useTranslate();
-  const [events, setEvents] = useState<PublicEvent[]>([]);
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [anonymous, setAnonymous] = useState(false);
-  const [eventId, setEventId] = useState("");
-  const [paymentPhone, setPaymentPhone] = useState("");
-  const [amount, setAmount] = useState("");
-  const [step, setStep] = useState<1 | 2>(1);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [charge, setCharge] = useState<Charge | null>(null);
-
-  useEffect(() => {
-    void http.get("/public/events").then(({ data }) => {
-      const rows = unwrapEnvelope<PublicEvent[]>(data);
-      const list = Array.isArray(rows) ? rows : [];
-      setEvents(list);
-      setEventId((current) => current || latestCreatedEventId(list));
-    });
-  }, []);
-
-  useEffect(() => {
-    const sponsorId = charge?.sponsor?.id;
-    const status = charge?.payment?.status;
-    if (!sponsorId || !status || status !== PAYMENT_STATUSES.PENDING) {
-      return;
-    }
-    const timer = window.setInterval(() => {
-      void http
-        .post(`/sponsors/${sponsorId}/refresh`)
-        .then(({ data }) => {
-          const next = unwrapEnvelope<{ payment?: Charge["payment"] }>(data);
-          if (!next.payment) {
-            return;
-          }
-          setCharge((current) =>
-            current ? { ...current, payment: next.payment } : current
-          );
-        })
-        .catch(() => undefined);
-    }, PAYMENT_POLL_MS);
-    return () => window.clearInterval(timer);
-  }, [charge?.sponsor?.id, charge?.payment?.status]);
-
-  function continueToPayment(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError("");
-    if (!fullName.trim() || !email.trim() || !eventId) {
-      setError(translate("sponsors.detailsRequired"));
-      return;
-    }
-    setPaymentPhone((current) => current || phone);
-    setStep(2);
-  }
-
-  async function pay(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError("");
-    if (!paymentPhone.trim()) {
-      setError(translate("sponsors.phoneRequired"));
-      return;
-    }
-    const parsedAmount = acceptedSponsorAmount(amount);
-    if (parsedAmount == null) {
-      setError(
-        translate("sponsors.amountMinimum", { amount: SPONSOR_AMOUNT_XAF })
-      );
-      return;
-    }
-    setBusy(true);
-    try {
-      const { data } = await http.post("/sponsors", {
-        fullName: fullName.trim(),
-        email: email.trim(),
-        phone: phone.trim() || null,
-        anonymous,
-        eventId,
-        paymentPhone: paymentPhone.trim(),
-        amount: parsedAmount,
-      });
-      setCharge(unwrapEnvelope<Charge>(data));
-    } catch (cause) {
-      setError(messageFromError(cause, translate("sponsors.failed")));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  const paid =
-    charge?.payment?.status === PAYMENT_STATUSES.PAID ||
-    charge?.payment?.status === PAYMENT_STATUSES.WAIVED ||
-    charge?.alreadyPaid ||
-    charge?.waived;
+  const page = useSponsorJoinPage();
+  const { translate, charge } = page;
 
   return (
     <PublicShell>
@@ -148,7 +33,7 @@ export function SponsorJoinPage() {
           </CardDescription>
         </CardHeader>
         <Separator />
-        {paid ? (
+        {page.paid ? (
           <div className="flex flex-col gap-2 font-serif text-base leading-relaxed">
             <p>{translate("sponsors.paid")}</p>
             {charge?.payment?.trackingId ? (
@@ -167,7 +52,12 @@ export function SponsorJoinPage() {
               </p>
             ) : null}
             {charge.link ? (
-              <a className="underline" href={charge.link} target="_blank" rel="noreferrer">
+              <a
+                className="underline"
+                href={charge.link}
+                target="_blank"
+                rel="noreferrer"
+              >
                 {translate("payments.openLink")}
               </a>
             ) : null}
@@ -175,8 +65,8 @@ export function SponsorJoinPage() {
               <p className="font-mono">{charge.payment.trackingId}</p>
             ) : null}
           </div>
-        ) : step === 1 ? (
-          <form className="flex flex-col gap-4" onSubmit={continueToPayment}>
+        ) : page.step === 1 ? (
+          <form className="flex flex-col gap-4" onSubmit={page.continueToPayment}>
             <div className="flex flex-col gap-2">
               <Label htmlFor="sponsor-name">
                 {translate("people.fields.fullName")}
@@ -184,8 +74,8 @@ export function SponsorJoinPage() {
               </Label>
               <Input
                 id="sponsor-name"
-                value={fullName}
-                onChange={(event) => setFullName(event.target.value)}
+                value={page.fullName}
+                onChange={(event) => page.setFullName(event.target.value)}
                 required
                 autoComplete="name"
               />
@@ -198,8 +88,8 @@ export function SponsorJoinPage() {
               <Input
                 id="sponsor-email"
                 type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                value={page.email}
+                onChange={(event) => page.setEmail(event.target.value)}
                 required
                 autoComplete="email"
               />
@@ -207,44 +97,46 @@ export function SponsorJoinPage() {
             <PhoneField
               id="sponsor-phone"
               label={translate("people.fields.phone")}
-              value={phone}
-              onChange={setPhone}
+              value={page.phone}
+              onChange={page.setPhone}
             />
             <label className="flex items-center gap-2 text-sm">
               <Checkbox
-                checked={anonymous}
-                onCheckedChange={(checked) => setAnonymous(checked === true)}
+                checked={page.anonymous}
+                onCheckedChange={(checked) =>
+                  page.setAnonymous(checked === true)
+                }
               />
               {translate("sponsors.anonymous")}
             </label>
             <LabeledSelect
               label={translate("sponsors.event")}
-              value={eventId}
-              onChange={setEventId}
+              value={page.eventId}
+              onChange={page.setEventId}
               required
               placeholder={translate("sponsors.eventPlaceholder")}
-              options={events.map((event) => ({
+              options={page.events.map((event) => ({
                 value: event.id,
                 label: event.title,
               }))}
             />
-            {error ? (
+            {page.error ? (
               <p className="text-sm text-destructive" role="alert">
-                {error}
+                {page.error}
               </p>
             ) : null}
             <Button type="submit">{translate("people.steps.next")}</Button>
           </form>
         ) : (
-          <form className="flex flex-col gap-4" onSubmit={pay}>
+          <form className="flex flex-col gap-4" onSubmit={page.pay}>
             <p className="text-sm text-muted-foreground">
               {translate("sponsors.paymentHint")}
             </p>
             <PhoneField
               id="sponsor-payment-phone"
               label={translate("sponsors.paymentPhone")}
-              value={paymentPhone}
-              onChange={setPaymentPhone}
+              value={page.paymentPhone}
+              onChange={page.setPaymentPhone}
               required
             />
             <div className="flex flex-col gap-2">
@@ -255,31 +147,37 @@ export function SponsorJoinPage() {
               <Input
                 id="sponsor-amount"
                 type="number"
-                min={SPONSOR_AMOUNT_XAF}
+                min={page.sponsorAmount}
                 step={1}
                 inputMode="numeric"
-                value={amount}
-                onChange={(event) => setAmount(event.target.value)}
+                value={page.amount}
+                onChange={(event) => page.setAmount(event.target.value)}
                 placeholder={translate("payments.amountPlaceholder")}
                 required
               />
               <p className="text-xs text-muted-foreground">
                 {translate("sponsors.amountMinimum", {
-                  amount: SPONSOR_AMOUNT_XAF,
+                  amount: page.sponsorAmount,
                 })}
               </p>
             </div>
-            {error ? (
+            {page.error ? (
               <p className="text-sm text-destructive" role="alert">
-                {error}
+                {page.error}
               </p>
             ) : null}
             <div className="flex flex-col gap-2 sm:flex-row">
-              <Button type="button" variant="outline" onClick={() => setStep(1)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={page.backToDetails}
+              >
                 {translate("people.steps.back")}
               </Button>
-              <Button type="submit" disabled={busy}>
-                {busy ? translate("sponsors.paying") : translate("sponsors.pay")}
+              <Button type="submit" disabled={page.busy}>
+                {page.busy
+                  ? translate("sponsors.paying")
+                  : translate("sponsors.pay")}
               </Button>
             </div>
           </form>
@@ -287,15 +185,4 @@ export function SponsorJoinPage() {
       </AuthFormFrame>
     </PublicShell>
   );
-}
-
-function messageFromError(error: unknown, fallback: string) {
-  if (axios.isAxiosError(error)) {
-    const message = (error.response?.data as { message?: string } | undefined)
-      ?.message;
-    if (message && message !== "Validation failed") {
-      return message;
-    }
-  }
-  return fallback;
 }

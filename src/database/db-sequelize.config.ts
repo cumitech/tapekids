@@ -19,12 +19,18 @@ export const sequelize = new Sequelize(
     dialect: "mysql",
     dialectModule: mysql,
     logging:
-      process.env.NODE_ENV === "development"
+      process.env.DEBUG_SQL === "1"
         ? (sql) => {
             console.info(`[SQL] ${sql.slice(0, 120)}${sql.length > 120 ? "…" : ""}`);
           }
         : false,
-    benchmark: true,
+    benchmark: process.env.DEBUG_SQL === "1",
+    pool: {
+      max: Number(process.env.MYSQL_POOL_MAX) || 10,
+      min: 0,
+      acquire: 20_000,
+      idle: 10_000,
+    },
   }
 );
 

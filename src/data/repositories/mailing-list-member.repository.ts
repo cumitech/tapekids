@@ -1,6 +1,7 @@
 import type { InferCreationAttributes } from "sequelize";
 
 import { MailingListMember, Person } from "@/data/entities";
+import { PERSON_LIST_ATTRIBUTES } from "@/data/query-shape";
 import { NotFoundException } from "@/exceptions/not-found.exception";
 import { nanoid } from "@/lib/api/id";
 
@@ -41,7 +42,13 @@ export class MailingListMemberRepository {
 
   async findById(id: string): Promise<MailingListMember> {
     const member = await MailingListMember.findByPk(id, {
-      include: [{ model: Person, as: "person" }],
+      include: [
+        {
+          model: Person,
+          as: "person",
+          attributes: [...PERSON_LIST_ATTRIBUTES],
+        },
+      ],
     });
     if (!member) {
       throw new NotFoundException("MailingListMember", id);
@@ -52,7 +59,13 @@ export class MailingListMemberRepository {
   async listByList(mailingListId: string): Promise<MailingListMember[]> {
     return MailingListMember.findAll({
       where: { mailingListId },
-      include: [{ model: Person, as: "person" }],
+      include: [
+        {
+          model: Person,
+          as: "person",
+          attributes: [...PERSON_LIST_ATTRIBUTES],
+        },
+      ],
       order: [["createdAt", "ASC"]],
     });
   }

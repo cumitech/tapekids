@@ -3,11 +3,18 @@ import { Op, fn, col, type InferCreationAttributes } from "sequelize";
 import type { InvitationStatus } from "@/constants/event-participation";
 import { INVITATION_STATUSES } from "@/constants/event-participation";
 import { Event, Invitation, InvitationBatch, Person } from "@/data/entities";
+import { PERSON_LIST_ATTRIBUTES } from "@/data/query-shape";
 import { NotFoundException } from "@/exceptions/not-found.exception";
 
 export type InvitationCreatePayload = InferCreationAttributes<Invitation>;
 
-const PERSON_INCLUDE = [{ model: Person, as: "person" as const }];
+const PERSON_INCLUDE = [
+  {
+    model: Person,
+    as: "person" as const,
+    attributes: [...PERSON_LIST_ATTRIBUTES],
+  },
+];
 
 export class InvitationRepository {
   async create(payload: InvitationCreatePayload): Promise<Invitation> {
@@ -23,7 +30,7 @@ export class InvitationRepository {
 
   async findById(id: string): Promise<Invitation> {
     const invitation = await Invitation.findByPk(id, {
-      include: PERSON_INCLUDE,
+      include: [{ model: Person, as: "person" }],
     });
     if (!invitation) {
       throw new NotFoundException("Invitation", id);
@@ -34,7 +41,7 @@ export class InvitationRepository {
   async findByToken(token: string): Promise<Invitation | null> {
     return Invitation.findOne({
       where: { token },
-      include: PERSON_INCLUDE,
+      include: [{ model: Person, as: "person" }],
     });
   }
 
@@ -54,6 +61,7 @@ export class InvitationRepository {
         },
       ],
       order: [["createdAt", "DESC"]],
+      limit: 200,
     });
   }
 

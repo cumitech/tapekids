@@ -20,12 +20,32 @@ const EMPTY: IntegrationsStatus = {
   campayWebhookUrl: "",
 };
 
+let cached: IntegrationsStatus | null = null;
+let pending: Promise<IntegrationsStatus> | null = null;
+
+function loadIntegrations() {
+  if (cached) {
+    return Promise.resolve(cached);
+  }
+  if (!pending) {
+    pending = apiGet<IntegrationsStatus>("/integrations")
+      .then((data) => {
+        cached = data;
+        return data;
+      })
+      .finally(() => {
+        pending = null;
+      });
+  }
+  return pending;
+}
+
 export function useIntegrations() {
-  const [status, setStatus] = useState<IntegrationsStatus>(EMPTY);
+  const [status, setStatus] = useState<IntegrationsStatus>(cached ?? EMPTY);
 
   useEffect(() => {
     let cancelled = false;
-    apiGet<IntegrationsStatus>("/integrations")
+    void loadIntegrations()
       .then((data) => {
         if (!cancelled) {
           setStatus(data);

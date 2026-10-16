@@ -1,7 +1,5 @@
 "use client";
 
-import { useShow } from "@refinedev/core";
-
 import { EventForm } from "@/components/events/event-form.component";
 import { EventImage } from "@/components/events/event-image";
 import { EventOperations } from "@/components/events/event-operations";
@@ -13,41 +11,12 @@ import {
   ShowViewHeader,
 } from "@/components/shared/refine-ui/views/show-view";
 import { PORTAL_SURFACE } from "@/constants/layout";
-import { useDashboardFormModal } from "@/hooks/core/use-dashboard-form-modal.hook";
-import { useLocale } from "@/hooks/core/use-locale.hook";
-import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
-import { formatDateTime, formatMoney } from "@/lib/format";
+import { useEventsShowPage } from "@/hooks/events/use-events-show.hook";
 import { cn } from "@/lib/utils";
-import type { Event } from "@/models/events/event.model";
-
-function moneyOrDash(
-  amount: string | number | null | undefined,
-  currency: string
-) {
-  if (amount == null || amount === "") {
-    return "-";
-  }
-  return formatMoney(amount, currency);
-}
-
-const EVENT_FIELDS = [
-  "city",
-  "venue",
-  "startsAt",
-  "endsAt",
-  "isPublished",
-  "currency",
-  "requiresParticipantFee",
-  "participantFeeAmount",
-] as const;
 
 export function EventsShowPage() {
-  const { openEdit } = useDashboardFormModal();
-  const { locale } = useLocale();
-  const labels = useResourceLabels("events", EVENT_FIELDS);
-  const { query } = useShow<Event>({ resource: "events" });
-  const record = query.data?.data;
-  const currency = record?.currency || "XAF";
+  const page = useEventsShowPage();
+  const { record, labels } = page;
 
   return (
     <ShowView>
@@ -56,21 +25,21 @@ export function EventsShowPage() {
         onEdit={
           record
             ? () =>
-                openEdit("events", record.id, ({ close }) => (
+                page.openEdit("events", record.id, ({ close }) => (
                   <EventForm
                     mode="edit"
                     id={record.id}
                     onCancel={close}
                     onSuccess={() => {
                       close();
-                      void query.refetch();
+                      page.refetch();
                     }}
                   />
                 ))
             : undefined
         }
       />
-      {record ? (
+      {record && page.detailFields ? (
         <div className="flex flex-col gap-6">
           <article
             className={cn(
@@ -102,19 +71,7 @@ export function EventsShowPage() {
               <RecordDetails
                 className="border-0 bg-white p-0 shadow-none"
                 labels={labels.fields}
-                fields={{
-                  city: record.city,
-                  venue: record.venue,
-                  startsAt: formatDateTime(record.startsAt, locale),
-                  endsAt: formatDateTime(record.endsAt, locale) || "-",
-                  isPublished: record.isPublished,
-                  currency,
-                  requiresParticipantFee: record.requiresParticipantFee,
-                  participantFeeAmount: moneyOrDash(
-                    record.participantFeeAmount,
-                    currency
-                  ),
-                }}
+                fields={page.detailFields}
               />
             </div>
           </article>

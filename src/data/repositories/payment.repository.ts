@@ -4,6 +4,7 @@ import type { PaymentKind } from "@/constants/event-participation";
 import { PAYMENT_STATUSES } from "@/constants/event-participation";
 import { Event, Payment, Person } from "@/data/entities";
 import { listSearchWhere } from "@/data/list-where";
+import { EVENT_REF_ATTRIBUTES, PERSON_ROSTER_ATTRIBUTES } from "@/data/query-shape";
 import type { ListQuery, PaginatedResult } from "@/data/types/pagination";
 import { NotFoundException } from "@/exceptions/not-found.exception";
 import { paymentTrackingId } from "@/lib/api/id";
@@ -14,8 +15,16 @@ export type PaymentUpdatePayload = Partial<
 >;
 
 const PAYMENT_INCLUDE = [
-  { model: Person, as: "person" as const },
-  { model: Event, as: "event" as const },
+  {
+    model: Person,
+    as: "person" as const,
+    attributes: [...PERSON_ROSTER_ATTRIBUTES],
+  },
+  {
+    model: Event,
+    as: "event" as const,
+    attributes: [...EVENT_REF_ATTRIBUTES],
+  },
 ];
 
 export class PaymentRepository {
@@ -58,13 +67,16 @@ export class PaymentRepository {
     ]);
     const hasWhere = Object.keys(where).length > 0;
     const combined = search && hasWhere ? { [Op.and]: [where, search] } : search || where;
-    const { rows, count } = await Payment.findAndCountAll({
-      where: combined,
-      include: PAYMENT_INCLUDE,
-      offset: query.offset,
-      limit: query.limit,
-      order: [[query.sort, query.order]],
-    });
+    const [count, rows] = await Promise.all([
+      Payment.count({ where: combined }),
+      Payment.findAll({
+        where: combined,
+        include: PAYMENT_INCLUDE,
+        offset: query.offset,
+        limit: query.limit,
+        order: [[query.sort, query.order]],
+      }),
+    ]);
 
     return {
       data: rows,

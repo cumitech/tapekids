@@ -1,1 +1,1 @@
-export { SponsorshipsPage as default } from "@/views/portal/role-portals.page";
+export { SponsorshipsPage as default } from "@/views/portal/sponsorships.page";

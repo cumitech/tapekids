@@ -85,6 +85,65 @@ export function setListQueryCache(key: string, value: ListCacheEntry) {
   writeStore(store);
 }
 
+function rowId(row: unknown): string | undefined {
+  if (!row || typeof row !== "object" || !("id" in row)) {
+    return undefined;
+  }
+  const id = (row as { id?: unknown }).id;
+  return id == null ? undefined : String(id);
+}
+
+export function removeIdFromListQueryCache(resource: string, id: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  const store = readStore();
+  const needle = `"r":"${resource}"`;
+  let changed = false;
+  for (const [key, entry] of Object.entries(store)) {
+    if (!key.includes(needle) || !Array.isArray(entry.data)) {
+      continue;
+    }
+    const next = entry.data.filter((row) => rowId(row) !== id);
+    if (next.length !== entry.data.length) {
+      store[key] = { data: next, total: Math.max(0, entry.total - 1) };
+      changed = true;
+    }
+  }
+  if (changed) {
+    writeStore(store);
+  }
+}
+
+export function upsertListQueryCacheRecord(resource: string, record: unknown) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  const id = rowId(record);
+  if (!id) {
+    clearListQueryCache(resource);
+    return;
+  }
+  const store = readStore();
+  const needle = `"r":"${resource}"`;
+  let changed = false;
+  for (const [key, entry] of Object.entries(store)) {
+    if (!key.includes(needle) || !Array.isArray(entry.data)) {
+      continue;
+    }
+    const index = entry.data.findIndex((row) => rowId(row) === id);
+    if (index >= 0) {
+      entry.data[index] = { ...(entry.data[index] as object), ...(record as object) };
+      changed = true;
+    }
+  }
+  if (changed) {
+    writeStore(store);
+  } else {
+    clearListQueryCache(resource);
+  }
+}
+
 export function clearListQueryCache(resource?: string) {
   if (typeof window === "undefined") {
     return;

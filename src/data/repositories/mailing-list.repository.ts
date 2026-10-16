@@ -1,7 +1,12 @@
 import type { InferCreationAttributes } from "sequelize";
 
-import { Invitation, MailingList, MailingListMember, Person, User } from "@/data/entities";
+import { MailingList, MailingListMember, Person, User } from "@/data/entities";
 import { listSearchWhere } from "@/data/list-where";
+import {
+  PERSON_LIST_ATTRIBUTES,
+  personIdsWithInvitations,
+  withInvitationFlag,
+} from "@/data/query-shape";
 import { contentTranslationRepository } from "@/data/repositories/content-translation.repository";
 import type { ListQuery, PaginatedResult } from "@/data/types/pagination";
 import { NotFoundException } from "@/exceptions/not-found.exception";
@@ -18,14 +23,7 @@ const memberInclude = {
     {
       model: Person,
       as: "person",
-      include: [
-        {
-          model: Invitation,
-          as: "invitations",
-          attributes: ["id", "status", "sentAt"],
-          required: false,
-        },
-      ],
+      attributes: [...PERSON_LIST_ATTRIBUTES],
     },
   ],
 };
@@ -35,21 +33,55 @@ export class MailingListRepository {
     return MailingList.create(payload);
   }
 
-  async findById(id: string): Promise<MailingList> {
+  async requireId(id: string): Promise<void> {
+    const list = await MailingList.findByPk(id, { attributes: ["id"] });
+    if (!list) {
+      throw new NotFoundException("MailingList", id);
+    }
+  }
+
+  async findById(
+    id: string,
+    options?: { members?: boolean }
+  ): Promise<MailingList> {
+    const withMembers = options?.members !== false;
     const list = await MailingList.findByPk(id, {
-      include: [
-        memberInclude,
-        {
-          model: User,
-          as: "createdBy",
-          attributes: ["id", "email", "username", "role"],
-        },
-      ],
+      include: withMembers
+        ? [
+            memberInclude,
+            {
+              model: User,
+              as: "createdBy",
+              attributes: ["id", "email", "username", "role"],
+            },
+          ]
+        : [
+            {
+              model: User,
+              as: "createdBy",
+              attributes: ["id", "email", "username", "role"],
+            },
+          ],
     });
     if (!list) {
       throw new NotFoundException("MailingList", id);
     }
-    return list;
+    if (!withMembers) {
+      return list;
+    }
+    const plain = list.toJSON() as MailingList & {
+      members?: Array<{ personId: string; person?: { id: string } }>;
+    };
+    const personIds = (plain.members ?? [])
+      .map((member) => member.person?.id ?? member.personId)
+      .filter(Boolean);
+    const invited = await personIdsWithInvitations(personIds);
+    for (const member of plain.members ?? []) {
+      if (member.person) {
+        member.person = withInvitationFlag(member.person, invited);
+      }
+    }
+    return plain as MailingList;
   }
 
   async list(query: ListQuery): Promise<PaginatedResult<MailingList>> {
@@ -75,15 +107,16 @@ export class MailingListRepository {
       throw new NotFoundException("MailingList", id);
     }
     await list.update(payload);
-    return this.findById(id);
+    return list;
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string): Promise<MailingList> {
     const list = await MailingList.findByPk(id);
     if (!list) {
       throw new NotFoundException("MailingList", id);
     }
     await contentTranslationRepository.deleteFor("mailing_list", id);
     await list.destroy();
+    return list;
   }
 }

@@ -37,6 +37,8 @@
     "edit": "Edit",
     "cancel": "Cancel",
     "confirm": "Are you sure?",
+    "confirmDeleteDescription": "This cannot be undone.",
+    "confirmDeleteEventDescription": "This also removes the roster, invitations, and payments for this event. People stay in the directory.",
     "refresh": "Refresh",
     "show": "Show",
     "list": "List",

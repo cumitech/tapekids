@@ -5,6 +5,7 @@ import type { PropsWithChildren, ReactNode } from "react";
 import { useResourceParams } from "@refinedev/core";
 
 import { ResourceHero } from "@/components/portal/resource-hero";
+import { DeleteButton } from "@/components/shared/refine-ui/buttons/delete";
 import { RefreshButton } from "@/components/shared/refine-ui/buttons/refresh";
 import { useResourceViewTitle } from "@/hooks/core/use-resource-labels.hook";
 import { cn } from "@/lib/utils";
@@ -55,6 +56,12 @@ export const EditViewHeader = ({
             recordItemId={recordItemId}
             resource={resourceName}
           />
+          {recordItemId ? (
+            <DeleteButton
+              recordItemId={recordItemId}
+              resource={resourceName}
+            />
+          ) : null}
         </>
       }
     />

@@ -217,7 +217,7 @@ export function MailingListPeoplePicker({
         map.set(key, group);
       }
       group.items.push(person);
-      if (person.invitations && person.invitations.length > 0) {
+      if (person.hasInvitation || (person.invitations && person.invitations.length > 0)) {
         group.invitedCount += 1;
       }
     }

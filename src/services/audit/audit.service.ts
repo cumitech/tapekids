@@ -20,7 +20,12 @@ export class AuditService {
     return auditLogRepository.list(query);
   }
 
-  async record(input: AuditInput): Promise<void> {
+  record(input: AuditInput): Promise<void> {
+    void this.persist(input);
+    return Promise.resolve();
+  }
+
+  private async persist(input: AuditInput): Promise<void> {
     try {
       const context = getRequestContext();
       const before = snapshot(input.before);

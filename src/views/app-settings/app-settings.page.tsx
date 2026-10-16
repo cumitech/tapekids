@@ -1,85 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useTranslate } from "@refinedev/core";
-
 import { StatusBadge } from "@/components/portal/status-badge";
 import { ListView, ListViewHeader } from "@/components/shared/refine-ui/views/list-view";
 import { Button } from "@/components/shared/ui/button";
-import { APP_SETTING_KEYS } from "@/constants/app-settings";
 import { PORTAL_SURFACE } from "@/constants/layout";
-import { apiErrorMessage, apiGet, apiPatch } from "@/lib/client/api";
-import { formatDateTime } from "@/lib/format";
-import { useLocale } from "@/hooks/core/use-locale.hook";
+import {
+  isBooleanOpen,
+  useAppSettingsPage,
+} from "@/hooks/app-settings/use-app-settings.hook";
 import { cn } from "@/lib/utils";
 
-type SettingRow = {
-  key: string;
-  type: "boolean" | "text";
-  value: string;
-};
-
-type BatchRow = {
-  id: string;
-  subject: string;
-  kind: string;
-  status: string;
-  linksOpen: boolean;
-  eventTitle: string;
-};
-
-type InvitationRow = {
-  id: string;
-  status: string;
-  email: string;
-  personName: string;
-  eventTitle: string;
-  batchSubject: string;
-  batchLinksOpen: boolean;
-  invitationOpen: boolean;
-  expiresAt: string | null;
-};
-
-type SettingsPage = {
-  settings: SettingRow[];
-  batches: BatchRow[];
-  invitations: InvitationRow[];
-};
-
-function isBooleanOpen(value: string) {
-  return value === "true" || value === "1";
-}
-
 export function AppSettingsPage() {
-  const translate = useTranslate();
-  const { locale } = useLocale();
-  const [page, setPage] = useState<SettingsPage | null>(null);
-  const [busyKey, setBusyKey] = useState("");
-  const [error, setError] = useState("");
-
-  const load = useCallback(async () => {
-    const data = await apiGet<SettingsPage>("/app-settings");
-    setPage(data);
-  }, []);
-
-  useEffect(() => {
-    void load().catch((err) => {
-      setError(apiErrorMessage(err, translate("appSettings.failed")));
-    });
-  }, [load, translate]);
-
-  async function run(key: string, action: () => Promise<void>) {
-    setBusyKey(key);
-    setError("");
-    try {
-      await action();
-      await load();
-    } catch (err) {
-      setError(apiErrorMessage(err, translate("appSettings.failed")));
-    } finally {
-      setBusyKey("");
-    }
-  }
+  const page = useAppSettingsPage();
+  const { translate } = page;
 
   return (
     <ListView>
@@ -88,16 +21,19 @@ export function AppSettingsPage() {
         <p className="text-sm text-muted-foreground">
           {translate("appSettings.description")}
         </p>
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        {page.error ? (
+          <p className="text-sm text-destructive">{page.error}</p>
+        ) : null}
 
         <section className={cn(PORTAL_SURFACE, "bg-white p-5 dark:bg-card")}>
           <h2 className="text-lg font-semibold">
             {translate("appSettings.settingsTitle")}
           </h2>
           <ul className="mt-3 divide-y overflow-hidden rounded-md border">
-            {(page?.settings ?? []).map((setting) => {
-              const open = setting.type === "boolean" && isBooleanOpen(setting.value);
-              const known = setting.key === APP_SETTING_KEYS.INVITATION_LINKS_OPEN;
+            {(page.page?.settings ?? []).map((setting) => {
+              const open =
+                setting.type === "boolean" && isBooleanOpen(setting.value);
+              const known = setting.key === page.invitationLinksKey;
               return (
                 <li
                   key={setting.key}
@@ -122,15 +58,8 @@ export function AppSettingsPage() {
                       type="button"
                       size="sm"
                       variant={open ? "outline" : "default"}
-                      disabled={busyKey === setting.key}
-                      onClick={() =>
-                        void run(setting.key, async () => {
-                          await apiPatch("/app-settings", {
-                            key: setting.key,
-                            open: !open,
-                          });
-                        })
-                      }
+                      disabled={page.busyKey === setting.key}
+                      onClick={() => page.toggleSetting(setting, open)}
                     >
                       {known
                         ? open
@@ -152,7 +81,7 @@ export function AppSettingsPage() {
             {translate("appSettings.batchesTitle")}
           </h2>
           <ul className="mt-3 divide-y overflow-hidden rounded-md border">
-            {(page?.batches ?? []).map((batch) => (
+            {(page.page?.batches ?? []).map((batch) => (
               <li
                 key={batch.id}
                 className="flex flex-wrap items-center justify-between gap-3 px-3 py-3"
@@ -173,14 +102,8 @@ export function AppSettingsPage() {
                     type="button"
                     size="sm"
                     variant="outline"
-                    disabled={busyKey === `${batch.id}:extend`}
-                    onClick={() =>
-                      void run(`${batch.id}:extend`, async () => {
-                        await apiPatch(`/app-settings/batches/${batch.id}`, {
-                          extend: true,
-                        });
-                      })
-                    }
+                    disabled={page.busyKey === `${batch.id}:extend`}
+                    onClick={() => page.extendBatch(batch.id)}
                   >
                     {translate("appSettings.extendBatch")}
                   </Button>
@@ -188,14 +111,8 @@ export function AppSettingsPage() {
                     type="button"
                     size="sm"
                     variant={batch.linksOpen ? "outline" : "default"}
-                    disabled={busyKey === batch.id}
-                    onClick={() =>
-                      void run(batch.id, async () => {
-                        await apiPatch(`/app-settings/batches/${batch.id}`, {
-                          open: !batch.linksOpen,
-                        });
-                      })
-                    }
+                    disabled={page.busyKey === batch.id}
+                    onClick={() => page.toggleBatch(batch)}
                   >
                     {batch.linksOpen
                       ? translate("appSettings.closeBatch")
@@ -204,7 +121,7 @@ export function AppSettingsPage() {
                 </div>
               </li>
             ))}
-            {page && page.batches.length === 0 ? (
+            {page.page && page.page.batches.length === 0 ? (
               <li className="px-3 py-4 text-sm text-muted-foreground">
                 {translate("empty")}
               </li>
@@ -217,7 +134,7 @@ export function AppSettingsPage() {
             {translate("appSettings.invitationsTitle")}
           </h2>
           <ul className="mt-3 divide-y overflow-hidden rounded-md border">
-            {(page?.invitations ?? []).map((invitation) => (
+            {(page.page?.invitations ?? []).map((invitation) => (
               <li
                 key={invitation.id}
                 className="flex flex-wrap items-center justify-between gap-3 px-3 py-3"
@@ -229,11 +146,7 @@ export function AppSettingsPage() {
                     {invitation.batchSubject}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {invitation.expiresAt
-                      ? translate("appSettings.expires", {
-                          date: formatDateTime(invitation.expiresAt, locale),
-                        })
-                      : null}
+                    {page.expiresLabel(invitation.expiresAt)}
                     {invitation.expiresAt ? " · " : null}
                     {invitation.invitationOpen
                       ? translate("appSettings.linkOpen")
@@ -249,15 +162,8 @@ export function AppSettingsPage() {
                     type="button"
                     size="sm"
                     variant="outline"
-                    disabled={busyKey === `${invitation.id}:extend`}
-                    onClick={() =>
-                      void run(`${invitation.id}:extend`, async () => {
-                        await apiPatch(
-                          `/app-settings/invitations/${invitation.id}`,
-                          { extend: true }
-                        );
-                      })
-                    }
+                    disabled={page.busyKey === `${invitation.id}:extend`}
+                    onClick={() => page.extendInvitation(invitation.id)}
                   >
                     {translate("appSettings.extendInvitation")}
                   </Button>
@@ -265,15 +171,8 @@ export function AppSettingsPage() {
                     type="button"
                     size="sm"
                     variant={invitation.invitationOpen ? "outline" : "default"}
-                    disabled={busyKey === invitation.id}
-                    onClick={() =>
-                      void run(invitation.id, async () => {
-                        await apiPatch(
-                          `/app-settings/invitations/${invitation.id}`,
-                          { open: !invitation.invitationOpen }
-                        );
-                      })
-                    }
+                    disabled={page.busyKey === invitation.id}
+                    onClick={() => page.toggleInvitation(invitation)}
                   >
                     {invitation.invitationOpen
                       ? translate("appSettings.closeInvitation")
@@ -282,7 +181,7 @@ export function AppSettingsPage() {
                 </div>
               </li>
             ))}
-            {page && page.invitations.length === 0 ? (
+            {page.page && page.page.invitations.length === 0 ? (
               <li className="px-3 py-4 text-sm text-muted-foreground">
                 {translate("empty")}
               </li>

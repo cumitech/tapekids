@@ -1,42 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import { useShow, useTranslate } from "@refinedev/core";
+import { CalendarIcon, MailCheckIcon } from "lucide-react";
 
 import { MailingListDeliveries } from "@/components/invitations/invitation-deliveries";
 import { InvitationQueueForm } from "@/components/invitations/invitation-queue-form";
 import { MailingListForm } from "@/components/mailing-lists/mailing-list-form.component";
-import { useAppModal } from "@/components/shared/modals/app-modal";
+import { DeleteConfirmPopover } from "@/components/shared/refine-ui/buttons/delete-confirm-popover";
 import {
   ShowView,
   ShowViewHeader,
 } from "@/components/shared/refine-ui/views/show-view";
 import { Button } from "@/components/shared/ui/button";
 import { Badge } from "@/components/shared/ui/badge";
-import { useBusyAction } from "@/hooks/core/use-busy-action.hook";
-import { useDashboardFormModal } from "@/hooks/core/use-dashboard-form-modal.hook";
-import { useLocale } from "@/hooks/core/use-locale.hook";
-import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
-import { apiDelete } from "@/lib/client/api";
+import { PORTAL_SURFACE } from "@/constants/layout";
+import {
+  memberIsInvited,
+  useMailingListsShowPage,
+} from "@/hooks/mailing-lists/use-mailing-lists-show.hook";
 import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, MailCheckIcon } from "lucide-react";
-import { PORTAL_SURFACE } from "@/constants/layout";
-import { categoryForAudience } from "@/constants/person";
-import type { MailingList } from "@/models/mailing-lists/mailing-list.model";
 
 export function MailingListsShowPage() {
-  const translate = useTranslate();
-  const { locale } = useLocale();
-  const { confirm } = useAppModal();
-  const { openEdit } = useDashboardFormModal();
-  const labels = useResourceLabels("mailingLists", ["name", "audienceKind"]);
-  const { query } = useShow<MailingList>({ resource: "mailing-lists" });
-  const record = query.data?.data;
-  const { busy, run } = useBusyAction();
-
-  const members = record?.members ?? [];
-  const [focusBatchId, setFocusBatchId] = useState<string | null>(null);
+  const page = useMailingListsShowPage();
+  const { record, labels, translate, locale } = page;
 
   return (
     <ShowView>
@@ -45,7 +31,7 @@ export function MailingListsShowPage() {
         onEdit={
           record
             ? () =>
-                openEdit(
+                page.openEdit(
                   "mailingLists",
                   record.id,
                   ({ close }) => (
@@ -55,7 +41,7 @@ export function MailingListsShowPage() {
                       onCancel={close}
                       onSuccess={() => {
                         close();
-                        void query.refetch();
+                        page.refetch();
                       }}
                     />
                   ),
@@ -67,23 +53,17 @@ export function MailingListsShowPage() {
       {record ? (
         <div className="flex flex-col gap-8">
           <p className="text-muted-foreground">
-            {labels.fields.audienceKind}:{" "}
-            {(() => {
-              const category = categoryForAudience(record.audienceKind);
-              return category
-                ? translate(`people.categories.${category}`)
-                : record.audienceKind;
-            })()}
+            {labels.fields.audienceKind}: {page.audienceLabel}
           </p>
 
           <section className={cn(PORTAL_SURFACE, "bg-white p-5 dark:bg-card")}>
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-lg font-semibold">
-                {translate("mailingLists.members")} ({members.length})
+                {translate("mailingLists.members")} ({page.members.length})
               </h3>
             </div>
             <ul className="divide-y rounded-md border bg-white dark:bg-card">
-              {members.map((member) => (
+              {page.members.map((member) => (
                 <li
                   key={member.id}
                   className="flex items-center justify-between gap-2 px-3 py-2.5"
@@ -111,8 +91,7 @@ export function MailingListsShowPage() {
                           })}
                         </Badge>
                       ) : null}
-                      {member.person?.invitations &&
-                      member.person.invitations.length > 0 ? (
+                      {memberIsInvited(member.person) ? (
                         <Badge
                           variant="outline"
                           className="gap-1 border-amber-300 bg-amber-50 px-1.5 py-0 text-[10px] font-medium text-amber-700 dark:border-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
@@ -123,30 +102,22 @@ export function MailingListsShowPage() {
                       ) : null}
                     </div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    disabled={busy}
-                    onClick={() =>
-                      confirm({
-                        title: translate("buttons.confirm"),
-                        destructive: true,
-                        onConfirm: () =>
-                          run(async () => {
-                            await apiDelete(
-                              `/mailing-lists/${record.id}/members/${member.personId}`
-                            );
-                            await query.refetch();
-                          }, translate("mailingLists.memberRemoveFailed")),
-                      })
-                    }
+                  <DeleteConfirmPopover
+                    disabled={page.busy}
+                    onConfirm={() => page.removeMember(member.personId)}
                   >
-                    {translate("actions.delete")}
-                  </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={page.busy}
+                    >
+                      {translate("actions.delete")}
+                    </Button>
+                  </DeleteConfirmPopover>
                 </li>
               ))}
-              {members.length === 0 ? (
+              {page.members.length === 0 ? (
                 <li className="px-3 py-4 text-sm text-muted-foreground">
                   {translate("empty")}
                 </li>
@@ -156,11 +127,13 @@ export function MailingListsShowPage() {
 
           <InvitationQueueForm
             mailingListId={record.id}
-            onSent={(result) => setFocusBatchId(result.batch?.id ?? null)}
+            onSent={(result) =>
+              page.setFocusBatchId(result.batch?.id ?? null)
+            }
           />
           <MailingListDeliveries
             mailingListId={record.id}
-            focusBatchId={focusBatchId}
+            focusBatchId={page.focusBatchId}
           />
         </div>
       ) : null}

@@ -37,6 +37,8 @@
     "edit": "Modifier",
     "cancel": "Annuler",
     "confirm": "Êtes-vous sûr ?",
+    "confirmDeleteDescription": "Cette action est définitive.",
+    "confirmDeleteEventDescription": "Le roster, les invitations et les paiements de cet événement seront aussi supprimés. Les fiches personnes restent dans l'annuaire.",
     "refresh": "Actualiser",
     "show": "Afficher",
     "list": "Liste",

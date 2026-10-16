@@ -52,6 +52,7 @@ export function useCachedTable<TData extends BaseRecord>({
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
         placeholderData: keepPreviousData,
+        retry: 1,
       },
       filters: permanentFilters
         ? {

@@ -58,6 +58,8 @@ export function useResourceForm<
       action: mode,
       id,
       redirect: false,
+      mutationMode: "pessimistic",
+      invalidates: ["list"],
       queryOptions: refetchOnMount
         ? {
             staleTime: 0,

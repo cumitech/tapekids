@@ -119,12 +119,16 @@ export class PersonService {
   async assignYfId(id: string, body: unknown) {
     const { yfId } = parseInviteYfId(body);
     await assertYfIdAvailable(yfId, id);
-    const before = await personRepository.findById(id);
+    const before = await personRepository.findById(id, {
+      emergencyContacts: false,
+    });
     await personRepository.update(id, { yfId });
-    const person = await personRepository.findById(id);
+    const person = await personRepository.findById(id, {
+      emergencyContacts: false,
+    });
     const acceptedCount = await invitationService.acceptDeliveredYfInvites(person);
     await syncLinkedUserYfId(id, yfId);
-    const after = await personRepository.findById(id);
+    const after = person;
     await auditService.record({
       action: "update",
       entity: "Person",
@@ -136,7 +140,9 @@ export class PersonService {
   }
 
   async delete(id: string) {
-    const before = await personRepository.findById(id);
+    const before = await personRepository.findById(id, {
+      emergencyContacts: false,
+    });
     await personRepository.delete(id);
     await auditService.record({
       action: "delete",

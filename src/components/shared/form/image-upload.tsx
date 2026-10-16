@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useTranslate } from "@refinedev/core";
 import { ImagePlus, Loader2, Trash2 } from "lucide-react";
 
+import { DeleteConfirmPopover } from "@/components/shared/refine-ui/buttons/delete-confirm-popover";
 import { Button } from "@/components/shared/ui/button";
 import { apiErrorMessage, apiUpload } from "@/lib/client/api";
 import { compressImageIfNeeded } from "@/lib/uploads/compress-image";
@@ -97,16 +98,22 @@ export function ImageUpload({
           {preview ? translate("uploads.change") : translate("uploads.choose")}
         </Button>
         {preview ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
+          <DeleteConfirmPopover
+            title={translate("uploads.remove")}
             disabled={disabled || busy}
-            onClick={() => onChange("")}
+            confirmLabel={translate("uploads.remove")}
+            onConfirm={() => onChange("")}
           >
-            <Trash2 className="size-4" />
-            {translate("uploads.remove")}
-          </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={disabled || busy}
+            >
+              <Trash2 className="size-4" />
+              {translate("uploads.remove")}
+            </Button>
+          </DeleteConfirmPopover>
         ) : null}
       </div>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}

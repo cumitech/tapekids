@@ -49,6 +49,7 @@ export interface Person {
   isTrophy?: boolean;
   category?: PersonCategory | null;
   importedAt?: string | null;
+  hasInvitation?: boolean;
   invitations?: Array<{
     id: string;
     status: string;

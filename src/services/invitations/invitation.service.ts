@@ -105,7 +105,7 @@ export class InvitationService {
     const personIds = new Set(input.personIds ?? []);
 
     if (input.mailingListId) {
-      await mailingListRepository.findById(input.mailingListId);
+      await mailingListRepository.requireId(input.mailingListId);
       const fromList = await mailingListMemberRepository.listPersonIds(
         input.mailingListId
       );
@@ -182,7 +182,7 @@ export class InvitationService {
   }
 
   async listByMailingList(mailingListId: string) {
-    await mailingListRepository.findById(mailingListId);
+    await mailingListRepository.requireId(mailingListId);
     const batches = await invitationBatchRepository.listByMailingList(mailingListId);
     const counts = await invitationRepository.countByBatches(
       batches.map((batch) => batch.id)

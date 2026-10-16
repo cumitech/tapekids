@@ -1,1 +1,1 @@
-export { CampPage as default } from "@/views/portal/role-portals.page";
+export { CampPage as default } from "@/views/portal/camp.page";

@@ -1,53 +1,17 @@
 "use client";
 
 import { cloneElement, isValidElement } from "react";
-import { useTranslate } from "@refinedev/core";
 import { ListChecks } from "lucide-react";
 
 import { PortalCard } from "@/components/portal/portal-card";
 import { RESOURCE_CARD_TINT } from "@/components/portal/portal-tone";
-import { useRefineResources } from "@/hooks/core/refine-resources.hook";
-import { useRoleFlags } from "@/hooks/core/use-session-roles.hook";
-import { canPerform } from "@/lib/permissions";
+import { useAdminHome } from "@/hooks/dashboard/use-admin-home.hook";
 import { DashboardOpsHero } from "@/views/dashboard/dashboard-ops-hero";
 
 const ICON = { className: "h-4 w-4" };
-const ADMIN_GROUPS = [
-  {
-    titleKey: "dashboard.adminNavDirectory",
-    names: [
-      "people",
-      "trophy",
-      "waiting-list",
-      "mailing-lists",
-      "events",
-      "sponsors",
-      "payments",
-    ],
-  },
-  {
-    titleKey: "dashboard.adminNavReporting",
-    names: ["reports"],
-  },
-  {
-    titleKey: "dashboard.adminNavOversight",
-    names: ["audit-logs", "app-settings"],
-  },
-] as const;
 
 export function AdminHome() {
-  const translate = useTranslate();
-  const { roles } = useRoleFlags();
-  const resources = useRefineResources().filter((resource) =>
-    canPerform({ roles, resource: resource.name, action: "list" })
-  );
-  const groups = ADMIN_GROUPS.map((group) => ({
-    title: translate(group.titleKey),
-    resources: group.names.flatMap((name) => {
-      const resource = resources.find((item) => item.name === name);
-      return resource ? [resource] : [];
-    }),
-  })).filter((group) => group.resources.length > 0);
+  const { translate, groups } = useAdminHome();
 
   return (
     <section className="flex flex-col gap-5 sm:gap-6">

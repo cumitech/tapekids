@@ -62,7 +62,6 @@ function wrapRoute<P extends Params>(
             locale: localeFromRequest(request),
           };
           return await runWithRequestContext(store, async () => {
-            logger.info("http.request", { status: "start" });
             const params = await resolveParams(context);
             const response = await handler({ request, params, user });
             logger.info("http.request", {

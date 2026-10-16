@@ -17,6 +17,7 @@ import { FormSection } from "@/components/shared/form/form-section";
 import { GeoFields } from "@/components/shared/form/geo-fields.component";
 import { PhoneField } from "@/components/shared/form/phone-field";
 import { PersonCategorySelect } from "@/components/people/person-category-select";
+import { DeleteConfirmPopover } from "@/components/shared/refine-ui/buttons/delete-confirm-popover";
 import { Button } from "@/components/shared/ui/button";
 import { Checkbox } from "@/components/shared/ui/checkbox";
 import { Input } from "@/components/shared/ui/input";
@@ -468,17 +469,22 @@ export function PersonFields({
                       />
                     )}
                   />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="mb-px shrink-0"
+                  <DeleteConfirmPopover
+                    title={copy.removeGuardian}
                     disabled={fields.length <= MIN_GUARDIANS}
-                    aria-label={copy.removeGuardian}
-                    onClick={() => remove(index)}
+                    onConfirm={() => remove(index)}
                   >
-                    <Trash2 />
-                  </Button>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="mb-px shrink-0"
+                      disabled={fields.length <= MIN_GUARDIANS}
+                      aria-label={copy.removeGuardian}
+                    >
+                      <Trash2 />
+                    </Button>
+                  </DeleteConfirmPopover>
                 </div>
               </div>
             ))}

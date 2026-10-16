@@ -26,6 +26,7 @@ export interface MailingList {
       email: string;
       phone?: string | null;
       importedAt?: string | null;
+      hasInvitation?: boolean;
       invitations?: Array<{
         id: string;
         status: string;

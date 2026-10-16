@@ -7,7 +7,9 @@ import {
   clearListQueryCache,
   getListQueryCache,
   listQueryCacheKey,
+  removeIdFromListQueryCache,
   setListQueryCache,
+  upsertListQueryCacheRecord,
 } from "@/lib/client/list-query-cache";
 import { unwrapEnvelope } from "@/lib/client/api";
 import { http } from "@/utils/axios";
@@ -21,6 +23,10 @@ const LOCAL_RESOURCES = new Set([
 
 // Axios already uses API_URL as baseURL. Passing it here again produced /api/api/*.
 const restProvider = dataProviderSimpleRest("", http);
+const inflightLists = new Map<
+  string,
+  Promise<{ data: unknown[]; total: number }>
+>();
 
 export const dataProvider = {
   ...restProvider,
@@ -39,14 +45,24 @@ export const dataProvider = {
       };
     }
 
-    const result = await restProvider.getList(params);
-    if (!skipCache) {
-      setListQueryCache(cacheKey, {
-        data: result.data,
-        total: result.total,
-      });
+    const pending = inflightLists.get(cacheKey);
+    if (pending) {
+      return pending;
     }
-    return result;
+
+    const request = restProvider.getList(params).then((result) => {
+      if (!skipCache) {
+        setListQueryCache(cacheKey, {
+          data: result.data,
+          total: result.total,
+        });
+      }
+      return result;
+    }).finally(() => {
+      inflightLists.delete(cacheKey);
+    });
+    inflightLists.set(cacheKey, request);
+    return request;
   },
   getOne: async (params) => {
     if (params.resource === "me") {
@@ -79,12 +95,17 @@ export const dataProvider = {
       return { data: { ...person, id: "me" } };
     }
     const result = await restProvider.update(params);
-    clearListQueryCache(params.resource);
+    upsertListQueryCacheRecord(params.resource, result.data);
     return result;
   },
   deleteOne: async (params) => {
-    const result = await restProvider.deleteOne(params);
-    clearListQueryCache(params.resource);
-    return result;
+    const id = String(params.id);
+    removeIdFromListQueryCache(params.resource, id);
+    try {
+      return await restProvider.deleteOne(params);
+    } catch (error) {
+      clearListQueryCache(params.resource);
+      throw error;
+    }
   },
 } as DataProvider;
