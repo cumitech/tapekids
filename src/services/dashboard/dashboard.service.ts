@@ -2,16 +2,17 @@ import { col, fn, Op } from "sequelize";
 
 import { APP_SETTING_KEYS } from "@/constants/app-settings";
 import {
-  EVENT_MEMBERSHIP_KINDS,
   INVITATION_STATUSES,
   PAYMENT_STATUSES,
 } from "@/constants/event-participation";
 import { PERSON_CATEGORIES } from "@/constants/person";
-import { Event, Invitation, Payment, Person } from "@/data/entities";
+import { Event, Invitation, Payment } from "@/data/entities";
 import { AppSettingRepository } from "@/data/repositories/app-setting.repository";
+import { TrophyRepository } from "@/data/repositories/trophy.repository";
 import type { DashboardStats } from "@/models/dashboard/dashboard-stats.model";
 
 const appSettingRepository = new AppSettingRepository();
+const trophyRepository = new TrophyRepository();
 
 export class DashboardService {
   async stats(): Promise<DashboardStats> {
@@ -24,18 +25,13 @@ export class DashboardService {
       totalEvents,
       invitationLinksOpen,
     ] = await Promise.all([
-      Invitation.count({
-        distinct: true,
-        col: "personId",
-        where: {
-          status: INVITATION_STATUSES.ACCEPTED,
-          kind: EVENT_MEMBERSHIP_KINDS.CAMPER,
-        },
-      }),
-      Person.count({ where: { category: PERSON_CATEGORIES.TROPHY_CAMPER } }),
-      Person.count({
-        where: { category: PERSON_CATEGORIES.TROPHY_PARTICIPANT },
-      }),
+      trophyRepository.countUniqueRegisteredPeople(),
+      trophyRepository.countUniqueRegisteredPeople([
+        PERSON_CATEGORIES.TROPHY_CAMPER,
+      ]),
+      trophyRepository.countUniqueRegisteredPeople([
+        PERSON_CATEGORIES.TROPHY_PARTICIPANT,
+      ]),
       Invitation.count({
         where: {
           status: {
