@@ -126,6 +126,10 @@ export class ReportService {
     return this.listMemberships(EVENT_MEMBERSHIP_KINDS.CAMPER, query);
   }
 
+  async listChaperones(query: ListQuery) {
+    return this.listMemberships(EVENT_MEMBERSHIP_KINDS.COORDINATOR, query);
+  }
+
   listTrophyCampers(query: ListQuery) {
     return this.listTrophyMemberships(REPORT_KINDS.TROPHY_CAMPERS, query);
   }
@@ -148,7 +152,8 @@ export class ReportService {
       report === REPORT_KINDS.SPONSORS ||
       report === REPORT_KINDS.PARTICIPANTS ||
       report === REPORT_KINDS.TROPHY_CAMPERS ||
-      report === REPORT_KINDS.TROPHY_PARTICIPANTS
+      report === REPORT_KINDS.TROPHY_PARTICIPANTS ||
+      report === REPORT_KINDS.CHAPERONES
     ) {
       const result = await this.exportMemberships(report);
       return {
@@ -254,6 +259,9 @@ export class ReportService {
     }
     if (report === REPORT_KINDS.PARTICIPANTS) {
       return this.listParticipants(query);
+    }
+    if (report === REPORT_KINDS.CHAPERONES) {
+      return this.listChaperones(query);
     }
     if (report === REPORT_KINDS.TROPHY_CAMPERS) {
       return this.listTrophyCampers(query);

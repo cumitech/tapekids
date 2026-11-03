@@ -8,7 +8,10 @@ import {
   type Sequelize,
 } from "sequelize";
 
-import type { PersonCategory } from "@/constants/person";
+import {
+  PERSON_CATEGORIES,
+  type PersonCategory,
+} from "@/constants/person";
 import type { Invitation } from "./invitation";
 
 export class Person extends Model<
@@ -38,7 +41,7 @@ export class Person extends Model<
   declare points: CreationOptional<number | null>;
   declare ageYears: CreationOptional<number | null>;
   declare isTrophy: CreationOptional<boolean>;
-  declare category: CreationOptional<PersonCategory | null>;
+  declare category: CreationOptional<PersonCategory>;
   declare importedAt: CreationOptional<Date | null>;
   declare invitations?: NonAttribute<Invitation[]>;
 }
@@ -141,8 +144,12 @@ export function initPerson(sequelize: Sequelize) {
         defaultValue: false,
       },
       category: {
-        type: DataTypes.STRING(32),
-        allowNull: true,
+        type: DataTypes.ENUM(
+          PERSON_CATEGORIES.TROPHY_PARTICIPANT,
+          PERSON_CATEGORIES.TROPHY_CAMPER
+        ),
+        allowNull: false,
+        defaultValue: PERSON_CATEGORIES.TROPHY_PARTICIPANT,
       },
       importedAt: {
         type: DataTypes.DATE,

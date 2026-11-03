@@ -3,6 +3,7 @@ import { z } from "zod";
 import { DEFAULT_COUNTRY } from "@/constants/geo";
 import {
   PERSON_CATEGORY_VALUES,
+  PERSON_CATEGORIES,
   PERSON_GENDERS,
   SHIRT_SIZES,
   canonicalShirtSize,
@@ -91,7 +92,7 @@ export const createPersonSchema = z.object({
     .or(z.literal(""))
     .optional()
     .nullable()
-    .transform((value) => (value ? value : null)),
+    .transform((value) => value || PERSON_CATEGORIES.TROPHY_PARTICIPANT),
   importedAt: z.coerce.date().nullable().optional(),
   emergencyContacts: z.array(emergencyContactSchema).max(3).optional(),
 });
@@ -139,7 +140,7 @@ export function toCreatePersonPayload(input: CreatePerson) {
     ageYears:
       input.ageYears != null ? input.ageYears : ageInYears(input.dateOfBirth),
     isTrophy: input.isTrophy ?? false,
-    category: input.category ?? null,
+    category: input.category ?? PERSON_CATEGORIES.TROPHY_PARTICIPANT,
     importedAt: input.importedAt ?? null,
   };
 }

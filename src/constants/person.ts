@@ -32,15 +32,6 @@ export function canonicalShirtSize<T>(value: T): (typeof SHIRT_SIZES)[number] | 
 export const MIN_GUARDIANS = 1;
 export const MAX_GUARDIANS = 3;
 
-/** Top-level person groups used in directory and Excel import. */
-export const PERSON_CATEGORY_GROUPS = {
-  CAMPER: "camper",
-  CHAPERONE: "chaperone",
-} as const;
-
-export type PersonCategoryGroup =
-  (typeof PERSON_CATEGORY_GROUPS)[keyof typeof PERSON_CATEGORY_GROUPS];
-
 /**
  * Leaf categories stored on `people.category`.
  * Trophy campers attend multi-day camps; trophy participants attend day events.
@@ -48,23 +39,12 @@ export type PersonCategoryGroup =
 export const PERSON_CATEGORIES = {
   TROPHY_CAMPER: "trophy_camper",
   TROPHY_PARTICIPANT: "trophy_participant",
-  CHAPERONE: "chaperone",
 } as const;
 
 export type PersonCategory =
   (typeof PERSON_CATEGORIES)[keyof typeof PERSON_CATEGORIES];
 
 export const PERSON_CATEGORY_VALUES = Object.values(PERSON_CATEGORIES);
-
-export const PERSON_CATEGORIES_FOR_CAMPS: PersonCategory[] = [
-  PERSON_CATEGORIES.TROPHY_CAMPER,
-  PERSON_CATEGORIES.CHAPERONE,
-];
-
-export const PERSON_CATEGORIES_FOR_DAY_EVENTS: PersonCategory[] = [
-  PERSON_CATEGORIES.TROPHY_PARTICIPANT,
-  PERSON_CATEGORIES.CHAPERONE,
-];
 
 export function isPersonGender(value: unknown): value is PersonGender {
   return PERSON_GENDERS.includes(value as PersonGender);
@@ -74,16 +54,18 @@ export function isPersonCategory(value: unknown): value is PersonCategory {
   return PERSON_CATEGORY_VALUES.includes(value as PersonCategory);
 }
 
-/** Older mailing lists stored camper/coordinator. Both map onto a person category. */
-const AUDIENCE_CATEGORY_ALIASES: Record<string, PersonCategory> = {
+/** Normalize older mailing-list audience values without storing them as person categories. */
+type AudienceCategory = PersonCategory | "chaperone";
+
+const AUDIENCE_CATEGORY_ALIASES: Record<string, AudienceCategory> = {
   trophy_camper: PERSON_CATEGORIES.TROPHY_CAMPER,
   camper: PERSON_CATEGORIES.TROPHY_CAMPER,
   trophy_participant: PERSON_CATEGORIES.TROPHY_PARTICIPANT,
-  chaperone: PERSON_CATEGORIES.CHAPERONE,
-  coordinator: PERSON_CATEGORIES.CHAPERONE,
+  chaperone: "chaperone",
+  coordinator: "chaperone",
 };
 
-export function categoryForAudience(value: unknown): PersonCategory | null {
+export function categoryForAudience(value: unknown): AudienceCategory | null {
   const key = String(value ?? "").trim();
   return AUDIENCE_CATEGORY_ALIASES[key] ?? null;
 }

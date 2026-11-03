@@ -13,7 +13,8 @@ import { LocalizedTabs } from "@/components/shared/form/localized-tabs";
 import { Button } from "@/components/shared/ui/button";
 import { Input } from "@/components/shared/ui/input";
 import { Textarea } from "@/components/shared/ui/textarea";
-import { PERSON_CATEGORY_VALUES, categoryForAudience } from "@/constants/person";
+import { isPersonCategory, categoryForAudience } from "@/constants/person";
+import { MAILING_LIST_AUDIENCE_KINDS } from "@/constants/event-participation";
 import { DEFAULT_LOCALE, LOCALES, type AppLocale } from "@/constants/locales";
 import { useMailingListForm } from "@/hooks/mailing-lists/use-mailing-list-form.hook";
 import { i18n } from "@/providers/i18n-provider/i18n";
@@ -235,7 +236,7 @@ export function MailingListForm({
               field.onChange(value);
               setValue("personIds", []);
             }}
-            options={PERSON_CATEGORY_VALUES.map((kind) => ({
+            options={Object.values(MAILING_LIST_AUDIENCE_KINDS).map((kind) => ({
               value: kind,
               label: translate(`people.categories.${kind}`),
             }))}
@@ -247,7 +248,9 @@ export function MailingListForm({
         name="personIds"
         render={({ field }) => (
           <MailingListPeoplePicker
-            category={audienceCategory}
+            category={
+              isPersonCategory(audienceCategory) ? audienceCategory : null
+            }
             value={field.value ?? []}
             onChange={field.onChange}
           />

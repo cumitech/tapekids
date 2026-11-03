@@ -100,21 +100,19 @@ export function MailingListPeoplePicker({
   }, [category]);
 
   const filters = useMemo(() => {
-    if (!category) {
-      return [];
-    }
     const next: Array<{
       field: string;
       operator: "eq" | "contains";
       value: string;
-    }> = [
-      {
+    }> = [];
+    if (category) {
+      next.push({
         field: "category",
         operator: "eq",
         value: category,
-      },
-    ];
-    if (selectedBatch !== "all") {
+      });
+    }
+    if (category && selectedBatch !== "all") {
       next.push({
         field: "importedAt",
         operator: "eq",
@@ -140,7 +138,7 @@ export function MailingListPeoplePicker({
     ],
     filters,
     queryOptions: {
-      enabled: Boolean(category),
+      enabled: true,
       staleTime: Infinity,
       gcTime: Infinity,
       refetchOnMount: false,
@@ -150,16 +148,13 @@ export function MailingListPeoplePicker({
   });
 
   const people = useMemo(() => {
-    if (!category) {
-      return [];
-    }
     return (
       (query as { result?: { data?: Person[] }; data?: { data?: Person[] } })
         .result?.data ??
       query.data?.data ??
       []
     );
-  }, [category, query]);
+  }, [query]);
   const peopleById = useMemo(
     () => new Map(people.map((person) => [person.id, person])),
     [people]

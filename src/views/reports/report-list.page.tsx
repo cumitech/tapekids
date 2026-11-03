@@ -9,7 +9,6 @@ import {
 import { REPORT_KINDS } from "@/constants/reports";
 import { useReportListPage } from "@/hooks/reports/use-report-list.hook";
 import { MembershipReportTable } from "@/views/reports/membership-report-table";
-import { PeopleReportTable } from "@/views/reports/people-report-table";
 import { WaitingListReportTable } from "@/views/reports/waiting-list-report-table";
 
 export function ReportListPage() {
@@ -39,7 +38,7 @@ export function ReportListPage() {
       ) : page.isWaitingList ? (
         <WaitingListReportTable />
       ) : page.isChaperones ? (
-        <PeopleReportTable kind={REPORT_KINDS.CHAPERONES} />
+        <MembershipReportTable resource="reports/chaperones" />
       ) : (
         <ErrorComponent />
       )}

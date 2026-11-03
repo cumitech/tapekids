@@ -7,7 +7,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { MailingListForm } from "@/components/mailing-lists/mailing-list-form.component";
 import { ResourceRowActions } from "@/components/shared/refine-ui/buttons/resource-row-actions";
 import { columnFilter } from "@/components/shared/refine-ui/data-table/data-table-column-filter";
-import { PERSON_CATEGORY_VALUES, categoryForAudience } from "@/constants/person";
+import { categoryForAudience } from "@/constants/person";
+import { MAILING_LIST_AUDIENCE_KINDS } from "@/constants/event-participation";
 import { useCachedTable } from "@/hooks/core/use-cached-table.hook";
 import { useDashboardFormModal } from "@/hooks/core/use-dashboard-form-modal.hook";
 import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
@@ -22,7 +23,7 @@ export function useMailingListsListPage() {
 
   const audienceOptions = useMemo(
     () =>
-      PERSON_CATEGORY_VALUES.map((value) => ({
+      Object.values(MAILING_LIST_AUDIENCE_KINDS).map((value) => ({
         value,
         label: translate(`people.categories.${value}`),
       })),
