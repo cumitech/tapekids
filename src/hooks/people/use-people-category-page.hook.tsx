@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import type { CrudFilter } from "@refinedev/core";
 import { useTranslate } from "@refinedev/core";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -27,6 +28,8 @@ import type { ImportBatchInfo } from "@/models/people/people-import.model";
 
 export function usePeopleCategoryPage(category: string) {
   const translate = useTranslate();
+  const searchParams = useSearchParams();
+  const requestedImportAt = searchParams.get("importedAt");
   const { path } = useLocale();
   const { openCreate, openEdit } = useDashboardFormModal();
   const refreshRef = useRef<() => void>(() => undefined);
@@ -35,6 +38,8 @@ export function usePeopleCategoryPage(category: string) {
   const [importBatches, setImportBatches] = useState<ImportBatchInfo[]>([]);
   const [importBatchError, setImportBatchError] = useState("");
   const [importBatchesLoading, setImportBatchesLoading] = useState(false);
+  const [importBatchesRefreshKey, setImportBatchesRefreshKey] = useState(0);
+  const [importHistoryRefreshKey, setImportHistoryRefreshKey] = useState(0);
   const pageIdsRef = useRef<string[]>([]);
   const selectedRef = useRef(selected);
   selectedRef.current = selected;
@@ -71,7 +76,7 @@ export function usePeopleCategoryPage(category: string) {
     return () => {
       active = false;
     };
-  }, [category, translate, valid]);
+  }, [category, importBatchesRefreshKey, translate, valid]);
 
   const toggleRow = useCallback((id: string) => {
     setSelected((current) => {
@@ -193,11 +198,35 @@ export function usePeopleCategoryPage(category: string) {
     permanentFilters,
   });
 
+  useEffect(() => {
+    if (!requestedImportAt || importBatchesLoading) {
+      return;
+    }
+    const batch = importBatchOptions.find(
+      (option) => option.value === requestedImportAt
+    );
+    if (!batch) {
+      return;
+    }
+    const column = table.reactTable.getColumn("importedAt");
+    if (column?.getFilterValue() !== batch.value) {
+      column?.setFilterValue(batch.value);
+    }
+  }, [
+    importBatchOptions,
+    importBatchesLoading,
+    requestedImportAt,
+    table.reactTable,
+  ]);
+
   pageIdsRef.current = records.map((row) => String(row.id));
   const pageIds = pageIdsRef.current;
   const total = table.refineCore.tableQuery.data?.total ?? 0;
   const filters = table.refineCore.filters;
   const filterKey = JSON.stringify(filters);
+  const selectedImportBatch = String(
+    table.reactTable.getColumn("importedAt")?.getFilterValue() ?? ""
+  );
   const pageFullySelected =
     pageIds.length > 0 && pageIds.every((id) => selected.has(id));
   const categoryLabel = valid
@@ -265,8 +294,14 @@ export function usePeopleCategoryPage(category: string) {
     selected,
     selectingAll,
     importBatchOptions,
+    selectedImportBatch,
     importBatchError,
     importBatchesLoading,
+    reloadImportBatches: () => {
+      setImportBatchesRefreshKey((key) => key + 1);
+      setImportHistoryRefreshKey((key) => key + 1);
+    },
+    importHistoryRefreshKey,
     total,
     pageIds,
     pageFullySelected,

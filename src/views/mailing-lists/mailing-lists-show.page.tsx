@@ -127,6 +127,7 @@ export function MailingListsShowPage() {
 
           <InvitationQueueForm
             mailingListId={record.id}
+            prepareOnly={page.prepareOnly}
             onSent={(result) =>
               page.setFocusBatchId(result.batch?.id ?? null)
             }

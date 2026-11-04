@@ -8,6 +8,8 @@ export const createInvitationBatchSchema = z
   .object({
     mailingListId: z.string().trim().min(1).optional().nullable(),
     personIds: z.array(z.string().trim().min(1)).optional(),
+    selectedPersonIds: z.array(z.string().trim().min(1)).min(1).max(5000).optional(),
+    draftOnly: z.boolean().optional(),
     kind: membershipKindSchema.optional(),
     subject: z.string().trim().min(1).max(255).optional(),
     body: z.string().trim().min(1).optional(),
@@ -33,6 +35,13 @@ export const createInvitationBatchSchema = z
       Boolean(value.mailingListId) || (value.personIds?.length ?? 0) > 0,
     {
       message: "Provide a mailing list or at least one person id.",
+    }
+  )
+  .refine(
+    (value) => !value.selectedPersonIds || Boolean(value.mailingListId),
+    {
+      message: "Selected recipients require a mailing list.",
+      path: ["selectedPersonIds"],
     }
   )
   .superRefine((value, ctx) => {

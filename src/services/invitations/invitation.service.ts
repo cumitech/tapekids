@@ -10,6 +10,7 @@ import {
 import type { Invitation } from "@/data/entities/invitation";
 import type { InvitationBatch } from "@/data/entities/invitation-batch";
 import { parseCreateInvitationBatch } from "@/data/dtos/invitation-batch.dto";
+import { parseInvitationReadiness } from "@/data/dtos/invitation-readiness.dto";
 import {
   parseAcceptInvitation,
   parseInviteYfId,
@@ -102,15 +103,32 @@ export class InvitationService {
       input.translations.fr.body = sanitizeRichText(input.translations.fr.body);
     }
 
-    const personIds = new Set(input.personIds ?? []);
+    const personIds = new Set(input.selectedPersonIds ?? input.personIds ?? []);
 
     if (input.mailingListId) {
       await mailingListRepository.requireId(input.mailingListId);
       const fromList = await mailingListMemberRepository.listPersonIds(
         input.mailingListId
       );
-      for (const id of fromList) {
-        personIds.add(id);
+      if (!input.selectedPersonIds) {
+        throw new ValidationException(
+          "Review recipient readiness before queuing invitations."
+        );
+      }
+      const memberIds = new Set(fromList);
+      if (input.selectedPersonIds.some((id) => !memberIds.has(id))) {
+        throw new ValidationException(
+          "One or more selected recipients are not in this mailing list."
+        );
+      }
+      const readiness = await this.invitationReadiness(eventId, {
+        mailingListId: input.mailingListId,
+      });
+      const readyIds = new Set(readiness.readyPersonIds);
+      if (input.selectedPersonIds.some((id) => !readyIds.has(id))) {
+        throw new ValidationException(
+          "The recipient list changed. Review invitation readiness again."
+        );
       }
     }
 
@@ -123,6 +141,21 @@ export class InvitationService {
     const people = await personRepository.findByIds(Array.from(personIds));
     if (people.length !== personIds.size) {
       throw new ValidationException("One or more people were not found.");
+    }
+    if (!input.selectedPersonIds) {
+      const hasInvalidEmail = people.some(
+        (person) => !isStandardEmail(normalizeEmail(person.email), 128)
+      );
+      const existingInvitations =
+        await invitationRepository.listStatusesByEventAndPeople(
+          eventId,
+          people.map((person) => person.id)
+        );
+      if (hasInvalidEmail || existingInvitations.length > 0) {
+        throw new ValidationException(
+          "Recipients must have valid email addresses and no existing invitation for this event."
+        );
+      }
     }
 
     const batch = await invitationBatchRepository.create({
@@ -168,7 +201,7 @@ export class InvitationService {
       await eventMembershipRepository.upsertInvited(eventId, person.id, kind);
     }
 
-    if (isMailConfigured()) {
+    if (!input.draftOnly && isMailConfigured()) {
       return this.sendBatch(batch.id);
     }
 
@@ -178,6 +211,77 @@ export class InvitationService {
       invitations,
       queuedCount: invitations.length,
       failedCount: 0,
+    };
+  }
+
+  async invitationReadiness(eventId: string, body: unknown) {
+    const { mailingListId } = parseInvitationReadiness(body);
+    await eventService.getById(eventId);
+    await mailingListRepository.requireId(mailingListId);
+
+    const memberIds = await mailingListMemberRepository.listPersonIds(
+      mailingListId
+    );
+    const people = await personRepository.findByIds(memberIds);
+    if (people.length !== memberIds.length) {
+      throw new ValidationException(
+        "One or more mailing list members could not be found."
+      );
+    }
+    const invitationStatuses =
+      await invitationRepository.listStatusesByEventAndPeople(
+        eventId,
+        people.map((person) => person.id)
+      );
+    const statusesByPerson = new Map<string, Set<string>>();
+    for (const invitation of invitationStatuses) {
+      const statuses = statusesByPerson.get(invitation.personId) ?? new Set();
+      statuses.add(invitation.status);
+      statusesByPerson.set(invitation.personId, statuses);
+    }
+
+    const readyPersonIds: string[] = [];
+    const invalidRecipients: Array<{
+      id: string;
+      fullName: string;
+      email: string;
+    }> = [];
+    const existingRecipients: Array<{
+      id: string;
+      fullName: string;
+      email: string;
+      statuses: string[];
+    }> = [];
+
+    for (const person of people) {
+      const email = normalizeEmail(person.email);
+      const statuses = statusesByPerson.get(person.id);
+      if (statuses?.size) {
+        existingRecipients.push({
+          id: person.id,
+          fullName: person.fullName,
+          email,
+          statuses: Array.from(statuses),
+        });
+      } else if (!isStandardEmail(email, 128)) {
+        invalidRecipients.push({
+          id: person.id,
+          fullName: person.fullName,
+          email,
+        });
+      } else {
+        readyPersonIds.push(person.id);
+      }
+    }
+
+    return {
+      total: memberIds.length,
+      readyCount: readyPersonIds.length,
+      invalidEmailCount: invalidRecipients.length,
+      existingInvitationCount: existingRecipients.length,
+      readyPersonIds,
+      invalidRecipients,
+      existingRecipients,
     };
   }
 
@@ -227,6 +331,7 @@ export class InvitationService {
         "One or more recipients are not in this send."
       );
     }
+
     const pending: Invitation[] = [];
     for (const row of chosen) {
       if (row && RETRYABLE_INVITATION_STATUSES.has(row.status)) {
@@ -242,6 +347,24 @@ export class InvitationService {
     return {
       sentCount: pending.length - failed,
       failedCount: failed,
+    };
+  }
+
+  async retryFailed(batchId: string) {
+    const invitations = await invitationRepository.listByBatch(batchId);
+    const failed = invitations.filter(
+      (invitation) => invitation.status === INVITATION_STATUSES.FAILED
+    );
+    if (failed.length === 0) {
+      throw new ValidationException("There are no failed invitations to retry.");
+    }
+    const { failed: failedCount } = await this.deliverInvitations(
+      batchId,
+      failed
+    );
+    return {
+      sentCount: failed.length - failedCount,
+      failedCount,
     };
   }
 

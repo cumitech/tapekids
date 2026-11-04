@@ -31,6 +31,13 @@ export const POST = adminRoute(async ({ request, user }) => {
     buffer,
     category
   );
+  const importBatchId = await personService.recordImportHistory({
+    category,
+    importedAt: result.importedAt ?? new Date().toISOString(),
+    fileName: file.name,
+    result,
+    mailingListId: null,
+  });
   let mailingList: {
     id: string;
     name: string;
@@ -69,7 +76,8 @@ export const POST = adminRoute(async ({ request, user }) => {
       name: createdList.name,
       memberCount: newPersonIds.length,
     };
+    await personService.attachImportMailingList(importBatchId, createdList.id);
   }
 
-  return jsonOk({ ...result, mailingList }, "People imported");
+  return jsonOk({ ...result, mailingList, importBatchId }, "People imported");
 });

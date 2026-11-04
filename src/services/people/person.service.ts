@@ -16,6 +16,7 @@ import {
   PersonRepository,
   type PersonUpdatePayload,
 } from "@/data/repositories/person.repository";
+import { PeopleImportBatchRepository } from "@/data/repositories/people-import-batch.repository";
 import { UserRepository } from "@/data/repositories/user.repository";
 import type { ListQuery } from "@/data/types/pagination";
 import { ConflictException } from "@/exceptions/conflict.exception";
@@ -23,10 +24,11 @@ import { ValidationException } from "@/exceptions/validation.exception";
 import { nanoid } from "@/lib/api/id";
 import { ageInYears } from "@/lib/people/age";
 import type { AppLocale } from "@/constants/locales";
-import { formatDateTime } from "@/lib/format";
+import { formatDateTime, formatImportBatchLabel } from "@/lib/format";
 import { parsePeopleWorkbook } from "@/lib/people/import-people";
 import type {
   ImportBatchInfo,
+  PeopleImportHistoryItem,
   PeopleImportResult,
 } from "@/models/people/people-import.model";
 import { auditService } from "@/services/audit/audit.service";
@@ -35,6 +37,7 @@ import { invitationService } from "@/services/invitations/invitation.service";
 const personRepository = new PersonRepository();
 const emergencyContactRepository = new EmergencyContactRepository();
 const userRepository = new UserRepository();
+const peopleImportBatchRepository = new PeopleImportBatchRepository();
 
 export class PersonService {
   list(query: ListQuery) {
@@ -273,6 +276,7 @@ export class PersonService {
     let unchanged = 0;
     const newPersonIds: string[] = [];
     const importedAt = new Date();
+    importedAt.setMilliseconds(0);
 
     for (const [yfId, row] of Array.from(byYfId.entries())) {
       try {
@@ -323,12 +327,103 @@ export class PersonService {
     locale?: AppLocale
   ): Promise<ImportBatchInfo[]> {
     const rows = await personRepository.listImportBatches(category);
+
     return rows.map((row) => ({
       importedAt: row.importedAt.toISOString(),
       category: row.category,
       count: row.count,
-      label: formatDateTime(row.importedAt, locale) || row.importedAt.toISOString(),
+      label: formatImportBatchLabel(row.importedAt, locale),
     }));
+  }
+
+  async recordImportHistory(input: {
+    category: PersonCategory;
+    importedAt: string;
+    fileName: string;
+    result: PeopleImportResult;
+    mailingListId: string | null;
+  }) {
+    const now = new Date();
+    const batch = await peopleImportBatchRepository.create({
+      id: nanoid(),
+      category: input.category,
+      importedAt: new Date(input.importedAt),
+      fileName: input.fileName.slice(0, 255),
+      created: input.result.created,
+      updated: input.result.updated,
+      unchanged: input.result.unchanged,
+      skipped: input.result.skipped,
+      mailingListId: input.mailingListId,
+      createdAt: now,
+      updatedAt: now,
+    });
+    return batch.id;
+  }
+
+  attachImportMailingList(batchId: string, mailingListId: string) {
+    return peopleImportBatchRepository.attachMailingList(batchId, mailingListId);
+  }
+
+  async listImportHistory(
+    category?: PersonCategory
+  ): Promise<PeopleImportHistoryItem[]> {
+    const [batches, legacyBatches] = await Promise.all([
+      peopleImportBatchRepository.list(category),
+      personRepository.listImportBatches(category),
+    ]);
+    const recordedKeys = new Set(
+      batches.map(
+        (batch) =>
+          `${batch.category}:${new Date(batch.importedAt).toISOString()}`
+      )
+    );
+    const recorded = batches.map((batch) => {
+      const record = batch.toJSON();
+      const mailingList = batch.mailingList;
+      return {
+        id: record.id,
+        importedAt: record.importedAt.toISOString(),
+        category: record.category,
+        fileName: record.fileName,
+        created: record.created,
+        updated: record.updated,
+        unchanged: record.unchanged,
+        skipped: record.skipped,
+        totalProcessed:
+          record.created + record.updated + record.unchanged + record.skipped,
+        mailingList: mailingList
+          ? {
+              id: mailingList.id,
+              name: mailingList.name,
+            }
+          : null,
+        recorded: true,
+      };
+    });
+    const legacy = legacyBatches
+      .filter(
+        (batch) =>
+          !recordedKeys.has(
+            `${batch.category}:${batch.importedAt.toISOString()}`
+          )
+      )
+      .map((batch) => ({
+        id: `legacy-${batch.category ?? "unknown"}-${batch.importedAt.getTime()}`,
+        importedAt: batch.importedAt.toISOString(),
+        category: batch.category ?? "",
+        fileName: "",
+        created: null,
+        updated: null,
+        unchanged: null,
+        skipped: null,
+        totalProcessed: batch.count,
+        mailingList: null,
+        recorded: false,
+      }));
+    return [...recorded, ...legacy].sort(
+      (a, b) =>
+        new Date(b.importedAt).getTime() - new Date(a.importedAt).getTime()
+    );
   }
 
   private async upsertImportedPerson(

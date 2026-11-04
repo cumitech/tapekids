@@ -91,6 +91,24 @@ export class InvitationRepository {
     });
   }
 
+  async listStatusesByEventAndPeople(
+    eventId: string,
+    personIds: string[]
+  ): Promise<Array<{ personId: string; status: string }>> {
+    if (personIds.length === 0) {
+      return [];
+    }
+    const rows = await Invitation.findAll({
+      attributes: ["personId", "status"],
+      where: {
+        eventId,
+        personId: { [Op.in]: personIds },
+      },
+      raw: true,
+    });
+    return rows as unknown as Array<{ personId: string; status: string }>;
+  }
+
   async listByPersonStatus(
     personId: string,
     status: InvitationStatus

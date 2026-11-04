@@ -16,6 +16,10 @@ import { initMailingListMember, MailingListMember } from "./mailing-list-member"
 import { initPasswordReset, PasswordReset } from "./password-reset";
 import { initPayment, Payment } from "./payment";
 import { initPerson, Person } from "./person";
+import {
+  initPeopleImportBatch,
+  PeopleImportBatch,
+} from "./people-import-batch";
 import { initUser, User } from "./user";
 import { initSponsor, Sponsor } from "./sponsor";
 import {
@@ -32,6 +36,7 @@ export function initEntities() {
   }
 
   initPerson(sequelize);
+  initPeopleImportBatch(sequelize);
   initUser(sequelize);
   initEvent(sequelize);
   initContentTranslation(sequelize);
@@ -104,6 +109,16 @@ export function initEntities() {
   MailingList.belongsTo(User, {
     foreignKey: "createdById",
     as: "createdBy",
+  });
+  MailingList.hasMany(PeopleImportBatch, {
+    foreignKey: "mailingListId",
+    as: "peopleImportBatches",
+    onDelete: "SET NULL",
+  });
+  PeopleImportBatch.belongsTo(MailingList, {
+    foreignKey: "mailingListId",
+    as: "mailingList",
+    onDelete: "SET NULL",
   });
 
   MailingList.hasMany(MailingListMember, {
@@ -265,6 +280,7 @@ export {
   PasswordReset,
   Payment,
   Person,
+  PeopleImportBatch,
   Sponsor,
   User,
   WAITING_LIST_STATUS,

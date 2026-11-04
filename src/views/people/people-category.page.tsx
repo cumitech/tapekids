@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronLeft, Loader2, Upload } from "lucide-react";
+import { ChevronLeft, Filter, Loader2, Upload } from "lucide-react";
 
 import { PeopleImportForm } from "@/components/people/people-import-form";
+import { ImportBatchHistory } from "@/components/people/import-batch-history";
 import { PersonForm } from "@/components/people/person-form.component";
 import { useAppModal } from "@/components/shared/modals/app-modal";
 import { DeleteConfirmPopover } from "@/components/shared/refine-ui/buttons/delete-confirm-popover";
@@ -72,6 +73,7 @@ export function PeopleCategoryPage({ category }: PeopleCategoryPageProps) {
                   onImported={() => {
                     page.clearSelection();
                     page.refresh();
+                    page.reloadImportBatches();
                   }}
                 />
               ),
@@ -82,16 +84,25 @@ export function PeopleCategoryPage({ category }: PeopleCategoryPageProps) {
           {page.translate("people.import.action")}
         </Button>
       </ListViewHeader>
-      <div className="flex flex-col gap-1.5 sm:max-w-md">
-        <Label>{page.translate("people.import.batchFilter")}</Label>
+      <div className="rounded-xl border border-primary/25 bg-primary/[0.04] p-4 shadow-sm sm:p-5">
+        <div className="mb-3 flex items-start gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Filter aria-hidden="true" className="size-5" />
+          </span>
+          <div className="min-w-0">
+            <Label
+              htmlFor="people-import-batch-filter"
+              className="text-base font-semibold"
+            >
+              {page.translate("people.import.batchFilter")}
+            </Label>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {page.translate("people.import.batchFilterHint")}
+            </p>
+          </div>
+        </div>
         <Select
-          value={
-            String(
-              page.table.reactTable
-                .getColumn("importedAt")
-                ?.getFilterValue() ?? ""
-            ) || "all"
-          }
+          value={page.selectedImportBatch || "all"}
           onValueChange={(value) =>
             page.table.reactTable
               .getColumn("importedAt")
@@ -99,7 +110,10 @@ export function PeopleCategoryPage({ category }: PeopleCategoryPageProps) {
           }
           disabled={page.importBatchesLoading}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger
+            id="people-import-batch-filter"
+            className="h-12 w-full border-primary/25 bg-background text-base shadow-sm"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -113,8 +127,43 @@ export function PeopleCategoryPage({ category }: PeopleCategoryPageProps) {
             ))}
           </SelectContent>
         </Select>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+          <p aria-live="polite" className="text-sm text-muted-foreground">
+            {page.selectedImportBatch
+              ? page.translate("people.import.showingBatch", {
+                  batch:
+                    page.importBatchOptions.find(
+                      (batch) => batch.value === page.selectedImportBatch
+                    )?.label ?? "",
+                  count: page.total,
+                })
+              : page.translate("people.import.showingAllPeople", {
+                  count: page.total,
+                })}
+          </p>
+          {page.selectedImportBatch ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                page.table.reactTable
+                  .getColumn("importedAt")
+                  ?.setFilterValue(undefined)
+              }
+            >
+              {page.translate("people.import.clearBatchFilter")}
+            </Button>
+          ) : null}
+        </div>
+        {page.category !== "trophy_participant" ? (
+          <ImportBatchHistory
+            category={page.category}
+            refreshKey={page.importHistoryRefreshKey}
+          />
+        ) : null}
         {page.importBatchError ? (
-          <p className="text-sm text-destructive">{page.importBatchError}</p>
+          <p className="mt-2 text-sm text-destructive">{page.importBatchError}</p>
         ) : null}
       </div>
       <div className="flex flex-wrap items-center gap-2">

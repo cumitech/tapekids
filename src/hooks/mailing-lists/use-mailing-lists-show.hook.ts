@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useShow, useTranslate } from "@refinedev/core";
+import { useSearchParams } from "next/navigation";
 
 import { useBusyAction } from "@/hooks/core/use-busy-action.hook";
 import { useDashboardFormModal } from "@/hooks/core/use-dashboard-form-modal.hook";
@@ -26,6 +27,7 @@ export function memberIsInvited(person?: {
 
 export function useMailingListsShowPage() {
   const translate = useTranslate();
+  const searchParams = useSearchParams();
   const { locale } = useLocale();
   const { openEdit } = useDashboardFormModal();
   const labels = useResourceLabels("mailingLists", ["name", "audienceKind"]);
@@ -60,6 +62,7 @@ export function useMailingListsShowPage() {
     busy,
     focusBatchId,
     audienceLabel,
+    prepareOnly: searchParams.get("prepare") === "1",
     openEdit,
     refetch: () => void query.refetch(),
     setFocusBatchId,

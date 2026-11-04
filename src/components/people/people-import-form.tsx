@@ -156,10 +156,10 @@ export function PeopleImportForm({
               <Link
                 className="font-medium text-primary underline underline-offset-4"
                 href={path(
-                  `/dashboard/mailing-lists/show/${result.mailingList.id}`
+                  `/dashboard/mailing-lists/show/${result.mailingList.id}?prepare=1#prepare-invitations`
                 )}
               >
-                {translate("people.import.openMailingList", {
+                {translate("people.import.prepareInvitations", {
                   name: result.mailingList.name,
                 })}
               </Link>
@@ -169,6 +169,16 @@ export function PeopleImportForm({
               {translate("people.import.noNewPeople")}
             </p>
           )}
+          {result.importBatchId && (lockedCategory || category) ? (
+            <Link
+              className="text-sm font-medium text-primary underline underline-offset-4"
+              href={path(
+                `/dashboard/people/category/${lockedCategory || category}?importedAt=${encodeURIComponent(result.importedAt ?? "")}`
+              )}
+            >
+              {translate("people.import.showBatch")}
+            </Link>
+          ) : null}
           {result.errors.length ? (
             <ul className="max-h-32 overflow-auto text-sm text-destructive">
               {result.errors.map((item) => (

@@ -49,6 +49,21 @@ export function formatDateTime(
   return `${formatDate(date, locale)} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
 
+export function formatImportBatchLabel(
+  value: string | Date | null | undefined,
+  locale?: string,
+  _sameDayCount?: number
+) {
+  if (!value) {
+    return "";
+  }
+  const date = instant(value);
+  if (!date) {
+    return String(value);
+  }
+  return formatDate(date, locale);
+}
+
 export function formatPresentedValue(value: unknown, locale?: string): unknown {
   if (typeof value === "string" && DATE_TIME.test(value)) {
     return formatDateTime(value, locale);

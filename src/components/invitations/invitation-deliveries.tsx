@@ -157,6 +157,22 @@ export function InvitationRecipients({ batchId }: { batchId: string }) {
     [filter, rows]
   );
   const selectable = visible.filter((row) => RETRYABLE.has(row.status));
+  const counts = useMemo(() => {
+    const values = { success: 0, failed: 0, pending: 0 };
+    for (const row of rows ?? []) {
+      if (
+        row.status === INVITATION_STATUSES.SENT ||
+        row.status === INVITATION_STATUSES.ACCEPTED
+      ) {
+        values.success += 1;
+      } else if (row.status === INVITATION_STATUSES.FAILED) {
+        values.failed += 1;
+      } else if (row.status === INVITATION_STATUSES.QUEUED) {
+        values.pending += 1;
+      }
+    }
+    return values;
+  }, [rows]);
   const allSelected =
     selectable.length > 0 && selectable.every((row) => selected.has(row.id));
 
@@ -202,6 +218,23 @@ export function InvitationRecipients({ batchId }: { batchId: string }) {
       await load();
       notify?.({
         type: result.sentCount > 0 ? "success" : "error",
+        message: translate("mailingLists.deliveries.resendDone", {
+          sent: result.sentCount,
+          failed: result.failedCount,
+        }),
+      });
+    }, translate("mailingLists.deliveries.resendFailed"));
+  }
+
+  function retryFailed() {
+    return run(async () => {
+      const result = await apiPost<{ sentCount: number; failedCount: number }>(
+        `/invitation-batches/${batchId}/retry-failed`
+      );
+      setSelected(new Set());
+      await load();
+      notify?.({
+        type: result.failedCount === 0 ? "success" : "error",
         message: translate("mailingLists.deliveries.resendDone", {
           sent: result.sentCount,
           failed: result.failedCount,
@@ -256,6 +289,13 @@ export function InvitationRecipients({ batchId }: { batchId: string }) {
       ) : null}
       {rows ? (
         <>
+          <div className="rounded-md border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+            {translate("mailingLists.deliveries.summary", {
+              success: counts.success,
+              failed: counts.failed,
+              pending: counts.pending,
+            })}
+          </div>
           <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
@@ -268,6 +308,18 @@ export function InvitationRecipients({ batchId }: { batchId: string }) {
               {busy ? <Loader2 className="size-4 animate-spin" /> : null}
               {translate("mailingLists.deliveries.resend")}
             </Button>
+            {counts.failed > 0 ? (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!integrations.mailEnabled || busy}
+                onClick={() => void retryFailed()}
+              >
+                {translate("mailingLists.deliveries.retryFailed", {
+                  count: counts.failed,
+                })}
+              </Button>
+            ) : null}
             {selected.size > 0 ? (
               <span className="text-sm text-muted-foreground">
                 {translate("mailingLists.deliveries.selected", {
