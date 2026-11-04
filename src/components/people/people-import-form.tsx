@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import Link from "next/link";
 import { useTranslate } from "@refinedev/core";
 import { FileSpreadsheet } from "lucide-react";
 
@@ -9,6 +10,7 @@ import { ModalActions } from "@/components/shared/modals/app-modal";
 import { RequiredMark } from "@/components/shared/form/required-mark";
 import { Button } from "@/components/shared/ui/button";
 import { Label } from "@/components/shared/ui/label";
+import { useLocale } from "@/hooks/core/use-locale.hook";
 import { cn } from "@/lib/utils";
 import type { PersonCategory } from "@/constants/person";
 import {
@@ -34,6 +36,7 @@ export function PeopleImportForm({
   onBusyChange,
 }: PeopleImportFormProps) {
   const translate = useTranslate();
+  const { path } = useLocale();
   const fileInputId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [category, setCategory] = useState<PersonCategory | "">(lockedCategory ?? "");
@@ -145,6 +148,27 @@ export function PeopleImportForm({
               skipped: result.skipped,
             })}
           </p>
+          {result.mailingList ? (
+            <p className="text-sm text-muted-foreground">
+              {translate("people.import.mailingListCreated", {
+                count: result.mailingList.memberCount,
+              })}{" "}
+              <Link
+                className="font-medium text-primary underline underline-offset-4"
+                href={path(
+                  `/dashboard/mailing-lists/show/${result.mailingList.id}`
+                )}
+              >
+                {translate("people.import.openMailingList", {
+                  name: result.mailingList.name,
+                })}
+              </Link>
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {translate("people.import.noNewPeople")}
+            </p>
+          )}
           {result.errors.length ? (
             <ul className="max-h-32 overflow-auto text-sm text-destructive">
               {result.errors.map((item) => (

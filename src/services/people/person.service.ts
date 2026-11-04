@@ -221,7 +221,7 @@ export class PersonService {
   async importFromWorkbook(
     buffer: Buffer,
     category: PersonCategory
-  ): Promise<PeopleImportResult> {
+  ): Promise<{ result: PeopleImportResult; newPersonIds: string[] }> {
     const parsed = parsePeopleWorkbook(buffer, category);
     const errors: PeopleImportResult["errors"] = [];
     let skipped = parsed.skipped;
@@ -271,19 +271,21 @@ export class PersonService {
     let created = 0;
     let updated = 0;
     let unchanged = 0;
+    const newPersonIds: string[] = [];
     const importedAt = new Date();
 
     for (const [yfId, row] of Array.from(byYfId.entries())) {
       try {
         const current = existingByYfId.get(yfId) ?? null;
-        const result = await this.upsertImportedPerson(
+        const upsertResult = await this.upsertImportedPerson(
           row.person,
           current,
           importedAt
         );
-        if (result === "created") {
+        if (upsertResult.status === "created") {
           created += 1;
-        } else if (result === "updated") {
+          newPersonIds.push(upsertResult.personId);
+        } else if (upsertResult.status === "updated") {
           updated += 1;
         } else {
           unchanged += 1;
@@ -313,7 +315,7 @@ export class PersonService {
       after: { category, ...result },
     });
 
-    return result;
+    return { result, newPersonIds };
   }
 
   async listImportBatches(
@@ -333,7 +335,10 @@ export class PersonService {
     input: CreatePerson,
     existing: Person | null,
     importedAt: Date
-  ): Promise<"created" | "updated" | "unchanged"> {
+  ): Promise<{
+    status: "created" | "updated" | "unchanged";
+    personId: string;
+  }> {
     const resolvedImportedAt = existing?.importedAt ?? importedAt;
     const inputWithImport: CreatePerson = {
       ...input,
@@ -345,12 +350,17 @@ export class PersonService {
         existing.id,
         toUpdatePersonPayload(inputWithImport) as PersonUpdatePayload
       );
-      return matches ? "unchanged" : "updated";
+      return {
+        status: matches ? "unchanged" : "updated",
+        personId: existing.id,
+      };
     }
 
     try {
-      await personRepository.create(toCreatePersonPayload(inputWithImport));
-      return "created";
+      const created = await personRepository.create(
+        toCreatePersonPayload(inputWithImport)
+      );
+      return { status: "created", personId: created.id };
     } catch (error) {
       if (!isUniqueConstraintError(error) || !input.yfId) {
         throw error;
@@ -369,7 +379,10 @@ export class PersonService {
         raced.id,
         toUpdatePersonPayload(racedInputWithImport) as PersonUpdatePayload
       );
-      return matches ? "unchanged" : "updated";
+      return {
+        status: matches ? "unchanged" : "updated",
+        personId: raced.id,
+      };
     }
   }
 }

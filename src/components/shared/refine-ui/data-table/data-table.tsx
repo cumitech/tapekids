@@ -356,6 +356,16 @@ export function getCommonStyles<TData>({
     };
   }
 
+  const configuredWidth = column.columnDef.size;
+  if (configuredWidth !== undefined) {
+    return {
+      width: configuredWidth,
+      minWidth: configuredWidth,
+      maxWidth: configuredWidth,
+      overflow: "hidden",
+    };
+  }
+
   const isPinned = column.getIsPinned();
   const isLastLeftPinnedColumn =
     isPinned === "left" && column.getIsLastColumn("left");

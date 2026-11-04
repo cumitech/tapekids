@@ -381,7 +381,7 @@
       "parentGuardianPhone": "Téléphone",
       "medicalNotes": "Notes médicales",
       "country": "Pays",
-      "importedAt": "Date d'importation",
+      "importedAt": "Lot d'importation",
       "sentAt": "Invitation envoyée",
       "registeredAt": "Inscrit le",
       "isTrophy": "Trophées"
@@ -404,7 +404,17 @@
       "missing": "Choisissez une catégorie et un fichier Excel.",
       "failed": "Impossible d'importer ce fichier.",
       "networkFailed": "Erreur réseau pendant l'import. Vérifiez la connexion et réessayez. Le même fichier ne créera pas de doublons.",
+      "batchFilter": "Afficher les personnes d'un lot d'importation",
+      "allBatches": "Toutes les personnes",
+      "batchesFailed": "Impossible de charger les lots d'importation.",
+      "notImported": "Saisie manuelle",
+      "invitationStatus": "Invitation",
+      "invited": "Invité",
+      "notInvited": "Non invité",
       "result": "Créés {{created}}, mis à jour {{updated}}, inchangés {{unchanged}}, ignorés {{skipped}}.",
+      "mailingListCreated": "Une liste d'envoi distincte a été créée avec {{count}} nouvelles personnes. Les invitations n'ont pas été envoyées.",
+      "openMailingList": "Ouvrir {{name}}",
+      "noNewPeople": "Aucune nouvelle personne n'a été ajoutée ; aucune liste d'envoi n'a été créée. Les anciens participants/campeurs ne sont pas ajoutés à une nouvelle liste d'invitation.",
       "rowError": "Ligne {{row}} : {{message}}"
     },
     "summary": {

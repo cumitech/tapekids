@@ -16,12 +16,14 @@ import { useDashboardFormModal } from "@/hooks/core/use-dashboard-form-modal.hoo
 import { useLocale } from "@/hooks/core/use-locale.hook";
 import { usePeopleDirectoryColumns } from "@/hooks/people/use-people-directory-columns.hook";
 import { apiErrorMessage, apiGet, apiPost } from "@/lib/client/api";
+import type { SelectOption } from "@/components/shared/form/labeled-select";
 import { invalidateListCaches } from "@/lib/client/invalidate-lists";
 import {
   matchingPeopleQuery,
   onlyCategoryFilter,
 } from "@/lib/people/list-query";
 import type { Person } from "@/models/people/person.model";
+import type { ImportBatchInfo } from "@/models/people/people-import.model";
 
 export function usePeopleCategoryPage(category: string) {
   const translate = useTranslate();
@@ -30,10 +32,46 @@ export function usePeopleCategoryPage(category: string) {
   const refreshRef = useRef<() => void>(() => undefined);
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [selectingAll, setSelectingAll] = useState(false);
+  const [importBatches, setImportBatches] = useState<ImportBatchInfo[]>([]);
+  const [importBatchError, setImportBatchError] = useState("");
+  const [importBatchesLoading, setImportBatchesLoading] = useState(false);
   const pageIdsRef = useRef<string[]>([]);
   const selectedRef = useRef(selected);
   selectedRef.current = selected;
   const valid = isPersonCategory(category);
+
+  useEffect(() => {
+    if (!valid) {
+      setImportBatches([]);
+      return;
+    }
+
+    let active = true;
+    setImportBatchesLoading(true);
+    setImportBatchError("");
+    apiGet<ImportBatchInfo[]>(`/people/import-batches?category=${category}`)
+      .then((batches) => {
+        if (active) {
+          setImportBatches(batches);
+        }
+      })
+      .catch((error) => {
+        if (active) {
+          setImportBatchError(
+            apiErrorMessage(error, translate("people.import.batchesFailed"))
+          );
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setImportBatchesLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [category, translate, valid]);
 
   const toggleRow = useCallback((id: string) => {
     setSelected((current) => {
@@ -95,8 +133,18 @@ export function usePeopleCategoryPage(category: string) {
     [openEdit]
   );
 
+  const importBatchOptions = useMemo<SelectOption[]>(
+    () =>
+      importBatches.map((batch) => ({
+        value: batch.importedAt,
+        label: `${batch.label} (${batch.count})`,
+      })),
+    [importBatches]
+  );
   const directoryColumns = usePeopleDirectoryColumns<Person>({
     renderActions,
+    importBatchOptions,
+    compact: true,
   });
 
   const columns = useMemo<ColumnDef<Person>[]>(() => {
@@ -216,6 +264,9 @@ export function usePeopleCategoryPage(category: string) {
     categoryLabel,
     selected,
     selectingAll,
+    importBatchOptions,
+    importBatchError,
+    importBatchesLoading,
     total,
     pageIds,
     pageFullySelected,

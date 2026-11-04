@@ -4,6 +4,11 @@ export type PeopleImportResult = {
   unchanged: number;
   skipped: number;
   importedAt?: string;
+  mailingList?: {
+    id: string;
+    name: string;
+    memberCount: number;
+  } | null;
   errors: Array<{ row: number; message: string }>;
 };
 
@@ -13,4 +18,3 @@ export type ImportBatchInfo = {
   count: number;
   label: string;
 };
-

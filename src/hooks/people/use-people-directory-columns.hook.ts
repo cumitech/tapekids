@@ -1,14 +1,16 @@
 "use client";
 
-import { useMemo, type ReactNode } from "react";
+import { createElement, useMemo, type ReactNode } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslate } from "@refinedev/core";
 
 import { columnFilter } from "@/components/shared/refine-ui/data-table/data-table-column-filter";
+import type { SelectOption } from "@/components/shared/form/labeled-select";
 import { useLocale } from "@/hooks/core/use-locale.hook";
 import { useResourceLabels } from "@/hooks/core/use-resource-labels.hook";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatDateTime } from "@/lib/format";
 import { formatPhoneDisplay } from "@/lib/phone";
+import { Badge } from "@/components/shared/ui/badge";
 
 export const PEOPLE_DIRECTORY_FIELDS = [
   "yfId",
@@ -38,10 +40,13 @@ export type PeopleDirectoryRow = {
   town?: string | null;
   address?: string | null;
   importedAt?: string | Date | null;
+  hasInvitation?: boolean;
 };
 
 type UsePeopleDirectoryColumnsOptions<T extends PeopleDirectoryRow> = {
   renderActions?: (row: T) => ReactNode;
+  importBatchOptions?: SelectOption[];
+  compact?: boolean;
 };
 
 export function usePeopleDirectoryColumns<T extends PeopleDirectoryRow>(
@@ -51,18 +56,40 @@ export function usePeopleDirectoryColumns<T extends PeopleDirectoryRow>(
   const { locale } = useLocale();
   const labels = useResourceLabels("people", PEOPLE_DIRECTORY_FIELDS);
   const renderActions = options?.renderActions;
+  const importBatchOptions = options?.importBatchOptions;
+  const compact = options?.compact ?? false;
 
   return useMemo<ColumnDef<T>[]>(() => {
     const columns: ColumnDef<T>[] = [
       {
+        id: "importedAt",
+        accessorKey: "importedAt",
+        header: labels.fields.importedAt,
+        size: 190,
+        cell: ({ row }) =>
+          createElement(
+            Badge,
+            {
+              variant: row.original.importedAt ? "secondary" : "outline",
+              className: "font-medium tabular-nums",
+            },
+            row.original.importedAt
+              ? formatDateTime(row.original.importedAt, locale)
+              : translate("people.import.notImported")
+          ),
+        ...columnFilter("select", importBatchOptions ?? []),
+      },
+      {
         id: "yfId",
         accessorKey: "yfId",
         header: labels.fields.yfId,
+        size: 110,
       },
       {
         id: "fullName",
         accessorKey: "fullName",
         header: labels.fields.fullName,
+        size: 190,
       },
       {
         id: "isTrophy",
@@ -70,7 +97,12 @@ export function usePeopleDirectoryColumns<T extends PeopleDirectoryRow>(
         header: labels.fields.isTrophy,
         cell: ({ row }) => translate(row.original.isTrophy ? "yes" : "no"),
       },
-      { id: "email", accessorKey: "email", header: labels.fields.email },
+      {
+        id: "email",
+        accessorKey: "email",
+        header: labels.fields.email,
+        size: 220,
+      },
       {
         id: "gender",
         accessorKey: "gender",
@@ -115,14 +147,6 @@ export function usePeopleDirectoryColumns<T extends PeopleDirectoryRow>(
         accessorKey: "address",
         header: labels.fields.address,
       },
-      {
-        id: "importedAt",
-        accessorKey: "importedAt",
-        header: "Import date",
-        cell: ({ row }) =>
-          formatDate(row.original.importedAt, locale) || "-",
-        ...columnFilter("select"),
-      },
     ];
 
     if (renderActions) {
@@ -133,6 +157,42 @@ export function usePeopleDirectoryColumns<T extends PeopleDirectoryRow>(
       });
     }
 
-    return columns;
-  }, [labels, locale, renderActions, translate]);
+    if (!compact) {
+      return columns;
+    }
+
+    const compactColumns = columns.filter((column) =>
+      ["importedAt", "yfId", "fullName", "email", "actions"].includes(
+        column.id ?? ""
+      )
+    );
+    const emailIndex = compactColumns.findIndex(
+      (column) => column.id === "email"
+    );
+    compactColumns.splice(
+      emailIndex + 1,
+      0,
+      {
+        id: "invitationStatus",
+        header: translate("people.import.invitationStatus"),
+        size: 135,
+        enableSorting: false,
+        enableColumnFilter: false,
+        cell: ({ row }) =>
+          createElement(
+            Badge,
+            {
+              variant: row.original.hasInvitation ? "secondary" : "outline",
+            },
+            translate(
+              row.original.hasInvitation
+                ? "people.import.invited"
+                : "people.import.notInvited"
+            )
+          ),
+      } satisfies ColumnDef<T>
+    );
+
+    return compactColumns;
+  }, [compact, importBatchOptions, labels, locale, renderActions, translate]);
 }

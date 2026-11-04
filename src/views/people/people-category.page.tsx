@@ -11,6 +11,14 @@ import { ErrorComponent } from "@/components/shared/refine-ui/layout/error-compo
 import { ListView, ListViewHeader } from "@/components/shared/refine-ui/views/list-view";
 import { DataTable } from "@/components/shared/refine-ui/data-table/data-table";
 import { Button } from "@/components/shared/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shared/ui/select";
+import { Label } from "@/components/shared/ui/label";
 import { usePeopleCategoryPage } from "@/hooks/people/use-people-category.hook";
 
 type PeopleCategoryPageProps = {
@@ -74,6 +82,41 @@ export function PeopleCategoryPage({ category }: PeopleCategoryPageProps) {
           {page.translate("people.import.action")}
         </Button>
       </ListViewHeader>
+      <div className="flex flex-col gap-1.5 sm:max-w-md">
+        <Label>{page.translate("people.import.batchFilter")}</Label>
+        <Select
+          value={
+            String(
+              page.table.reactTable
+                .getColumn("importedAt")
+                ?.getFilterValue() ?? ""
+            ) || "all"
+          }
+          onValueChange={(value) =>
+            page.table.reactTable
+              .getColumn("importedAt")
+              ?.setFilterValue(value === "all" ? undefined : value)
+          }
+          disabled={page.importBatchesLoading}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              {page.translate("people.import.allBatches")}
+            </SelectItem>
+            {page.importBatchOptions.map((batch) => (
+              <SelectItem key={batch.value} value={batch.value}>
+                {batch.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {page.importBatchError ? (
+          <p className="text-sm text-destructive">{page.importBatchError}</p>
+        ) : null}
+      </div>
       <div className="flex flex-wrap items-center gap-2">
         <Button
           type="button"

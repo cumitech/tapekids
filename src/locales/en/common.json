@@ -381,7 +381,7 @@
       "parentGuardianPhone": "Phone",
       "medicalNotes": "Medical notes",
       "country": "Country",
-      "importedAt": "Import date",
+      "importedAt": "Import batch",
       "sentAt": "Invitation sent",
       "registeredAt": "Registered at",
       "isTrophy": "Trophies"
@@ -404,7 +404,17 @@
       "missing": "Choose a category and an Excel file.",
       "failed": "Could not import this file.",
       "networkFailed": "Network error while importing. Check your connection and try again. The same file will not create duplicates.",
+      "batchFilter": "Show people from import batch",
+      "allBatches": "All people",
+      "batchesFailed": "Could not load import batches.",
+      "notImported": "Manual entry",
+      "invitationStatus": "Invitation",
+      "invited": "Invited",
+      "notInvited": "Not invited",
       "result": "Created {{created}}, updated {{updated}}, unchanged {{unchanged}}, skipped {{skipped}}.",
+      "mailingListCreated": "A separate mailing list was created with {{count}} new people. Invitations have not been sent.",
+      "openMailingList": "Open {{name}}",
+      "noNewPeople": "No new people were added, so no mailing list was created. Existing participant/camper records were not added to a new invite list.",
       "rowError": "Row {{row}}: {{message}}"
     },
     "summary": {
